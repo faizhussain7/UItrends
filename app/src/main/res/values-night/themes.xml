@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Resolved when app night mode is active (see ThemeModeStore + applyThemeNightMode). -->
+  <style name="Theme.Trendinguipatterns.Starting" parent="Theme.Trendinguipatterns.Starting.Dark" />
+</resources>

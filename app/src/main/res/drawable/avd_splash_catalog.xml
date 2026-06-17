@@ -1,0 +1,2789 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:drawable="@drawable/ic_splash_catalog_vector">
+    <target android:name="bijapur_p0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.55" />
+                        <keyframe android:fraction="0.1800" android:value="0.55" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.1050" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="strokeWidth"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="strokeWidth"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="4.1" />
+                        <keyframe android:fraction="0.0578" android:value="4.59" />
+                        <keyframe android:fraction="0.1050" android:value="4.1" />
+                        <keyframe android:fraction="0.1800" android:value="4.1" />
+                        <keyframe android:fraction="0.2500" android:value="4.1" />
+                        <keyframe android:fraction="1.0000" android:value="4.1" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p1">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.85" />
+                        <keyframe android:fraction="0.1800" android:value="0.85" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0070" android:value="0.0" />
+                        <keyframe android:fraction="0.1120" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p2">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0140" android:value="0.0" />
+                        <keyframe android:fraction="0.1190" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="strokeWidth"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="strokeWidth"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="3.9" />
+                        <keyframe android:fraction="0.0578" android:value="4.37" />
+                        <keyframe android:fraction="0.1050" android:value="3.9" />
+                        <keyframe android:fraction="0.1800" android:value="3.9" />
+                        <keyframe android:fraction="0.2500" android:value="3.9" />
+                        <keyframe android:fraction="1.0000" android:value="3.9" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p3">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.8" />
+                        <keyframe android:fraction="0.1800" android:value="0.8" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0210" android:value="0.0" />
+                        <keyframe android:fraction="0.1260" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p4">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.8" />
+                        <keyframe android:fraction="0.1800" android:value="0.8" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0280" android:value="0.0" />
+                        <keyframe android:fraction="0.1330" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p5">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.8" />
+                        <keyframe android:fraction="0.1800" android:value="0.8" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0350" android:value="0.0" />
+                        <keyframe android:fraction="0.1400" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p6">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.8" />
+                        <keyframe android:fraction="0.1800" android:value="0.8" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0420" android:value="0.0" />
+                        <keyframe android:fraction="0.1470" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p7">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.8" />
+                        <keyframe android:fraction="0.1800" android:value="0.8" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0490" android:value="0.0" />
+                        <keyframe android:fraction="0.1540" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p8">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.8" />
+                        <keyframe android:fraction="0.1800" android:value="0.8" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0560" android:value="0.0" />
+                        <keyframe android:fraction="0.1610" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p9">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.8" />
+                        <keyframe android:fraction="0.1800" android:value="0.8" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0630" android:value="0.0" />
+                        <keyframe android:fraction="0.1680" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bijapur_p10">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.8" />
+                        <keyframe android:fraction="0.1800" android:value="0.8" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0700" android:value="0.0" />
+                        <keyframe android:fraction="0.1750" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="motion_bijapur">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="rotation"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="rotation"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.0250" android:value="-14.0" />
+                        <keyframe android:fraction="0.0550" android:value="11.0" />
+                        <keyframe android:fraction="0.0850" android:value="-8.0" />
+                        <keyframe android:fraction="0.1050" android:value="0.0" />
+                        <keyframe android:fraction="0.1800" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/overshoot_interpolator">
+                    <propertyValuesHolder android:propertyName="scaleX"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.9" />
+                        <keyframe android:fraction="0.0350" android:value="1.12" />
+                        <keyframe android:fraction="0.0700" android:value="1.02" />
+                        <keyframe android:fraction="0.1050" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="1.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/overshoot_interpolator">
+                    <propertyValuesHolder android:propertyName="scaleY"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.9" />
+                        <keyframe android:fraction="0.0350" android:value="1.12" />
+                        <keyframe android:fraction="0.0700" android:value="1.02" />
+                        <keyframe android:fraction="0.1050" android:value="1.0" />
+                        <keyframe android:fraction="0.1800" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="1.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="translateY"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="1.25" />
+                        <keyframe android:fraction="0.0550" android:value="-1.75" />
+                        <keyframe android:fraction="0.1050" android:value="0.0" />
+                        <keyframe android:fraction="0.1800" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="translateX"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.55" />
+                        <keyframe android:fraction="0.4300" android:value="0.55" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.3550" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="strokeWidth"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="strokeWidth"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="4.1" />
+                        <keyframe android:fraction="0.2500" android:value="4.1" />
+                        <keyframe android:fraction="0.3078" android:value="4.59" />
+                        <keyframe android:fraction="0.3550" android:value="4.1" />
+                        <keyframe android:fraction="0.4300" android:value="4.1" />
+                        <keyframe android:fraction="0.5000" android:value="4.1" />
+                        <keyframe android:fraction="1.0000" android:value="4.1" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p1">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2570" android:value="0.0" />
+                        <keyframe android:fraction="0.3620" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p2">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2640" android:value="0.0" />
+                        <keyframe android:fraction="0.3690" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="strokeWidth"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="strokeWidth"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="3.7" />
+                        <keyframe android:fraction="0.2500" android:value="3.7" />
+                        <keyframe android:fraction="0.3078" android:value="4.14" />
+                        <keyframe android:fraction="0.3550" android:value="3.7" />
+                        <keyframe android:fraction="0.4300" android:value="3.7" />
+                        <keyframe android:fraction="0.5000" android:value="3.7" />
+                        <keyframe android:fraction="1.0000" android:value="3.7" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p3">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2710" android:value="0.0" />
+                        <keyframe android:fraction="0.3760" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p4">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.88" />
+                        <keyframe android:fraction="0.4300" android:value="0.88" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2780" android:value="0.0" />
+                        <keyframe android:fraction="0.3830" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p5">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.88" />
+                        <keyframe android:fraction="0.4300" android:value="0.88" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2850" android:value="0.0" />
+                        <keyframe android:fraction="0.3900" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p6">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.88" />
+                        <keyframe android:fraction="0.4300" android:value="0.88" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2920" android:value="0.0" />
+                        <keyframe android:fraction="0.3970" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p7">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.88" />
+                        <keyframe android:fraction="0.4300" android:value="0.88" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2990" android:value="0.0" />
+                        <keyframe android:fraction="0.4040" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p8">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.88" />
+                        <keyframe android:fraction="0.4300" android:value="0.88" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.3060" android:value="0.0" />
+                        <keyframe android:fraction="0.4110" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p9">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.88" />
+                        <keyframe android:fraction="0.4300" android:value="0.88" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.3130" android:value="0.0" />
+                        <keyframe android:fraction="0.4180" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p10">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.88" />
+                        <keyframe android:fraction="0.4300" android:value="0.88" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.3200" android:value="0.0" />
+                        <keyframe android:fraction="0.4250" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="golconda_p11">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.2750" android:value="0.88" />
+                        <keyframe android:fraction="0.4300" android:value="0.88" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.3270" android:value="0.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.4320" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="motion_golconda">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="rotation"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="rotation"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.3200" android:value="34.0" />
+                        <keyframe android:fraction="0.3550" android:value="0.0" />
+                        <keyframe android:fraction="0.4300" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/overshoot_interpolator">
+                    <propertyValuesHolder android:propertyName="scaleX"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.9" />
+                        <keyframe android:fraction="0.2850" android:value="1.12" />
+                        <keyframe android:fraction="0.3200" android:value="1.02" />
+                        <keyframe android:fraction="0.3550" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="1.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/overshoot_interpolator">
+                    <propertyValuesHolder android:propertyName="scaleY"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="1.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.9" />
+                        <keyframe android:fraction="0.2850" android:value="1.12" />
+                        <keyframe android:fraction="0.3200" android:value="1.02" />
+                        <keyframe android:fraction="0.3550" android:value="1.0" />
+                        <keyframe android:fraction="0.4300" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="1.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="translateY"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="1.25" />
+                        <keyframe android:fraction="0.3050" android:value="-1.75" />
+                        <keyframe android:fraction="0.3550" android:value="0.0" />
+                        <keyframe android:fraction="0.4300" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="translateX"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.2500" android:value="0.0" />
+                        <keyframe android:fraction="0.3100" android:value="-2.0" />
+                        <keyframe android:fraction="0.3550" android:value="0.0" />
+                        <keyframe android:fraction="0.4300" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.55" />
+                        <keyframe android:fraction="0.6800" android:value="0.55" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.6050" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="strokeWidth"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="strokeWidth"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="4.1" />
+                        <keyframe android:fraction="0.5000" android:value="4.1" />
+                        <keyframe android:fraction="0.5577" android:value="4.59" />
+                        <keyframe android:fraction="0.6050" android:value="4.1" />
+                        <keyframe android:fraction="0.6800" android:value="4.1" />
+                        <keyframe android:fraction="0.7500" android:value="4.1" />
+                        <keyframe android:fraction="1.0000" android:value="4.1" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p1">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.88" />
+                        <keyframe android:fraction="0.6800" android:value="0.88" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5070" android:value="0.0" />
+                        <keyframe android:fraction="0.6120" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p2">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5140" android:value="0.0" />
+                        <keyframe android:fraction="0.6190" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="strokeWidth"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="strokeWidth"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="3.85" />
+                        <keyframe android:fraction="0.5000" android:value="3.85" />
+                        <keyframe android:fraction="0.5577" android:value="4.31" />
+                        <keyframe android:fraction="0.6050" android:value="3.85" />
+                        <keyframe android:fraction="0.6800" android:value="3.85" />
+                        <keyframe android:fraction="0.7500" android:value="3.85" />
+                        <keyframe android:fraction="1.0000" android:value="3.85" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p3">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.92" />
+                        <keyframe android:fraction="0.6800" android:value="0.92" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5210" android:value="0.0" />
+                        <keyframe android:fraction="0.6260" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p4">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.92" />
+                        <keyframe android:fraction="0.6800" android:value="0.92" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5280" android:value="0.0" />
+                        <keyframe android:fraction="0.6330" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p5">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.88" />
+                        <keyframe android:fraction="0.6800" android:value="0.88" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5350" android:value="0.0" />
+                        <keyframe android:fraction="0.6400" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p6">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.88" />
+                        <keyframe android:fraction="0.6800" android:value="0.88" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5420" android:value="0.0" />
+                        <keyframe android:fraction="0.6470" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p7">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.88" />
+                        <keyframe android:fraction="0.6800" android:value="0.88" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5490" android:value="0.0" />
+                        <keyframe android:fraction="0.6540" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p8">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.88" />
+                        <keyframe android:fraction="0.6800" android:value="0.88" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5560" android:value="0.0" />
+                        <keyframe android:fraction="0.6610" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p9">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.88" />
+                        <keyframe android:fraction="0.6800" android:value="0.88" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5630" android:value="0.0" />
+                        <keyframe android:fraction="0.6680" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p10">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.88" />
+                        <keyframe android:fraction="0.6800" android:value="0.88" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5700" android:value="0.0" />
+                        <keyframe android:fraction="0.6750" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p11">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.7" />
+                        <keyframe android:fraction="0.6800" android:value="0.7" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5770" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.6820" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p12">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.7" />
+                        <keyframe android:fraction="0.6800" android:value="0.7" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5840" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.6890" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p13">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.7" />
+                        <keyframe android:fraction="0.6800" android:value="0.7" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5910" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.6960" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p14">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.7" />
+                        <keyframe android:fraction="0.6800" android:value="0.7" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5980" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7030" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p15">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.7" />
+                        <keyframe android:fraction="0.6800" android:value="0.7" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.6050" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7100" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rauza_p16">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5250" android:value="0.7" />
+                        <keyframe android:fraction="0.6800" android:value="0.7" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.6120" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7170" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="motion_rauza">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="rotation"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="rotation"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="-3.0" />
+                        <keyframe android:fraction="0.5700" android:value="4.0" />
+                        <keyframe android:fraction="0.6050" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/overshoot_interpolator">
+                    <propertyValuesHolder android:propertyName="scaleX"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.9" />
+                        <keyframe android:fraction="0.5350" android:value="1.12" />
+                        <keyframe android:fraction="0.5700" android:value="1.02" />
+                        <keyframe android:fraction="0.6050" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="1.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/overshoot_interpolator">
+                    <propertyValuesHolder android:propertyName="scaleY"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="1.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.9" />
+                        <keyframe android:fraction="0.5350" android:value="1.12" />
+                        <keyframe android:fraction="0.5700" android:value="1.02" />
+                        <keyframe android:fraction="0.6050" android:value="1.0" />
+                        <keyframe android:fraction="0.6800" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="1.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="translateY"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="2.0" />
+                        <keyframe android:fraction="0.5550" android:value="-2.8" />
+                        <keyframe android:fraction="0.6050" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="translateX"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.5000" android:value="0.0" />
+                        <keyframe android:fraction="0.5600" android:value="3.0" />
+                        <keyframe android:fraction="0.6050" android:value="0.0" />
+                        <keyframe android:fraction="0.6800" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.55" />
+                        <keyframe android:fraction="0.9300" android:value="0.55" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8550" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="strokeWidth"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="strokeWidth"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="4.1" />
+                        <keyframe android:fraction="0.7500" android:value="4.1" />
+                        <keyframe android:fraction="0.8077" android:value="4.59" />
+                        <keyframe android:fraction="0.8550" android:value="4.1" />
+                        <keyframe android:fraction="0.9300" android:value="4.1" />
+                        <keyframe android:fraction="1.0000" android:value="4.1" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p1">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.88" />
+                        <keyframe android:fraction="0.9300" android:value="0.88" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7570" android:value="0.0" />
+                        <keyframe android:fraction="0.8620" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p2">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7640" android:value="0.0" />
+                        <keyframe android:fraction="0.8690" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="strokeWidth"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="strokeWidth"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="3.8" />
+                        <keyframe android:fraction="0.7500" android:value="3.8" />
+                        <keyframe android:fraction="0.8077" android:value="4.26" />
+                        <keyframe android:fraction="0.8550" android:value="3.8" />
+                        <keyframe android:fraction="0.9300" android:value="3.8" />
+                        <keyframe android:fraction="1.0000" android:value="3.8" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p3">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.92" />
+                        <keyframe android:fraction="0.9300" android:value="0.92" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7710" android:value="0.0" />
+                        <keyframe android:fraction="0.8760" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p4">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.9" />
+                        <keyframe android:fraction="0.9300" android:value="0.9" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7780" android:value="0.0" />
+                        <keyframe android:fraction="0.8830" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p5">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.88" />
+                        <keyframe android:fraction="0.9300" android:value="0.88" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7850" android:value="0.0" />
+                        <keyframe android:fraction="0.8900" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p6">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.88" />
+                        <keyframe android:fraction="0.9300" android:value="0.88" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7920" android:value="0.0" />
+                        <keyframe android:fraction="0.8970" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p7">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.88" />
+                        <keyframe android:fraction="0.9300" android:value="0.88" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7990" android:value="0.0" />
+                        <keyframe android:fraction="0.9040" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p8">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.88" />
+                        <keyframe android:fraction="0.9300" android:value="0.88" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8060" android:value="0.0" />
+                        <keyframe android:fraction="0.9110" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p9">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.78" />
+                        <keyframe android:fraction="0.9300" android:value="0.78" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8130" android:value="0.0" />
+                        <keyframe android:fraction="0.9180" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p10">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.78" />
+                        <keyframe android:fraction="0.9300" android:value="0.78" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8200" android:value="0.0" />
+                        <keyframe android:fraction="0.9250" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p11">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.78" />
+                        <keyframe android:fraction="0.9300" android:value="0.78" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8270" android:value="0.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="0.9320" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p12">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.78" />
+                        <keyframe android:fraction="0.9300" android:value="0.78" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8340" android:value="0.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="0.9390" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p13">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.72" />
+                        <keyframe android:fraction="0.9300" android:value="0.72" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8410" android:value="0.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="0.9460" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p14">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.72" />
+                        <keyframe android:fraction="0.9300" android:value="0.72" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8480" android:value="0.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="0.9530" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p15">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.72" />
+                        <keyframe android:fraction="0.9300" android:value="0.72" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8550" android:value="0.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="0.9600" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="hyderabad_p16">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="strokeAlpha"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="0.72" />
+                        <keyframe android:fraction="0.9300" android:value="0.72" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="trimPathEnd"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.8620" android:value="0.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="0.9670" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="motion_hyderabad">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="rotation"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="rotation"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.0" />
+                        <keyframe android:fraction="0.7750" android:value="-14.0" />
+                        <keyframe android:fraction="0.8050" android:value="11.0" />
+                        <keyframe android:fraction="0.8350" android:value="-8.0" />
+                        <keyframe android:fraction="0.8550" android:value="0.0" />
+                        <keyframe android:fraction="0.9300" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/overshoot_interpolator">
+                    <propertyValuesHolder android:propertyName="scaleX"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.9" />
+                        <keyframe android:fraction="0.7850" android:value="1.12" />
+                        <keyframe android:fraction="0.8200" android:value="1.02" />
+                        <keyframe android:fraction="0.8550" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="1.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/overshoot_interpolator">
+                    <propertyValuesHolder android:propertyName="scaleY"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="1.0" />
+                        <keyframe android:fraction="0.7500" android:value="0.9" />
+                        <keyframe android:fraction="0.7850" android:value="1.12" />
+                        <keyframe android:fraction="0.8200" android:value="1.02" />
+                        <keyframe android:fraction="0.8550" android:value="1.0" />
+                        <keyframe android:fraction="0.9300" android:value="1.0" />
+                        <keyframe android:fraction="1.0000" android:value="1.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+                    <propertyValuesHolder android:propertyName="translateY"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="0.7500" android:value="1.25" />
+                        <keyframe android:fraction="0.8050" android:value="-1.75" />
+                        <keyframe android:fraction="0.8550" android:value="0.0" />
+                        <keyframe android:fraction="0.9300" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:duration="5600"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:interpolator="@android:interpolator/fast_out_slow_in">
+                    <propertyValuesHolder android:propertyName="translateX"
+                        android:valueType="floatType">
+                        <keyframe android:fraction="0.0000" android:value="0.0" />
+                        <keyframe android:fraction="1.0000" android:value="0.0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

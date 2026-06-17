@@ -1,0 +1,1162 @@
+package com.mfhapps.trendingui.screens.calm
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.DisplaySettings
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import com.mfhapps.trendingui.ui.components.HapticSlider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
+import com.mfhapps.trendingui.ui.components.SwitchPreferenceRow
+import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
+import com.mfhapps.trendingui.ui.detail.LocalDetailPaneActive
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
+
+private data class CalmSection(
+    val title: String,
+    val body: String,
+    val readMinutes: Int,
+)
+
+private val CalmSections = listOf(
+    CalmSection(
+        title = "Introduction",
+        body = "Calm UI keeps attention on the words. No badges, no parallax, no drawer chrome—just a comfortable measure, quiet typography, and room to think.",
+        readMinutes = 2,
+    ),
+    CalmSection(
+        title = "Measure & rhythm",
+        body = "Body copy targets about sixty characters per line. Line height scales with your reader settings so long sessions stay easy on the eyes.",
+        readMinutes = 3,
+    ),
+    CalmSection(
+        title = "Gentle motion",
+        body = "Section changes use a soft cross-fade only. When reduce motion is on at the system level, transitions shorten automatically.",
+        readMinutes = 2,
+    ),
+    CalmSection(
+        title = "E-ink mode",
+        body = "E-ink follows system light or dark and offers black, blue, or green ink on tinted paper—flat surfaces with no elevation tint.",
+        readMinutes = 2,
+    ),
+    CalmSection(
+        title = "Reader controls",
+        body = "Tap the display-settings icon to open reading options inline—type size, line height, serif, e-ink, and focus mode. Chapters are always one tap away in the strip below.",
+        readMinutes = 2,
+    ),
+)
+
+private enum class CalmInkColor(val label: String) {
+    Black("Black"),
+    Blue("Blue"),
+    Green("Green"),
+}
+
+private data class CalmEInkPalette(
+    val background: Color,
+    val onBackground: Color,
+    val primary: Color,
+    val onPrimary: Color,
+    val primaryContainer: Color,
+    val onPrimaryContainer: Color,
+    val onSurfaceVariant: Color,
+    val outline: Color,
+    val outlineVariant: Color,
+    val surfaceContainerLow: Color,
+    val surfaceContainerHigh: Color,
+    val surfaceContainerHighest: Color,
+    val inkPreview: Color,
+)
+
+private fun calmEInkColorScheme(systemDark: Boolean, inkColor: CalmInkColor) =
+    if (systemDark) {
+        darkColorSchemeFrom(calmEInkDarkPalette(inkColor))
+    } else {
+        lightColorSchemeFrom(calmEInkLightPalette(inkColor))
+    }
+
+private fun calmEInkLightPalette(ink: CalmInkColor): CalmEInkPalette = when (ink) {
+    CalmInkColor.Black -> CalmEInkPalette(
+        background = Color(0xFFF4F0E6),
+        onBackground = Color(0xFF1A1A1A),
+        primary = Color(0xFF1A1A1A),
+        onPrimary = Color(0xFFF4F0E6),
+        primaryContainer = Color(0xFFE4E0D6),
+        onPrimaryContainer = Color(0xFF1A1A1A),
+        onSurfaceVariant = Color(0xFF3D3D3D),
+        outline = Color(0xFF8C877A),
+        outlineVariant = Color(0xFFCFC9BC),
+        surfaceContainerLow = Color(0xFFEDE9DF),
+        surfaceContainerHigh = Color(0xFFDBD7CD),
+        surfaceContainerHighest = Color(0xFFD2CEC4),
+        inkPreview = Color(0xFF1A1A1A),
+    )
+    CalmInkColor.Blue -> CalmEInkPalette(
+        background = Color(0xFFEDF2F8),
+        onBackground = Color(0xFF152A45),
+        primary = Color(0xFF152A45),
+        onPrimary = Color(0xFFEDF2F8),
+        primaryContainer = Color(0xFFD4E3F0),
+        onPrimaryContainer = Color(0xFF152A45),
+        onSurfaceVariant = Color(0xFF4A6278),
+        outline = Color(0xFF7A94AC),
+        outlineVariant = Color(0xFFC5D4E2),
+        surfaceContainerLow = Color(0xFFE4ECF4),
+        surfaceContainerHigh = Color(0xFFD0DDE8),
+        surfaceContainerHighest = Color(0xFFC4D4E4),
+        inkPreview = Color(0xFF1E4A7A),
+    )
+    CalmInkColor.Green -> CalmEInkPalette(
+        background = Color(0xFFEFF4EC),
+        onBackground = Color(0xFF1A3220),
+        primary = Color(0xFF1A3220),
+        onPrimary = Color(0xFFEFF4EC),
+        primaryContainer = Color(0xFFD6E6D8),
+        onPrimaryContainer = Color(0xFF1A3220),
+        onSurfaceVariant = Color(0xFF4A5E4E),
+        outline = Color(0xFF7A947E),
+        outlineVariant = Color(0xFFC5D6C8),
+        surfaceContainerLow = Color(0xFFE6EFE8),
+        surfaceContainerHigh = Color(0xFFD2E2D6),
+        surfaceContainerHighest = Color(0xFFC6DACA),
+        inkPreview = Color(0xFF1E5C32),
+    )
+}
+
+private fun calmEInkDarkPalette(ink: CalmInkColor): CalmEInkPalette = when (ink) {
+    CalmInkColor.Black -> CalmEInkPalette(
+        background = Color(0xFF141412),
+        onBackground = Color(0xFFE8E4DA),
+        primary = Color(0xFFE8E4DA),
+        onPrimary = Color(0xFF141412),
+        primaryContainer = Color(0xFF2C2C28),
+        onPrimaryContainer = Color(0xFFE8E4DA),
+        onSurfaceVariant = Color(0xFFC4C0B6),
+        outline = Color(0xFF7A766C),
+        outlineVariant = Color(0xFF3A3A36),
+        surfaceContainerLow = Color(0xFF1A1A18),
+        surfaceContainerHigh = Color(0xFF2A2A26),
+        surfaceContainerHighest = Color(0xFF32322E),
+        inkPreview = Color(0xFFE8E4DA),
+    )
+    CalmInkColor.Blue -> CalmEInkPalette(
+        background = Color(0xFF0D1218),
+        onBackground = Color(0xFFC8DCEC),
+        primary = Color(0xFFA8C8E8),
+        onPrimary = Color(0xFF0D1218),
+        primaryContainer = Color(0xFF1E3044),
+        onPrimaryContainer = Color(0xFFC8DCEC),
+        onSurfaceVariant = Color(0xFF94A8BC),
+        outline = Color(0xFF5A7088),
+        outlineVariant = Color(0xFF283848),
+        surfaceContainerLow = Color(0xFF121A22),
+        surfaceContainerHigh = Color(0xFF1C2834),
+        surfaceContainerHighest = Color(0xFF243444),
+        inkPreview = Color(0xFF7EB0DC),
+    )
+    CalmInkColor.Green -> CalmEInkPalette(
+        background = Color(0xFF0E1210),
+        onBackground = Color(0xFFD2E8D6),
+        primary = Color(0xFF9BC4A4),
+        onPrimary = Color(0xFF0E1210),
+        primaryContainer = Color(0xFF1E2E22),
+        onPrimaryContainer = Color(0xFFD2E8D6),
+        onSurfaceVariant = Color(0xFF94AE98),
+        outline = Color(0xFF5A7460),
+        outlineVariant = Color(0xFF283830),
+        surfaceContainerLow = Color(0xFF121A14),
+        surfaceContainerHigh = Color(0xFF1C2A20),
+        surfaceContainerHighest = Color(0xFF24362A),
+        inkPreview = Color(0xFF88C49A),
+    )
+}
+
+private fun lightColorSchemeFrom(p: CalmEInkPalette) = lightColorScheme(
+    primary = p.primary,
+    onPrimary = p.onPrimary,
+    primaryContainer = p.primaryContainer,
+    onPrimaryContainer = p.onPrimaryContainer,
+    secondary = p.onSurfaceVariant,
+    onSecondary = p.background,
+    secondaryContainer = p.surfaceContainerLow,
+    onSecondaryContainer = p.onBackground,
+    tertiary = p.onSurfaceVariant,
+    onTertiary = p.background,
+    background = p.background,
+    onBackground = p.onBackground,
+    surface = p.background,
+    onSurface = p.onBackground,
+    surfaceVariant = p.surfaceContainerLow,
+    onSurfaceVariant = p.onSurfaceVariant,
+    outline = p.outline,
+    outlineVariant = p.outlineVariant,
+    surfaceContainerLowest = p.background,
+    surfaceContainerLow = p.surfaceContainerLow,
+    surfaceContainer = p.surfaceContainerLow,
+    surfaceContainerHigh = p.surfaceContainerHigh,
+    surfaceContainerHighest = p.surfaceContainerHighest,
+    inverseSurface = p.onBackground,
+    inverseOnSurface = p.background,
+    scrim = Color(0x66000000),
+)
+
+private fun darkColorSchemeFrom(p: CalmEInkPalette) = darkColorScheme(
+    primary = p.primary,
+    onPrimary = p.onPrimary,
+    primaryContainer = p.primaryContainer,
+    onPrimaryContainer = p.onPrimaryContainer,
+    secondary = p.onSurfaceVariant,
+    onSecondary = p.background,
+    secondaryContainer = p.surfaceContainerLow,
+    onSecondaryContainer = p.onBackground,
+    tertiary = p.onSurfaceVariant,
+    onTertiary = p.background,
+    background = p.background,
+    onBackground = p.onBackground,
+    surface = p.background,
+    onSurface = p.onBackground,
+    surfaceVariant = p.surfaceContainerLow,
+    onSurfaceVariant = p.onSurfaceVariant,
+    outline = p.outline,
+    outlineVariant = p.outlineVariant,
+    surfaceContainerLowest = p.background,
+    surfaceContainerLow = p.surfaceContainerLow,
+    surfaceContainer = p.surfaceContainerLow,
+    surfaceContainerHigh = p.surfaceContainerHigh,
+    surfaceContainerHighest = p.surfaceContainerHighest,
+    inverseSurface = p.onBackground,
+    inverseOnSurface = p.background,
+    scrim = Color(0x99000000),
+)
+
+private fun calmEInkVariantLabel(inkColor: CalmInkColor, systemDark: Boolean): String {
+    val tone = if (systemDark) "dark" else "light"
+    return "E-ink · ${inkColor.label.lowercase()} · $tone"
+}
+
+@Composable
+fun CalmUiScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
+    var fontScale by rememberSaveable { mutableFloatStateOf(1f) }
+    var lineHeightScale by rememberSaveable { mutableFloatStateOf(1.08f) }
+    var useSerif by rememberSaveable { mutableStateOf(false) }
+    var eInk by rememberSaveable { mutableStateOf(false) }
+    var inkColorId by rememberSaveable { mutableStateOf(CalmInkColor.Black.name) }
+    val inkColor = remember(inkColorId) {
+        CalmInkColor.entries.find { it.name == inkColorId } ?: CalmInkColor.Black
+    }
+    var focusMode by rememberSaveable { mutableStateOf(false) }
+    var readerPanelOpen by rememberSaveable { mutableStateOf(false) }
+    var sectionIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    val systemDark = isSystemInDarkTheme()
+    val base = MaterialTheme.colorScheme
+    val calmScheme = remember(base, eInk, systemDark, inkColor) {
+        if (eInk) {
+            calmEInkColorScheme(systemDark, inkColor)
+        } else {
+            base.copy(
+                background = base.surfaceContainerLowest,
+                onBackground = base.onSurface,
+                surface = base.surfaceContainerLowest,
+                onSurface = base.onSurface,
+                surfaceContainerLow = base.surfaceContainerLow,
+                surfaceContainerHigh = base.surfaceContainerHigh,
+            )
+        }
+    }
+
+    val bodyFontSize = (17f * fontScale).sp
+    val bodyLineHeight = (28f * fontScale * lineHeightScale).sp
+    val headlineFontSize = (26f * fontScale).sp
+    val headlineLineHeight = (34f * fontScale).sp
+    val readerFamily = if (useSerif) FontFamily.Serif else FontFamily.SansSerif
+
+    val calmTypography = MaterialTheme.typography.copy(
+        bodyLarge = MaterialTheme.typography.bodyLarge.copy(
+            fontFamily = readerFamily,
+            fontSize = bodyFontSize,
+            lineHeight = bodyLineHeight,
+            fontWeight = FontWeight.Normal,
+            color = calmScheme.onBackground,
+        ),
+        headlineMedium = MaterialTheme.typography.headlineMedium.copy(
+            fontFamily = readerFamily,
+            fontSize = headlineFontSize,
+            lineHeight = headlineLineHeight,
+            fontWeight = FontWeight.Medium,
+            color = calmScheme.onBackground,
+        ),
+        labelLarge = MaterialTheme.typography.labelLarge.copy(
+            fontFamily = readerFamily,
+            color = calmScheme.onSurfaceVariant,
+        ),
+        bodyMedium = MaterialTheme.typography.bodyMedium.copy(
+            fontFamily = readerFamily,
+            color = calmScheme.onSurfaceVariant,
+        ),
+    )
+
+    val reduceMotion = LocalReduceMotion.current
+    val inDetailPane = LocalDetailPaneActive.current
+    val compact = isCompactWindowWidth()
+    val showBackInTopBar = inDetailPane && compact
+    val showGuideInTopBar = guide != null && compact
+    val section = CalmSections[sectionIndex]
+    val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+    LaunchedEffect(focusMode) {
+        if (focusMode) {
+            readerPanelOpen = false
+        }
+    }
+
+    BackHandler(enabled = focusMode) {
+        focusMode = false
+    }
+
+    BackHandler(enabled = readerPanelOpen && !focusMode) {
+        readerPanelOpen = false
+    }
+
+    val totalReadMinutes = remember { CalmSections.sumOf { it.readMinutes } }
+    val eInkVariantLabel = calmEInkVariantLabel(inkColor, systemDark)
+    val progress = (sectionIndex + 1).toFloat() / CalmSections.size
+
+    MaterialTheme(colorScheme = calmScheme, typography = calmTypography) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        ) {
+            if (focusMode) {
+                CalmFocusReadingLayout(
+                    sectionIndex = sectionIndex,
+                    sectionCount = CalmSections.size,
+                    navBarBottom = navBarBottom,
+                    reduceMotion = reduceMotion,
+                    onExitFocus = { focusMode = false },
+                    onPrevious = { if (sectionIndex > 0) sectionIndex-- },
+                    onNext = { if (sectionIndex < CalmSections.lastIndex) sectionIndex++ },
+                )
+            } else {
+                Row(Modifier.fillMaxSize().statusBarsPadding()) {
+                    if (!compact) {
+                        CalmTableOfContentsRail(
+                            sections = CalmSections,
+                            selectedIndex = sectionIndex,
+                            onSelect = { sectionIndex = it },
+                            modifier = Modifier
+                                .width(220.dp)
+                                .fillMaxHeight(),
+                        )
+                        VerticalDivider()
+                    }
+
+                    Column(Modifier.weight(1f)) {
+                        Column {
+                            AnimatedContent(
+                                targetState = readerPanelOpen,
+                                transitionSpec = {
+                                    if (reduceMotion) {
+                                        fadeIn(tween(120)) togetherWith fadeOut(tween(120))
+                                    } else {
+                                        fadeIn(tween(220)) togetherWith fadeOut(tween(180))
+                                    }
+                                },
+                                label = "calmReaderHeader",
+                            ) { panelOpen ->
+                                if (panelOpen) {
+                                    ReaderSettingsPanel(
+                                        fontScale = fontScale,
+                                        onFontScale = { fontScale = it },
+                                        lineHeightScale = lineHeightScale,
+                                        onLineHeightScale = { lineHeightScale = it },
+                                        useSerif = useSerif,
+                                        onUseSerif = { useSerif = it },
+                                        eInk = eInk,
+                                        inkColor = inkColor,
+                                        eInkVariantLabel = eInkVariantLabel,
+                                        onEInk = { eInk = it },
+                                        onInkColor = { inkColorId = it.name },
+                                        focusMode = focusMode,
+                                        onFocusMode = { focusMode = it },
+                                        onClose = { readerPanelOpen = false },
+                                    )
+                                } else {
+                                    CalmReaderTopBar(
+                                        showBack = showBackInTopBar,
+                                        onNavigateBack = onNavigateBack,
+                                        readerPanelOpen = readerPanelOpen,
+                                        onToggleReaderPanel = { readerPanelOpen = true },
+                                        eInk = eInk,
+                                        eInkVariantLabel = eInkVariantLabel,
+                                        guide = guide,
+                                        showGuide = showGuideInTopBar,
+                                    )
+                                }
+                            }
+
+                            if (compact) {
+                                CalmChapterStrip(
+                                    sections = CalmSections,
+                                    selectedIndex = sectionIndex,
+                                    reduceMotion = reduceMotion,
+                                    onSelect = { sectionIndex = it },
+                                )
+                            }
+
+                            CalmReadingMeta(
+                                sectionIndex = sectionIndex,
+                                sectionCount = CalmSections.size,
+                                sectionMinutes = section.readMinutes,
+                                totalMinutes = totalReadMinutes,
+                                progress = progress,
+                            )
+                        }
+
+                        CalmArticleLazyColumn(
+                            sectionIndex = sectionIndex,
+                            reduceMotion = reduceMotion,
+                            navBarBottom = navBarBottom,
+                            contentTopPadding = 8.dp,
+                            modifier = Modifier.weight(1f),
+                        )
+
+                        CalmChapterNavigation(
+                            sectionIndex = sectionIndex,
+                            sectionCount = CalmSections.size,
+                            onPrevious = { if (sectionIndex > 0) sectionIndex-- },
+                            onNext = { if (sectionIndex < CalmSections.lastIndex) sectionIndex++ },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.background)
+                                .navigationBarsPadding()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalmArticleLazyColumn(
+    sectionIndex: Int,
+    reduceMotion: Boolean,
+    navBarBottom: Dp,
+    contentTopPadding: Dp,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        contentPadding = PaddingValues(
+            top = contentTopPadding,
+            bottom = 24.dp + navBarBottom,
+        ),
+    ) {
+        item {
+            CalmArticleBody(
+                sectionIndex = sectionIndex,
+                reduceMotion = reduceMotion,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CalmArticleBody(
+    sectionIndex: Int,
+    reduceMotion: Boolean,
+) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        AnimatedContent(
+            targetState = sectionIndex,
+            transitionSpec = {
+                if (reduceMotion) {
+                    fadeIn(tween(120)) togetherWith fadeOut(tween(120))
+                } else {
+                    fadeIn(tween(280)) togetherWith fadeOut(tween(220))
+                }
+            },
+            label = "calmSection",
+        ) { idx ->
+            val s = CalmSections[idx]
+            Column(Modifier.widthIn(max = 560.dp)) {
+                Text(
+                    text = s.title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .semantics { heading() },
+                )
+                Text(
+                    text = s.body,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalmFocusReadingLayout(
+    sectionIndex: Int,
+    sectionCount: Int,
+    navBarBottom: Dp,
+    reduceMotion: Boolean,
+    onExitFocus: () -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(scheme.background),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Focus reading",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = scheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "Chapter ${sectionIndex + 1} of $sectionCount",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurfaceVariant,
+                )
+            }
+            FilledTonalButton(
+                onClick = onExitFocus,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = scheme.primaryContainer,
+                    contentColor = scheme.onPrimaryContainer,
+                ),
+            ) {
+                Text(
+                    text = "Exit focus",
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
+
+        CalmArticleLazyColumn(
+            sectionIndex = sectionIndex,
+            reduceMotion = reduceMotion,
+            navBarBottom = navBarBottom,
+            contentTopPadding = 0.dp,
+            modifier = Modifier.weight(1f),
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .background(scheme.background)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedButton(
+                onClick = onPrevious,
+                enabled = sectionIndex > 0,
+            ) {
+                Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
+                Spacer(Modifier.width(6.dp))
+                Text("Previous")
+            }
+            OutlinedButton(
+                onClick = onNext,
+                enabled = sectionIndex < sectionCount - 1,
+            ) {
+                Text("Next")
+                Spacer(Modifier.width(6.dp))
+                Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalmReaderOptionsButton(
+    readerPanelOpen: Boolean,
+    onToggleReaderPanel: () -> Unit,
+) {
+    IconButton(onClick = onToggleReaderPanel) {
+        Icon(
+            imageVector = Icons.Outlined.DisplaySettings,
+            contentDescription = if (readerPanelOpen) {
+                "Close reading options"
+            } else {
+                "Reading options"
+            },
+            tint = if (readerPanelOpen) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
+        )
+    }
+}
+
+@Composable
+private fun VerticalDivider() {
+    Box(
+        Modifier
+            .fillMaxHeight()
+            .width(1.dp)
+            .background(MaterialTheme.colorScheme.outlineVariant),
+    )
+}
+
+@Composable
+private fun CalmReaderTopBar(
+    showBack: Boolean,
+    onNavigateBack: () -> Unit,
+    readerPanelOpen: Boolean,
+    onToggleReaderPanel: () -> Unit,
+    eInk: Boolean,
+    eInkVariantLabel: String,
+    guide: DemoTrendGuide?,
+    showGuide: Boolean,
+) {
+    val scheme = MaterialTheme.colorScheme
+    TopAppBar(
+        title = {
+            Column {
+                Text("Calm UI", style = MaterialTheme.typography.titleLarge)
+                if (eInk) {
+                    Text(
+                        eInkVariantLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = scheme.onSurfaceVariant,
+                    )
+                }
+            }
+        },
+        navigationIcon = {
+            if (showBack) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = "Back to catalog",
+                        tint = scheme.onBackground,
+                    )
+                }
+            }
+        },
+        actions = {
+            if (showGuide && guide != null) {
+                DetailPaneGuideAction(
+                    guide = guide,
+                    iconTint = scheme.onBackground,
+                )
+            }
+            CalmReaderOptionsButton(
+                readerPanelOpen = readerPanelOpen,
+                onToggleReaderPanel = onToggleReaderPanel,
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = scheme.background,
+            scrolledContainerColor = scheme.background,
+            titleContentColor = scheme.onBackground,
+            navigationIconContentColor = scheme.onBackground,
+            actionIconContentColor = scheme.onBackground,
+        ),
+    )
+}
+
+@Composable
+private fun ReaderSettingsPanel(
+    fontScale: Float,
+    onFontScale: (Float) -> Unit,
+    lineHeightScale: Float,
+    onLineHeightScale: (Float) -> Unit,
+    useSerif: Boolean,
+    onUseSerif: (Boolean) -> Unit,
+    eInk: Boolean,
+    inkColor: CalmInkColor,
+    eInkVariantLabel: String,
+    onEInk: (Boolean) -> Unit,
+    onInkColor: (CalmInkColor) -> Unit,
+    focusMode: Boolean,
+    onFocusMode: (Boolean) -> Unit,
+    onClose: () -> Unit,
+) {
+    val fontPct = (fontScale * 100f).toInt()
+    val lhPct = (lineHeightScale * 100f).toInt()
+
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(scheme.background),
+    ) {
+        TopAppBar(
+            title = {
+                Text(
+                    text = "Reader",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.semantics { heading() },
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = onClose) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = "Close reader settings",
+                        tint = scheme.onBackground,
+                    )
+                }
+            },
+            actions = {
+                FilledTonalButton(
+                    onClick = onClose,
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = scheme.primaryContainer,
+                        contentColor = scheme.onPrimaryContainer,
+                    ),
+                ) {
+                    Text(
+                        text = "Done",
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = scheme.background,
+                scrolledContainerColor = scheme.background,
+                titleContentColor = scheme.onBackground,
+                navigationIconContentColor = scheme.onBackground,
+                actionIconContentColor = scheme.onPrimaryContainer,
+            ),
+        )
+
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text("Text size", style = MaterialTheme.typography.bodyMedium)
+                    Text("$fontPct%", style = MaterialTheme.typography.labelMedium)
+                }
+                HapticSlider(
+                    value = fontScale,
+                    onValueChange = onFontScale,
+                    valueRange = 0.85f..1.55f,
+                    steps = 13,
+                )
+            }
+
+            Column {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text("Line height", style = MaterialTheme.typography.bodyMedium)
+                    Text("$lhPct%", style = MaterialTheme.typography.labelMedium)
+                }
+                HapticSlider(
+                    value = lineHeightScale,
+                    onValueChange = onLineHeightScale,
+                    valueRange = 0.95f..1.55f,
+                    steps = 11,
+                )
+            }
+
+            HorizontalDivider(color = scheme.outlineVariant)
+
+            SwitchPreferenceRow(
+                title = "Serif body",
+                subtitle = "Literata-style serif for long reads",
+                checked = useSerif,
+                onCheckedChange = onUseSerif,
+            )
+
+            SwitchPreferenceRow(
+                title = "E-ink mode",
+                subtitle = "Black, blue, or green ink — follows system light or dark",
+                checked = eInk,
+                onCheckedChange = onEInk,
+            )
+
+            AnimatedVisibility(visible = eInk) {
+                CalmInkColorPicker(
+                    selected = inkColor,
+                    systemDark = isSystemInDarkTheme(),
+                    onSelect = onInkColor,
+                )
+            }
+
+            SwitchPreferenceRow(
+                title = "Focus mode",
+                subtitle = "Hide toolbar and chapter chrome while reading",
+                checked = focusMode,
+                onCheckedChange = {
+                    onFocusMode(it)
+                    if (it) onClose()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun CalmInkColorPicker(
+    selected: CalmInkColor,
+    systemDark: Boolean,
+    onSelect: (CalmInkColor) -> Unit,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Ink color",
+            style = MaterialTheme.typography.bodyMedium,
+            color = scheme.onSurfaceVariant,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            CalmInkColor.entries.forEach { color ->
+                val isSelected = selected == color
+                val preview = if (systemDark) {
+                    calmEInkDarkPalette(color).inkPreview
+                } else {
+                    calmEInkLightPalette(color).inkPreview
+                }
+                Surface(
+                    onClick = { onSelect(color) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) {
+                        scheme.primaryContainer
+                    } else {
+                        scheme.surfaceContainerHigh
+                    },
+                    contentColor = if (isSelected) {
+                        scheme.onPrimaryContainer
+                    } else {
+                        scheme.onSurfaceVariant
+                    },
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(preview),
+                        )
+                        Text(
+                            text = color.label,
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalmChapterStrip(
+    sections: List<CalmSection>,
+    selectedIndex: Int,
+    reduceMotion: Boolean,
+    onSelect: (Int) -> Unit,
+) {
+    val listState = rememberLazyListState()
+    val safeIndex = selectedIndex.coerceIn(sections.indices)
+
+    LaunchedEffect(safeIndex, sections.size) {
+        if (sections.isEmpty()) return@LaunchedEffect
+        if (reduceMotion) {
+            listState.scrollToCenteredItem(safeIndex)
+        } else {
+            listState.animateScrollToCenteredItem(safeIndex)
+        }
+    }
+
+    LazyRow(
+        state = listState,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        itemsIndexed(
+            items = sections,
+            key = { index, _ -> index },
+        ) { index, section ->
+            FilterChip(
+                selected = index == safeIndex,
+                onClick = { onSelect(index) },
+                label = { Text(section.title) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+            )
+        }
+    }
+}
+
+private suspend fun LazyListState.scrollToCenteredItem(index: Int) {
+    if (index < 0) return
+    scrollToItem(index)
+    scroll {
+        val item = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index } ?: return@scroll
+        val viewportStart = layoutInfo.viewportStartOffset
+        val viewportEnd = layoutInfo.viewportEndOffset
+        val viewportCenter = viewportStart + (viewportEnd - viewportStart) / 2
+        val itemCenter = item.offset + item.size / 2
+        scrollBy((itemCenter - viewportCenter).toFloat())
+    }
+}
+
+private suspend fun LazyListState.animateScrollToCenteredItem(index: Int) {
+    if (index < 0) return
+    animateScrollToItem(index)
+    val item = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index } ?: return
+    val viewportStart = layoutInfo.viewportStartOffset
+    val viewportEnd = layoutInfo.viewportEndOffset
+    val viewportCenter = viewportStart + (viewportEnd - viewportStart) / 2
+    val itemCenter = item.offset + item.size / 2
+    val delta = (itemCenter - viewportCenter).toFloat()
+    if (delta != 0f) {
+        animateScrollBy(delta)
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun CalmTableOfContentsRail(
+    sections: List<CalmSection>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        modifier = modifier
+            .background(scheme.surfaceContainerLow)
+            .padding(vertical = 16.dp, horizontal = 12.dp),
+    ) {
+        Text(
+            "Contents",
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 12.dp)
+                .semantics { heading() },
+        )
+        sections.forEachIndexed { index, section ->
+            val selected = index == selectedIndex
+            Surface(
+                onClick = { onSelect(index) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp),
+                shape = MaterialTheme.shapes.medium,
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    Color.Transparent
+                },
+            ) {
+                Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                    Text(
+                        text = section.title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (selected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                    )
+                    Text(
+                        text = "${section.readMinutes} min",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalmReadingMeta(
+    sectionIndex: Int,
+    sectionCount: Int,
+    sectionMinutes: Int,
+    totalMinutes: Int,
+    progress: Float,
+) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp),
+    ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                "Chapter ${sectionIndex + 1} of $sectionCount",
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Text(
+                "~$sectionMinutes min · $totalMinutes min total",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.fillMaxWidth(),
+            trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
+private fun CalmChapterNavigation(
+    sectionIndex: Int,
+    sectionCount: Int,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OutlinedButton(
+            onClick = onPrevious,
+            enabled = sectionIndex > 0,
+        ) {
+            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
+            Spacer(Modifier.width(6.dp))
+            Text("Previous")
+        }
+        OutlinedButton(
+            onClick = onNext,
+            enabled = sectionIndex < sectionCount - 1,
+        ) {
+            Text("Next")
+            Spacer(Modifier.width(6.dp))
+            Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null)
+        }
+    }
+}

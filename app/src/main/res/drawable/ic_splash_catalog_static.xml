@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="432dp"
+    android:height="432dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+    <group
+        android:name="splash_canvas"
+        android:translateX="90.0"
+        android:translateY="90.0">
+        <group
+            android:name="splash_frame"
+            android:pivotX="54.0"
+            android:pivotY="54.0"
+            android:scaleX="1.34"
+            android:scaleY="1.34">
+        <group
+            android:name="motif_bijapur"
+            android:pivotX="54.0"
+            android:pivotY="54.0">
+            <group
+                android:name="motion_bijapur"
+                android:pivotX="54.0"
+                android:pivotY="54.0">
+            <path
+                android:name="bijapur_p0"
+                android:pathData="M 54.00,18.00 L 79.46,28.54 L 90.00,54.00 L 79.46,79.46 L 54.00,90.00 L 28.54,79.46 L 18.00,54.00 L 28.54,28.54 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="4.10"
+                android:strokeAlpha="0.55"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p1"
+                android:pathData="M 54.00,26.00 L 73.80,34.20 L 82.00,54.00 L 73.80,73.80 L 54.00,82.00 L 34.20,73.80 L 26.00,54.00 L 34.20,34.20 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.70"
+                android:strokeAlpha="0.85"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p2"
+                android:pathData="M 54.00,32.00 L 57.49,45.58 L 69.56,38.44 L 62.42,50.51 L 76.00,54.00 L 62.42,57.49 L 69.56,69.56 L 57.49,62.42 L 54.00,76.00 L 50.51,62.42 L 38.44,69.56 L 45.58,57.49 L 32.00,54.00 L 45.58,50.51 L 38.44,38.44 L 50.51,45.58 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.90"
+                android:strokeAlpha="1"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p3"
+                android:pathData="M 54.00,14.50 L 60.72,17.28 L 63.50,24.00 L 60.72,30.72 L 54.00,33.50 L 47.28,30.72 L 44.50,24.00 L 47.28,17.28 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0.80"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p4"
+                android:pathData="M 81.93,26.07 L 84.71,32.79 L 81.93,39.50 L 75.21,42.29 L 68.50,39.50 L 65.71,32.79 L 68.50,26.07 L 75.21,23.29 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0.80"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p5"
+                android:pathData="M 93.50,54.00 L 90.72,60.72 L 84.00,63.50 L 77.28,60.72 L 74.50,54.00 L 77.28,47.28 L 84.00,44.50 L 90.72,47.28 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0.80"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p6"
+                android:pathData="M 81.93,81.93 L 75.21,84.71 L 68.50,81.93 L 65.71,75.21 L 68.50,68.50 L 75.21,65.71 L 81.93,68.50 L 84.71,75.21 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0.80"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p7"
+                android:pathData="M 54.00,93.50 L 47.28,90.72 L 44.50,84.00 L 47.28,77.28 L 54.00,74.50 L 60.72,77.28 L 63.50,84.00 L 60.72,90.72 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0.80"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p8"
+                android:pathData="M 26.07,81.93 L 23.29,75.21 L 26.07,68.50 L 32.79,65.71 L 39.50,68.50 L 42.29,75.21 L 39.50,81.93 L 32.79,84.71 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0.80"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p9"
+                android:pathData="M 14.50,54.00 L 17.28,47.28 L 24.00,44.50 L 30.72,47.28 L 33.50,54.00 L 30.72,60.72 L 24.00,63.50 L 17.28,60.72 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0.80"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="bijapur_p10"
+                android:pathData="M 26.07,26.07 L 32.79,23.29 L 39.50,26.07 L 42.29,32.79 L 39.50,39.50 L 32.79,42.29 L 26.07,39.50 L 23.29,32.79 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0.80"
+                android:strokeLineJoin="round"
+                />
+            </group>
+        </group>
+        <group
+            android:name="motif_golconda"
+            android:pivotX="54.0"
+            android:pivotY="54.0">
+            <group
+                android:name="motion_golconda"
+                android:pivotX="54.0"
+                android:pivotY="54.0">
+            <path
+                android:name="golconda_p0"
+                android:pathData="M 54.00,16.00 L 80.87,27.13 L 92.00,54.00 L 80.87,80.87 L 54.00,92.00 L 27.13,80.87 L 16.00,54.00 L 27.13,27.13 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="4.10"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p1"
+                android:pathData="M 54.00,26.00 L 82.00,54.00 L 54.00,82.00 L 26.00,54.00 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.70"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p2"
+                android:pathData="M 73.80,34.20 L 73.80,73.80 L 34.20,73.80 L 34.20,34.20 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.70"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p3"
+                android:pathData="M 54.00,34.00 L 57.17,46.35 L 68.14,39.86 L 61.65,50.83 L 74.00,54.00 L 61.65,57.17 L 68.14,68.14 L 57.17,61.65 L 54.00,74.00 L 50.83,61.65 L 39.86,68.14 L 46.35,57.17 L 34.00,54.00 L 46.35,50.83 L 39.86,39.86 L 50.83,46.35 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p4"
+                android:pathData="M 54.00,22.00 L 54.00,34.00"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p5"
+                android:pathData="M 86.00,54.00 L 74.00,54.00"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p6"
+                android:pathData="M 54.00,86.00 L 54.00,74.00"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p7"
+                android:pathData="M 22.00,54.00 L 34.00,54.00"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p8"
+                android:pathData="M 71.72,36.28 L 64.39,43.61"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p9"
+                android:pathData="M 71.72,71.72 L 64.39,64.39"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p10"
+                android:pathData="M 36.28,71.72 L 43.61,64.39"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="golconda_p11"
+                android:pathData="M 36.28,36.28 L 43.61,43.61"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            </group>
+        </group>
+        <group
+            android:name="motif_rauza"
+            android:pivotX="54.0"
+            android:pivotY="54.0">
+            <group
+                android:name="motion_rauza"
+                android:pivotX="54.0"
+                android:pivotY="54.0">
+            <path
+                android:name="rauza_p0"
+                android:pathData="M 91.00,54.00 L 72.50,86.04 L 35.50,86.04 L 17.00,54.00 L 35.50,21.96 L 72.50,21.96 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="4.10"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p1"
+                android:pathData="M 82.00,54.00 L 68.00,78.25 L 40.00,78.25 L 26.00,54.00 L 40.00,29.75 L 68.00,29.75 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.70"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p2"
+                android:pathData="M 54.00,33.00 L 60.06,43.50 L 72.19,43.50 L 66.12,54.00 L 72.19,64.50 L 60.06,64.50 L 54.00,75.00 L 47.94,64.50 L 35.81,64.50 L 41.88,54.00 L 35.81,43.50 L 47.94,43.50 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p3"
+                android:pathData="M 54.00,38.50 L 67.42,61.75 L 40.58,61.75 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p4"
+                android:pathData="M 54.00,69.50 L 40.58,46.25 L 67.42,46.25 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p5"
+                android:pathData="M 70.45,63.50 L 84.12,71.39"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p6"
+                android:pathData="M 54.00,73.00 L 54.00,88.78"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p7"
+                android:pathData="M 37.55,63.50 L 23.88,71.39"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p8"
+                android:pathData="M 37.55,44.50 L 23.88,36.61"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p9"
+                android:pathData="M 54.00,35.00 L 54.00,19.22"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p10"
+                android:pathData="M 70.45,44.50 L 84.12,36.61"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p11"
+                android:pathData="M 78.00,54.00 L 42.00,74.78"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.50"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p12"
+                android:pathData="M 66.00,74.78 L 30.00,54.00"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.50"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p13"
+                android:pathData="M 42.00,74.78 L 42.00,33.22"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.50"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p14"
+                android:pathData="M 30.00,54.00 L 66.00,33.22"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.50"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p15"
+                android:pathData="M 42.00,33.22 L 78.00,54.00"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.50"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="rauza_p16"
+                android:pathData="M 66.00,33.22 L 66.00,74.78"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.50"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            </group>
+        </group>
+        <group
+            android:name="motif_hyderabad"
+            android:pivotX="54.0"
+            android:pivotY="54.0">
+            <group
+                android:name="motion_hyderabad"
+                android:pivotX="54.0"
+                android:pivotY="54.0">
+            <path
+                android:name="hyderabad_p0"
+                android:pathData="M 54.00,16.00 L 80.87,27.13 L 92.00,54.00 L 80.87,80.87 L 54.00,92.00 L 27.13,80.87 L 16.00,54.00 L 27.13,27.13 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="4.10"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p1"
+                android:pathData="M 54.00,22.50 L 76.27,31.73 L 85.50,54.00 L 76.27,76.27 L 54.00,85.50 L 31.73,76.27 L 22.50,54.00 L 31.73,31.73 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.70"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p2"
+                android:pathData="M 34.00,34.00 L 74.00,34.00 L 74.00,74.00 L 34.00,74.00 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.80"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p3"
+                android:pathData="M 72.03,35.97 L 72.03,72.03 L 35.97,72.03 L 35.97,35.97 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p4"
+                android:pathData="M 54.00,42.00 L 60.00,48.00 L 66.00,54.00 L 60.00,60.00 L 54.00,66.00 L 48.00,60.00 L 42.00,54.00 L 48.00,48.00 Z"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary_dark"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p5"
+                android:pathData="M 74.00,34.00 L 79.80,28.20"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p6"
+                android:pathData="M 74.00,74.00 L 79.80,79.80"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p7"
+                android:pathData="M 34.00,74.00 L 28.20,79.80"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p8"
+                android:pathData="M 34.00,34.00 L 28.20,28.20"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.85"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p9"
+                android:pathData="M 54.00,34.00 L 54.00,17.52"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p10"
+                android:pathData="M 74.00,54.00 L 90.48,54.00"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p11"
+                android:pathData="M 54.00,74.00 L 54.00,90.48"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p12"
+                android:pathData="M 34.00,54.00 L 17.52,54.00"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_primary"
+                android:strokeWidth="3.15"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p13"
+                android:pathData="M 63.90,44.10 L 70.59,37.41"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.45"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p14"
+                android:pathData="M 63.90,63.90 L 70.59,70.59"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.45"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p15"
+                android:pathData="M 44.10,63.90 L 37.41,70.59"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.45"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            <path
+                android:name="hyderabad_p16"
+                android:pathData="M 44.10,44.10 L 37.41,37.41"
+                android:fillColor="@android:color/transparent"
+                android:strokeColor="@color/brand_accent"
+                android:strokeWidth="2.45"
+                android:strokeAlpha="0"
+                android:strokeLineJoin="round"
+                />
+            </group>
+        </group>
+        </group>
+    </group>
+</vector>

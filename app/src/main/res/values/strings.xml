@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">UITrends</string>
+    <string name="launcher_icon_bijapur">Square Eight Star</string>
+    <string name="launcher_icon_golconda">Octagon Star Jaali</string>
+    <string name="launcher_icon_rauza">Star Hex Interlace</string>
+    <string name="launcher_icon_hyderabad">Octagon Square</string>
+    <string name="launcher_icon_confirm_title">Change app icon?</string>
+    <string name="launcher_icon_confirm_message">Your home screen icon will update. On some phones the app may close once — that is normal for this feature. Open the app again to see the matching splash screen.</string>
+    <string name="launcher_icon_confirm_new">New icon: %1$s</string>
+    <string name="launcher_icon_confirm_change">Change icon</string>
+    <string name="launcher_icon_confirm_cancel">Cancel</string>
+    <string name="launcher_icon_changed">Icon updated</string>
+    <string name="action_torch">Toggle torch</string>
+    <string name="action_flip_camera">Flip camera</string>
+    <string name="action_settings">Camera settings</string>
+</resources>

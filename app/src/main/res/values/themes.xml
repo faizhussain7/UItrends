@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Trendinguipatterns" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
+
+    <style name="Theme.Trendinguipatterns.Dark" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/splash_background_dark</item>
+    </style>
+
+    <style name="Theme.Trendinguipatterns.Starting.Light" parent="Theme.SplashScreen">
+        <item name="android:windowBackground">@color/splash_background</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_catalog_static</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.Trendinguipatterns</item>
+    </style>
+
+    <style name="Theme.Trendinguipatterns.Starting.Dark" parent="Theme.SplashScreen">
+        <item name="android:windowBackground">@color/splash_background_dark</item>
+        <item name="windowSplashScreenBackground">@color/splash_background_dark</item>
+        <item name="android:windowSplashScreenBackground">@color/splash_background_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_catalog_static</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.Trendinguipatterns.Dark</item>
+    </style>
+
+    <style name="Theme.Trendinguipatterns.Starting" parent="Theme.Trendinguipatterns.Starting.Light" />
+
+</resources>

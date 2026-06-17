@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:name="logo_root"
+        android:pivotX="54"
+        android:pivotY="54">
+        <path
+            android:pathData="M 54.00,16.00 L 80.87,27.13 L 92.00,54.00 L 80.87,80.87 L 54.00,92.00 L 27.13,80.87 L 16.00,54.00 L 27.13,27.13 Z"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary_dark"
+            android:strokeWidth="4.10"
+            android:strokeAlpha="0.55"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 54.00,22.50 L 76.27,31.73 L 85.50,54.00 L 76.27,76.27 L 54.00,85.50 L 31.73,76.27 L 22.50,54.00 L 31.73,31.73 Z"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary"
+            android:strokeWidth="3.70"
+            android:strokeAlpha="0.88"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 34.00,34.00 L 74.00,34.00 L 74.00,74.00 L 34.00,74.00 Z"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary"
+            android:strokeWidth="3.80"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 72.03,35.97 L 72.03,72.03 L 35.97,72.03 L 35.97,35.97 Z"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary_dark"
+            android:strokeWidth="3.15"
+            android:strokeAlpha="0.92"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 54.00,42.00 L 60.00,48.00 L 66.00,54.00 L 60.00,60.00 L 54.00,66.00 L 48.00,60.00 L 42.00,54.00 L 48.00,48.00 Z"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary_dark"
+            android:strokeWidth="3.15"
+            android:strokeAlpha="0.90"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 74.00,34.00 L 79.80,28.20"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_accent"
+            android:strokeWidth="2.85"
+            android:strokeAlpha="0.88"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 74.00,74.00 L 79.80,79.80"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_accent"
+            android:strokeWidth="2.85"
+            android:strokeAlpha="0.88"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 34.00,74.00 L 28.20,79.80"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_accent"
+            android:strokeWidth="2.85"
+            android:strokeAlpha="0.88"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 34.00,34.00 L 28.20,28.20"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_accent"
+            android:strokeWidth="2.85"
+            android:strokeAlpha="0.88"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 54.00,34.00 L 54.00,17.52"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary"
+            android:strokeWidth="3.15"
+            android:strokeAlpha="0.78"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 74.00,54.00 L 90.48,54.00"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary"
+            android:strokeWidth="3.15"
+            android:strokeAlpha="0.78"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 54.00,74.00 L 54.00,90.48"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary"
+            android:strokeWidth="3.15"
+            android:strokeAlpha="0.78"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 34.00,54.00 L 17.52,54.00"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_primary"
+            android:strokeWidth="3.15"
+            android:strokeAlpha="0.78"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 63.90,44.10 L 70.59,37.41"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_accent"
+            android:strokeWidth="2.45"
+            android:strokeAlpha="0.72"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 63.90,63.90 L 70.59,70.59"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_accent"
+            android:strokeWidth="2.45"
+            android:strokeAlpha="0.72"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 44.10,63.90 L 37.41,70.59"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_accent"
+            android:strokeWidth="2.45"
+            android:strokeAlpha="0.72"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M 44.10,44.10 L 37.41,37.41"
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="@color/brand_accent"
+            android:strokeWidth="2.45"
+            android:strokeAlpha="0.72"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>
