@@ -2,10 +2,10 @@
 
 <table>
   <tr>
-    <td align="center"><img src="docs/readme/logo-1.svg" width="68" alt="" /></td>
-    <td align="center"><img src="docs/readme/logo-2.svg" width="68" alt="" /></td>
-    <td align="center"><img src="docs/readme/logo-3.svg" width="68" alt="" /></td>
-    <td align="center"><img src="docs/readme/logo-4.svg" width="68" alt="" /></td>
+    <td align="center"><img src="readme-assets/logo-1.svg" width="68" alt="" /></td>
+    <td align="center"><img src="readme-assets/logo-2.svg" width="68" alt="" /></td>
+    <td align="center"><img src="readme-assets/logo-3.svg" width="68" alt="" /></td>
+    <td align="center"><img src="readme-assets/logo-4.svg" width="68" alt="" /></td>
   </tr>
 </table>
 
