@@ -15,7 +15,6 @@ enum class AppLauncherIcon(
     @param:DrawableRes val darkRoundIconMipmap: Int,
     @param:DrawableRes val launcherForegroundRes: Int,
     @param:DrawableRes val brandLogoRes: Int,
-    val legacyAliasClassName: String,
 ) {
     Bijapur(
         design = 1,
@@ -28,7 +27,6 @@ enum class AppLauncherIcon(
         darkRoundIconMipmap = R.mipmap.ic_launcher_round_dark,
         launcherForegroundRes = R.drawable.ic_launcher_foreground,
         brandLogoRes = R.drawable.ic_brand_logo,
-        legacyAliasClassName = "com.mfhapps.trendingui.LauncherIconBijapur",
     ),
     Golconda(
         design = 2,
@@ -41,7 +39,6 @@ enum class AppLauncherIcon(
         darkRoundIconMipmap = R.mipmap.ic_launcher_round_2_dark,
         launcherForegroundRes = R.drawable.ic_launcher_foreground_2,
         brandLogoRes = R.drawable.ic_brand_logo_2,
-        legacyAliasClassName = "com.mfhapps.trendingui.LauncherIconGolconda",
     ),
     Rauza(
         design = 3,
@@ -54,7 +51,6 @@ enum class AppLauncherIcon(
         darkRoundIconMipmap = R.mipmap.ic_launcher_round_3_dark,
         launcherForegroundRes = R.drawable.ic_launcher_foreground_3,
         brandLogoRes = R.drawable.ic_brand_logo_3,
-        legacyAliasClassName = "com.mfhapps.trendingui.LauncherIconRauza",
     ),
     Hyderabad(
         design = 4,
@@ -67,7 +63,6 @@ enum class AppLauncherIcon(
         darkRoundIconMipmap = R.mipmap.ic_launcher_round_4_dark,
         launcherForegroundRes = R.drawable.ic_launcher_foreground_4,
         brandLogoRes = R.drawable.ic_brand_logo_4,
-        legacyAliasClassName = "com.mfhapps.trendingui.LauncherIconHyderabad",
     ),
     ;
 
@@ -92,8 +87,7 @@ enum class AppLauncherIcon(
         fun fromAliasClassName(className: String): AppLauncherIcon? =
             entries.firstOrNull { entry ->
                 entry.lightAliasClassName == className ||
-                    entry.darkAliasClassName == className ||
-                    entry.legacyAliasClassName == className
+                    entry.darkAliasClassName == className
             }
     }
 }

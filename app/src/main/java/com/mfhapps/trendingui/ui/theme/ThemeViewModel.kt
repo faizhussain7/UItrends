@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.mfhapps.trendingui.TrendingApplication
+import com.mfhapps.trendingui.launcher.LauncherIconCoordinator
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -22,7 +23,13 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
     fun setThemeMode(mode: ThemeMode) {
         if (mode == themeModeStore.current()) return
         repository.setThemeMode(mode)
-        getApplication<Application>().syncThemeAppearance(mode)
+        val app = getApplication<Application>()
+        app.applyThemeNightMode(mode)
+        viewModelScope.launch {
+            if (repository.syncLauncherIconWithThemeOnce()) {
+                LauncherIconCoordinator.syncTheme(app, syncLauncherIconWithTheme = true)
+            }
+        }
     }
 
     fun setUseDynamicColor(enabled: Boolean) {
@@ -39,5 +46,14 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setBlurModalBackdrop(enabled: Boolean) {
         viewModelScope.launch { repository.setBlurModalBackdrop(enabled) }
+    }
+
+    fun setSyncLauncherIconWithTheme(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.setSyncLauncherIconWithTheme(enabled)
+            if (enabled) {
+                LauncherIconCoordinator.syncTheme(getApplication(), syncLauncherIconWithTheme = true)
+            }
+        }
     }
 }

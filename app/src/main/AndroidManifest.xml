@@ -29,42 +29,10 @@
             android:configChanges="uiMode"
             android:exported="true"
             android:theme="@style/Theme.Trendinguipatterns.Starting" />
-        <activity-alias
-            android:name=".LauncherIconBijapur"
-            android:enabled="false"
-            android:exported="false"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round"
-            android:targetActivity=".MainActivity" />
-        <activity-alias
-            android:name=".LauncherIconGolconda"
-            android:enabled="false"
-            android:exported="false"
-            android:icon="@mipmap/ic_launcher_2"
-            android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round_2"
-            android:targetActivity=".MainActivity" />
-        <activity-alias
-            android:name=".LauncherIconRauza"
-            android:enabled="false"
-            android:exported="false"
-            android:icon="@mipmap/ic_launcher_3"
-            android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round_3"
-            android:targetActivity=".MainActivity" />
-        <activity-alias
-            android:name=".LauncherIconHyderabad"
-            android:enabled="false"
-            android:exported="false"
-            android:icon="@mipmap/ic_launcher_4"
-            android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round_4"
-            android:targetActivity=".MainActivity" />
 
         <activity-alias
             android:name=".LauncherIconBijapurLight"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"

@@ -3,6 +3,10 @@ package com.mfhapps.trendingui.ui.detail
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
@@ -30,3 +34,10 @@ class NestedBackDispatcher {
 }
 
 val LocalNestedBackDispatcher = staticCompositionLocalOf { NestedBackDispatcher() }
+
+@Stable
+class ImmersiveTopBarCollapseState {
+    var collapsedFraction by mutableFloatStateOf(0f)
+}
+
+val LocalImmersiveTopBarCollapse = staticCompositionLocalOf<ImmersiveTopBarCollapseState?> { null }

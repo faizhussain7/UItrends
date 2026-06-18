@@ -33,8 +33,15 @@ object LauncherIconCoordinator {
     suspend fun reconcileOnStartup(container: AppContainer, context: Context): AppLauncherIcon {
         container.launcherIcons.migrateFromLegacyIfNeeded()
         val stored = container.launcherIcons.selectedIconOnce()
-        val darkTheme = resolveLauncherDarkTheme(context)
+        val syncWithTheme = container.themePreferences.syncLauncherIconWithThemeOnce()
         val active = LauncherIconManager.readActiveWithTheme(context)
+        if (!syncWithTheme) {
+            if (stored != active.icon) {
+                LauncherIconManager.apply(context, stored, active.darkTheme)
+            }
+            return stored
+        }
+        val darkTheme = resolveLauncherDarkTheme(context)
         return if (stored == active.icon && active.darkTheme == darkTheme) {
             stored
         } else {
@@ -43,7 +50,8 @@ object LauncherIconCoordinator {
         }
     }
 
-    fun syncTheme(context: Context) {
+    fun syncTheme(context: Context, syncLauncherIconWithTheme: Boolean) {
+        if (!syncLauncherIconWithTheme) return
         val darkTheme = resolveLauncherDarkTheme(context)
         val icon = LauncherIconManager.readActiveOrDefault(context)
         LauncherIconManager.apply(context, icon, darkTheme)

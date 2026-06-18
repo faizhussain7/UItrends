@@ -9,6 +9,7 @@ import coil.memory.MemoryCache
 import com.mfhapps.trendingui.di.AppContainer
 import com.mfhapps.trendingui.launcher.LauncherIconCoordinator
 import com.mfhapps.trendingui.launcher.SplashDrawableCache
+import com.mfhapps.trendingui.launcher.SplashScreenTiming
 import com.mfhapps.trendingui.startup.StartupSnapshot
 import com.mfhapps.trendingui.ui.theme.ThemeModeStore
 import com.mfhapps.trendingui.ui.theme.applyThemeNightMode
@@ -31,6 +32,7 @@ class TrendingApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        SplashScreenTiming.init(this)
         val themeModeStore = ThemeModeStore.get(this)
         themeModeStore.ensureMigratedFromLegacyDataStore(this)
         applyThemeNightMode(themeModeStore.current())

@@ -81,6 +81,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.SwitchPreferenceRow
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
 import com.mfhapps.trendingui.ui.detail.LocalDetailPaneActive
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
@@ -402,6 +403,7 @@ fun CalmUiScreen(
         Box(
             Modifier
                 .fillMaxSize()
+                .appHazeSource()
                 .background(MaterialTheme.colorScheme.background),
         ) {
             if (focusMode) {

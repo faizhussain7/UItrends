@@ -1,22 +1,55 @@
 package com.mfhapps.trendingui.launcher
 
-import com.mfhapps.trendingui.launcher.AppLauncherIcon
+import android.content.Context
+import com.mfhapps.trendingui.R
 
 
 object SplashScreenTiming {
-    val motifCount: Int = AppLauncherIcon.entries.size
+    private lateinit var values: Values
 
+    data class Values(
+        val motifCount: Int,
+        val motifSlotMs: Long,
+        val catalogCycleMs: Long,
+        val crossfadeMs: Long,
+        val fadeInMs: Long,
+        val animMs: Long,
+        val holdMs: Long,
+        val minDisplayMs: Long,
+    ) {
+        val themeAnimationDurationMs: Int = catalogCycleMs.toInt()
+    }
 
-    const val MOTIF_SLOT_MS = 1_400L
+    fun init(context: Context) {
+        if (::values.isInitialized) return
+        val res = context.resources
+        values = Values(
+            motifCount = res.getInteger(R.integer.splash_motif_count),
+            motifSlotMs = res.getInteger(R.integer.splash_motif_slot_ms).toLong(),
+            catalogCycleMs = res.getInteger(R.integer.splash_catalog_cycle_ms).toLong(),
+            crossfadeMs = res.getInteger(R.integer.splash_crossfade_ms).toLong(),
+            fadeInMs = res.getInteger(R.integer.splash_fade_in_ms).toLong(),
+            animMs = res.getInteger(R.integer.splash_anim_ms).toLong(),
+            holdMs = res.getInteger(R.integer.splash_hold_ms).toLong(),
+            minDisplayMs = res.getInteger(R.integer.splash_min_display_ms).toLong(),
+        )
+    }
 
-    const val CROSSFADE_MS = 360L
+    val motifCount: Int
+        get() = values.motifCount
 
+    val motifSlotMs: Long
+        get() = values.motifSlotMs
 
-    const val MOTIF_HOLD_MS = 420L
+    val catalogCycleMs: Long
+        get() = values.catalogCycleMs
 
-    val catalogCycleMs: Long = motifCount * MOTIF_SLOT_MS
+    val crossfadeMs: Long
+        get() = values.crossfadeMs
 
-    val themeAnimationDurationMs: Int = catalogCycleMs.toInt()
+    val minDisplayMs: Long
+        get() = values.minDisplayMs
 
-    val minDisplayMs: Long = catalogCycleMs + 400L
+    val themeAnimationDurationMs: Int
+        get() = values.themeAnimationDurationMs
 }

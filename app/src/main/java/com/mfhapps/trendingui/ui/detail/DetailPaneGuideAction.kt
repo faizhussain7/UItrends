@@ -1,5 +1,7 @@
 package com.mfhapps.trendingui.ui.detail
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,8 +14,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.brutal.BrutalChromeIconButton
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import com.mfhapps.trendingui.ui.neumorphism.NeuChromeIconButton
@@ -27,14 +31,20 @@ fun DetailPaneGuideAction(
     modifier: Modifier = Modifier,
     iconTint: Color = MaterialTheme.colorScheme.primary,
     chromeStyle: DetailChromeStyle = LocalDetailChromeStyle.current,
+    leading: @Composable (() -> Unit)? = null,
 ) {
     var showGuide by rememberSaveable { mutableStateOf(false) }
-    when (chromeStyle) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        leading?.invoke()
+        when (chromeStyle) {
         DetailChromeStyle.NeoBrutal -> BrutalChromeIconButton(
             onClick = { showGuide = true },
             icon = Icons.AutoMirrored.Outlined.HelpOutline,
             contentDescription = "UI pattern guide",
-            modifier = modifier,
             fill = MaterialTheme.colorScheme.secondaryContainer,
             iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
         )
@@ -42,14 +52,12 @@ fun DetailPaneGuideAction(
             onClick = { showGuide = true },
             icon = Icons.AutoMirrored.Outlined.HelpOutline,
             contentDescription = "UI pattern guide",
-            modifier = modifier,
             iconTint = MaterialTheme.colorScheme.primary,
         )
         DetailChromeStyle.Glass -> GlassChromeIconButton(
             onClick = { showGuide = true },
             icon = Icons.AutoMirrored.Outlined.HelpOutline,
             contentDescription = "UI pattern guide",
-            modifier = modifier,
         )
         DetailChromeStyle.Orbs,
         DetailChromeStyle.Spatial,
@@ -57,7 +65,6 @@ fun DetailPaneGuideAction(
         DetailChromeStyle.Default ->
             IconButton(
                 onClick = { showGuide = true },
-                modifier = modifier,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = iconTint),
             ) {
                 Icon(
@@ -66,6 +73,7 @@ fun DetailPaneGuideAction(
                     tint = iconTint,
                 )
             }
+        }
     }
 
     if (showGuide) {

@@ -14,4 +14,5 @@ data class ThemePreferences(
     val homeLayoutStyle: HomeLayoutStyle = HomeLayoutStyle.FeaturedList,
     val customGradient: CustomGradientConfig = CustomGradientConfig.Default,
     val blurModalBackdrop: Boolean = true,
+    val syncLauncherIconWithTheme: Boolean = false,
 )

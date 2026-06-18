@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.Brightness6
 import androidx.compose.material.icons.outlined.Dashboard
 import com.mfhapps.trendingui.ui.components.AppAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +34,7 @@ import com.mfhapps.trendingui.ui.settings.SettingsHomeDivider
 import com.mfhapps.trendingui.ui.settings.SettingsHomeRowHeader
 import com.mfhapps.trendingui.ui.settings.SettingsHomeStudioPanel
 import com.mfhapps.trendingui.ui.settings.SettingsSectionTitle
+import com.mfhapps.trendingui.ui.settings.SettingsSwitchRow
 import com.mfhapps.trendingui.ui.theme.HomeLayoutStyle
 import com.mfhapps.trendingui.ui.theme.ThemePreferences
 
@@ -42,6 +44,7 @@ fun HomeAppearanceSettings(
     preferences: ThemePreferences,
     selectedLauncherIcon: AppLauncherIcon,
     onLayoutChange: (HomeLayoutStyle) -> Unit,
+    onSyncLauncherIconWithThemeChange: (Boolean) -> Unit,
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -87,6 +90,16 @@ fun HomeAppearanceSettings(
                     },
                 )
             }
+
+            SettingsHomeDivider()
+
+            SettingsSwitchRow(
+                checked = preferences.syncLauncherIconWithTheme,
+                onCheckedChange = onSyncLauncherIconWithThemeChange,
+                icon = Icons.Outlined.Brightness6,
+                title = "Match app icon to theme",
+                subtitle = "Switch light and dark icon variants when the theme changes",
+            )
         }
     }
 

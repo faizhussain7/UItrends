@@ -1,23 +1,26 @@
 package com.mfhapps.trendingui.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -28,15 +31,22 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogWindowProvider
+import com.mfhapps.trendingui.screens.glass.LocalGlassBackdrop
 import com.mfhapps.trendingui.ui.platform.supportsBackdropBlur
+import com.mfhapps.trendingui.ui.theme.LocalCatalogHazeEnabled
+import com.mfhapps.trendingui.ui.theme.LocalCatalogHazeState
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
@@ -45,44 +55,55 @@ import dev.chrisbanes.haze.rememberHazeState
 
 val LocalModalBackdropBlurEnabled = compositionLocalOf { false }
 
+@Composable
+internal fun ClearDialogWindowDim() {
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val window = (view.parent as? DialogWindowProvider)?.window
+        val previousDim = window?.attributes?.dimAmount
+        window?.setDimAmount(0f)
+        onDispose {
+            if (window != null && previousDim != null) {
+                window.setDimAmount(previousDim)
+            }
+        }
+    }
+}
+
 internal val LocalAppHazeState = compositionLocalOf<HazeState?> { null }
 
 internal val LocalModalBackdropController = compositionLocalOf { ModalBackdropController() }
-
-internal val LocalCollapsedHeaderBackdropController = compositionLocalOf { CollapsedHeaderBackdropController() }
 
 internal data class ModalBackdropRegistration(
     val id: Any,
     val onDismiss: () -> Unit,
     val excludeTop: Dp = 0.dp,
-)
-
-internal data class CollapsedHeaderBackdropRegistration(
-    val id: Any,
-    val height: Dp,
-    val content: @Composable () -> Unit,
+    val hazeState: HazeState? = null,
 )
 
 class ModalBackdropController internal constructor() {
     internal val registrations = mutableStateListOf<ModalBackdropRegistration>()
 
-    fun register(id: Any, onDismiss: () -> Unit, excludeTop: Dp = 0.dp) {
+    fun register(
+        id: Any,
+        onDismiss: () -> Unit,
+        excludeTop: Dp = 0.dp,
+        hazeState: HazeState? = null,
+    ) {
         val index = registrations.indexOfFirst { it.id === id }
         if (index >= 0) {
             val current = registrations[index]
-            if (current.onDismiss === onDismiss && current.excludeTop == excludeTop) return
-            registrations[index] = ModalBackdropRegistration(id, onDismiss, excludeTop)
+            if (
+                current.onDismiss === onDismiss &&
+                current.excludeTop == excludeTop &&
+                current.hazeState === hazeState
+            ) {
+                return
+            }
+            registrations[index] = ModalBackdropRegistration(id, onDismiss, excludeTop, hazeState)
         } else {
-            registrations.add(ModalBackdropRegistration(id, onDismiss, excludeTop))
+            registrations.add(ModalBackdropRegistration(id, onDismiss, excludeTop, hazeState))
         }
-    }
-
-    fun updateExcludeTop(id: Any, excludeTop: Dp) {
-        val index = registrations.indexOfFirst { it.id === id }
-        if (index < 0) return
-        val current = registrations[index]
-        if (current.excludeTop == excludeTop) return
-        registrations[index] = current.copy(excludeTop = excludeTop)
     }
 
     fun unregister(id: Any) {
@@ -92,41 +113,10 @@ class ModalBackdropController internal constructor() {
     fun dismissTop() {
         registrations.lastOrNull()?.onDismiss?.invoke()
     }
-
-    internal val maxExcludeTop: Dp
-        get() = registrations.maxOfOrNull { it.excludeTop } ?: 0.dp
-}
-
-class CollapsedHeaderBackdropController internal constructor() {
-    internal val registrations = mutableStateListOf<CollapsedHeaderBackdropRegistration>()
-
-    fun register(
-        id: Any,
-        height: Dp,
-        content: @Composable () -> Unit,
-    ) {
-        val index = registrations.indexOfFirst { it.id === id }
-        if (index >= 0) {
-            registrations[index] = CollapsedHeaderBackdropRegistration(id, height, content)
-        } else {
-            registrations.add(CollapsedHeaderBackdropRegistration(id, height, content))
-        }
-    }
-
-    fun unregister(id: Any) {
-        registrations.removeAll { it.id === id }
-    }
-
-    internal val maxHeight: Dp
-        get() = registrations.maxOfOrNull { it.height } ?: 0.dp
 }
 
 @Composable
 fun rememberModalBackdropController(): ModalBackdropController = remember { ModalBackdropController() }
-
-@Composable
-fun rememberCollapsedHeaderBackdropController(): CollapsedHeaderBackdropController =
-    remember { CollapsedHeaderBackdropController() }
 
 @Composable
 fun ProvideAppModalBackdrop(
@@ -135,86 +125,22 @@ fun ProvideAppModalBackdrop(
 ) {
     val context = LocalContext.current
     val deviceSupportsBlur = remember(context) { context.supportsBackdropBlur() }
-    val effectiveBlur = blurEnabled && deviceSupportsBlur
-    val hazeState = rememberHazeState(blurEnabled = effectiveBlur)
+    val hazeState = rememberHazeState(blurEnabled = deviceSupportsBlur)
     val controller = rememberModalBackdropController()
-    val collapsedHeaderController = rememberCollapsedHeaderBackdropController()
+
+    val effectiveBlur = blurEnabled && deviceSupportsBlur
 
     CompositionLocalProvider(
         LocalModalBackdropBlurEnabled provides effectiveBlur,
         LocalAppHazeState provides hazeState,
         LocalModalBackdropController provides controller,
-        LocalCollapsedHeaderBackdropController provides collapsedHeaderController,
     ) {
         Box(Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(
-                        if (effectiveBlur) {
-                            Modifier.hazeSource(state = hazeState, zIndex = 0f)
-                        } else {
-                            Modifier
-                        },
-                    ),
-            ) {
-                content()
-            }
-            CollapsedHeaderBackdropScrim(
-                controller = collapsedHeaderController,
-                modifier = Modifier.zIndex(1f),
-            )
-            CollapsedHeaderChromeHost(
-                controller = collapsedHeaderController,
-                modifier = Modifier.zIndex(2f),
-            )
+            content()
             ModalBackdropScrim(
                 controller = controller,
-                modifier = Modifier.zIndex(3f),
+                modifier = Modifier.zIndex(8f),
             )
-        }
-    }
-}
-
-@Composable
-private fun CollapsedHeaderBackdropScrim(
-    controller: CollapsedHeaderBackdropController,
-    modifier: Modifier = Modifier,
-) {
-    val blurEnabled = LocalModalBackdropBlurEnabled.current
-    val hazeState = LocalAppHazeState.current
-    val registrations = controller.registrations
-    val height = registrations.maxOfOrNull { it.height } ?: 0.dp
-    if (!blurEnabled || hazeState == null || height <= 0.dp) return
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height)
-            .hazeEffect(state = hazeState, style = rememberModalBackdropHazeStyle())
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.08f)),
-    )
-}
-
-@Composable
-private fun CollapsedHeaderChromeHost(
-    controller: CollapsedHeaderBackdropController,
-    modifier: Modifier = Modifier,
-) {
-    val registrations = controller.registrations
-    if (registrations.isEmpty()) return
-
-    Box(modifier = modifier.fillMaxSize()) {
-        registrations.forEach { registration ->
-            if (registration.height <= 0.dp) return@forEach
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth()
-                    .height(registration.height),
-            ) {
-                registration.content()
-            }
         }
     }
 }
@@ -224,13 +150,12 @@ internal fun ModalBackdropScrim(
     controller: ModalBackdropController,
     modifier: Modifier = Modifier,
 ) {
-    val blurEnabled = LocalModalBackdropBlurEnabled.current
-    val hazeState = LocalAppHazeState.current
-    val isVisible = controller.registrations.isNotEmpty()
-    if (!blurEnabled || hazeState == null || !isVisible) return
+    val registrations = controller.registrations
+    val hazeState = registrations.lastOrNull()?.hazeState ?: activeAppHazeState()
+    val isVisible = registrations.isNotEmpty()
+    if (hazeState == null || !isVisible) return
 
-    val excludeTop = controller.maxExcludeTop
-    val scheme = MaterialTheme.colorScheme
+    val excludeTop = registrations.maxOfOrNull { it.excludeTop } ?: 0.dp
     val style = rememberModalBackdropHazeStyle()
     val dismissInteraction = remember { MutableInteractionSource() }
 
@@ -266,6 +191,7 @@ internal fun RegisterModalBackdrop(
     visible: Boolean,
     onDismiss: () -> Unit,
     excludeTop: Dp = 0.dp,
+    backdropEnabled: Boolean = LocalModalBackdropBlurEnabled.current,
 ) {
     val registrationId = remember { Any() }
     RegisterModalBackdrop(
@@ -273,6 +199,7 @@ internal fun RegisterModalBackdrop(
         visible = visible,
         onDismiss = onDismiss,
         excludeTop = excludeTop,
+        backdropEnabled = backdropEnabled,
     )
 }
 
@@ -282,18 +209,27 @@ internal fun RegisterModalBackdrop(
     visible: Boolean,
     onDismiss: () -> Unit,
     excludeTop: Dp = 0.dp,
+    backdropEnabled: Boolean = LocalModalBackdropBlurEnabled.current,
 ) {
-    val blurEnabled = LocalModalBackdropBlurEnabled.current
+    val context = LocalContext.current
+    val deviceSupportsBlur = remember(context) { context.supportsBackdropBlur() }
+    val effectiveBackdrop = backdropEnabled && deviceSupportsBlur
     val controller = LocalModalBackdropController.current
     val currentOnDismiss = rememberUpdatedState(onDismiss)
+    val hazeState = activeAppHazeState()
 
-    DisposableEffect(blurEnabled, id) {
+    DisposableEffect(id) {
         onDispose { controller.unregister(id) }
     }
 
     SideEffect {
-        if (blurEnabled && visible) {
-            controller.register(id, { currentOnDismiss.value() }, excludeTop)
+        if (effectiveBackdrop && visible) {
+            controller.register(
+                id = id,
+                onDismiss = { currentOnDismiss.value() },
+                excludeTop = excludeTop,
+                hazeState = hazeState,
+            )
         } else {
             controller.unregister(id)
         }
@@ -303,13 +239,87 @@ internal fun RegisterModalBackdrop(
 @Composable
 private fun rememberModalBackdropHazeStyle() = run {
     val scheme = MaterialTheme.colorScheme
-    remember(scheme) {
+    val isDark = scheme.background.luminance() < 0.45f
+    remember(scheme, isDark) {
+        val tintColor = if (isDark) {
+            scheme.surface.copy(alpha = 0.55f)
+        } else {
+            scheme.surface.copy(alpha = 0.68f)
+        }
         HazeDefaults.style(
-            backgroundColor = scheme.background,
-            blurRadius = 22.dp,
-            tint = HazeDefaults.tint(scheme.scrim.copy(alpha = 0.4f)),
-            noiseFactor = 0.05f,
+            backgroundColor = scheme.surface,
+            blurRadius = 32.dp,
+            tint = HazeDefaults.tint(tintColor),
+            noiseFactor = if (isDark) 0.06f else 0.05f,
         )
+    }
+}
+
+@Composable
+internal fun rememberCollapsedHeaderHazeStyle() = run {
+    val scheme = MaterialTheme.colorScheme
+    val isDark = scheme.background.luminance() < 0.45f
+    remember(scheme, isDark) {
+        val tintColor = if (isDark) {
+            scheme.surface.copy(alpha = 0.42f)
+        } else {
+            scheme.surface.copy(alpha = 0.58f)
+        }
+        HazeDefaults.style(
+            backgroundColor = scheme.surface,
+            blurRadius = 20.dp,
+            tint = HazeDefaults.tint(tintColor),
+            noiseFactor = if (isDark) 0.04f else 0.03f,
+        )
+    }
+}
+
+@Composable
+fun activeAppHazeState(): HazeState? {
+    val glass = LocalGlassBackdrop.current
+    if (glass != null && glass.hazeEnabled) return glass.hazeState
+    return LocalCatalogHazeState.current ?: LocalAppHazeState.current
+}
+
+@Composable
+private fun activeAppHazeEnabled(): Boolean {
+    val glass = LocalGlassBackdrop.current
+    if (glass != null) return glass.hazeEnabled
+    return if (LocalCatalogHazeState.current != null) {
+        LocalCatalogHazeEnabled.current
+    } else {
+        LocalModalBackdropBlurEnabled.current
+    }
+}
+
+@Composable
+fun Modifier.collapsedHeaderBlur(
+    collapsedFraction: Float,
+    collapseThreshold: Float = 0.02f,
+): Modifier {
+    val blurEnabled = collapsedHeaderBlurActive(collapsedFraction, collapseThreshold)
+    val hazeState = activeAppHazeState()
+    return if (blurEnabled && hazeState != null) {
+        then(
+            Modifier.hazeEffect(
+                state = hazeState,
+                style = rememberCollapsedHeaderHazeStyle(),
+            ),
+        )
+    } else {
+        this
+    }
+}
+
+@Composable
+fun Modifier.appHazeSource(zIndex: Float = 0f): Modifier {
+    val context = LocalContext.current
+    val deviceSupportsBlur = remember(context) { context.supportsBackdropBlur() }
+    val state = activeAppHazeState()
+    return if (deviceSupportsBlur && state != null) {
+        then(Modifier.hazeSource(state = state, zIndex = zIndex))
+    } else {
+        this
     }
 }
 
@@ -318,18 +328,9 @@ fun collapsedHeaderBlurActive(
     collapsedFraction: Float,
     collapseThreshold: Float = 0.02f,
 ): Boolean {
-    if (!LocalModalBackdropBlurEnabled.current) return false
-    if (LocalAppHazeState.current == null) return false
+    if (!activeAppHazeEnabled()) return false
+    if (activeAppHazeState() == null) return false
     return collapsedFraction >= collapseThreshold
-}
-
-@Composable
-fun Modifier.collapsedHeaderBlur(
-    collapsedFraction: Float,
-    collapseThreshold: Float = 0.02f,
-): Modifier {
-    if (!collapsedHeaderBlurActive(collapsedFraction, collapseThreshold)) return this
-    return this
 }
 
 @Composable
@@ -341,50 +342,79 @@ fun CollapsedHeaderBackdrop(
     collapseThreshold: Float = 0.02f,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val blurActive = collapsedHeaderBlurActive(collapsedFraction, collapseThreshold)
-    val controller = LocalCollapsedHeaderBackdropController.current
-    val density = LocalDensity.current
-    val registrationId = remember { Any() }
-    var measuredHeight by remember { mutableStateOf(0.dp) }
-    val currentContent by rememberUpdatedState(content)
+    val blurEnabled = collapsedHeaderBlurActive(collapsedFraction, collapseThreshold)
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.45f
 
-    DisposableEffect(registrationId) {
-        onDispose { controller.unregister(registrationId) }
-    }
-
-    LaunchedEffect(blurActive, measuredHeight) {
-        if (blurActive && measuredHeight > 0.dp) {
-            controller.register(registrationId, measuredHeight) {
-                Box(Modifier.fillMaxWidth()) {
-                    currentContent()
-                }
-            }
-        } else {
-            controller.unregister(registrationId)
-        }
-    }
-
-    if (!blurActive) {
-        Surface(
-            modifier = modifier.onSizeChanged { size ->
-                measuredHeight = with(density) { size.height.toDp() }
-            },
-            color = surfaceColor,
-            tonalElevation = tonalElevation,
-        ) {
-            Box(Modifier.fillMaxWidth(), content = content)
-        }
-        return
-    }
     Surface(
-        modifier = modifier.onSizeChanged { size ->
-            measuredHeight = with(density) { size.height.toDp() }
-        },
-        color = Color.Transparent,
-        tonalElevation = 0.dp,
+        modifier = modifier
+            .fillMaxWidth()
+            .collapsedHeaderBlur(collapsedFraction, collapseThreshold),
+        color = if (blurEnabled) Color.Transparent else surfaceColor,
+        tonalElevation = if (blurEnabled) 0.dp else tonalElevation,
+        shadowElevation = if (blurEnabled && !isDark) 1.dp else 0.dp,
     ) {
-        Box(Modifier.fillMaxWidth().alpha(0.001f), content = content)
+        Box(Modifier.fillMaxWidth(), content = content)
     }
+}
+
+val LocalCollapsingTopBarHeight = compositionLocalOf { 0.dp }
+
+/**
+ * Haze recipe: [hazeSource] on scroll content, [hazeEffect] on the top bar overlay.
+ * https://chrisbanes.github.io/haze/1.7.2/usage
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CollapsingBlurTopBarLayout(
+    scrollBehavior: TopAppBarScrollBehavior,
+    collapsedFraction: Float,
+    modifier: Modifier = Modifier,
+    collapseThreshold: Float = 0.02f,
+    topBar: @Composable BoxScope.(barModifier: Modifier) -> Unit,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val density = LocalDensity.current
+    var topBarHeight by remember { mutableStateOf(0.dp) }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+    ) {
+        CompositionLocalProvider(LocalCollapsingTopBarHeight provides topBarHeight) {
+            content()
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .zIndex(1f)
+                .onSizeChanged { size ->
+                    topBarHeight = with(density) { size.height.toDp() }
+                },
+        ) {
+            topBar(
+                Modifier
+                    .fillMaxWidth()
+                    .collapsedHeaderBlur(collapsedFraction, collapseThreshold),
+            )
+        }
+    }
+}
+
+@Composable
+fun collapsingTopBarContentPadding(
+    extra: PaddingValues = PaddingValues(0.dp),
+): PaddingValues {
+    val topBarHeight = LocalCollapsingTopBarHeight.current
+    val layoutDirection = LocalLayoutDirection.current
+    return PaddingValues(
+        top = topBarHeight + extra.calculateTopPadding(),
+        start = extra.calculateStartPadding(layoutDirection),
+        end = extra.calculateEndPadding(layoutDirection),
+        bottom = extra.calculateBottomPadding(),
+    )
 }
 
 @Composable
@@ -392,26 +422,15 @@ fun CollapsedTopAppBarBackdrop(
     collapsedFraction: Float,
     modifier: Modifier = Modifier,
     collapseThreshold: Float = 0.02f,
-    content: @Composable BoxScope.() -> Unit,
+    content: @Composable BoxScope.(barModifier: Modifier) -> Unit,
 ) {
-    CollapsedHeaderBackdrop(
-        collapsedFraction = collapsedFraction,
-        modifier = modifier,
-        surfaceColor = Color.Transparent,
-        tonalElevation = 0.dp,
-        collapseThreshold = collapseThreshold,
-        content = content,
-    )
-}
-
-@Composable
-fun collapsedHeaderSurfaceColor(
-    fallback: Color,
-    collapsedFraction: Float,
-    collapseThreshold: Float = 0.02f,
-): Color {
-    if (!collapsedHeaderBlurActive(collapsedFraction, collapseThreshold)) return fallback
-    return Color.Transparent
+    Box(modifier = modifier.fillMaxWidth()) {
+        content(
+            Modifier
+                .fillMaxWidth()
+                .collapsedHeaderBlur(collapsedFraction, collapseThreshold),
+        )
+    }
 }
 
 @Composable
@@ -425,9 +444,10 @@ fun rememberCollapsedTopAppBarColors(
     collapseThreshold: Float = 0.02f,
 ): TopAppBarColors {
     val blurActive = collapsedHeaderBlurActive(collapsedFraction, collapseThreshold)
+    val transparent = Color.Transparent
     return TopAppBarDefaults.topAppBarColors(
-        containerColor = if (blurActive) Color.Transparent else containerColor,
-        scrolledContainerColor = if (blurActive) Color.Transparent else scrolledContainerColor,
+        containerColor = if (blurActive) transparent else containerColor,
+        scrolledContainerColor = if (blurActive) transparent else scrolledContainerColor,
         navigationIconContentColor = navigationIconContentColor,
         titleContentColor = titleContentColor,
         actionIconContentColor = actionIconContentColor,

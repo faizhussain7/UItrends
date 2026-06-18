@@ -38,18 +38,17 @@ fun CatalogGradientChrome(
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .background(dynamicBrush),
-                )
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
+                        .background(dynamicBrush)
                         .then(
                             if (hazeEnabled) {
-                                Modifier.hazeSource(state = hazeState)
+                                Modifier.hazeSource(state = hazeState, zIndex = 0f)
                             } else {
                                 Modifier
                             },
                         ),
+                )
+                Box(
+                    modifier = Modifier.matchParentSize(),
                     content = content,
                 )
             }

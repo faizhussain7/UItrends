@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 internal val Context.themeDataStore: DataStore<Preferences> by preferencesDataStore(
@@ -43,8 +44,12 @@ class ThemePreferencesRepository(
                 saturation = prefs[Keys.customSaturation] ?: DEFAULT_CUSTOM_GRADIENT_SATURATION,
             ).normalized(),
             blurModalBackdrop = prefs[Keys.blurModalBackdrop] ?: true,
+            syncLauncherIconWithTheme = prefs[Keys.syncLauncherIconWithTheme] ?: false,
         )
     }
+
+    suspend fun syncLauncherIconWithThemeOnce(): Boolean =
+        context.themeDataStore.data.first()[Keys.syncLauncherIconWithTheme] ?: false
 
     fun setThemeMode(mode: ThemeMode) {
         themeModeStore.set(mode)
@@ -75,11 +80,16 @@ class ThemePreferencesRepository(
         context.themeDataStore.edit { it[Keys.blurModalBackdrop] = enabled }
     }
 
+    suspend fun setSyncLauncherIconWithTheme(enabled: Boolean) {
+        context.themeDataStore.edit { it[Keys.syncLauncherIconWithTheme] = enabled }
+    }
+
     private companion object Keys {
         val dynamicColor = booleanPreferencesKey("dynamic_color")
         val brandAccent = stringPreferencesKey("brand_accent")
         val homeLayout = stringPreferencesKey("home_layout")
         val blurModalBackdrop = booleanPreferencesKey("blur_modal_backdrop")
+        val syncLauncherIconWithTheme = booleanPreferencesKey("sync_launcher_icon_with_theme")
         val customStartHue = floatPreferencesKey("custom_gradient_start_hue")
         val customEndHue = floatPreferencesKey("custom_gradient_end_hue")
         val customSaturation = floatPreferencesKey("custom_gradient_saturation")

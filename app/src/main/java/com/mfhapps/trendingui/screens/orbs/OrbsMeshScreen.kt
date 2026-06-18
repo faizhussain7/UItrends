@@ -25,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -59,7 +58,9 @@ import com.mfhapps.trendingui.core.sensor.rememberGyroscopeTilt
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.demo.DemoAnimatedSection
 import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
-import com.mfhapps.trendingui.ui.components.CollapsedTopAppBarBackdrop
+import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
+import com.mfhapps.trendingui.ui.components.appHazeSource
+import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
@@ -114,29 +115,29 @@ fun OrbsMeshScreen(
         selectedPreset.themeTinted(scheme)
     }
 
-    Scaffold(
+    CollapsingBlurTopBarLayout(
+        scrollBehavior = scrollBehavior,
+        collapsedFraction = collapsedFraction,
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = Color.Transparent,
-        contentColor = scheme.onSurface,
-        topBar = {
+            .navigationBarsPadding(),
+        topBar = { barModifier ->
             OrbsCollapsingTopBar(
                 scrollBehavior = scrollBehavior,
                 collapsedFraction = collapsedFraction,
                 onNavigateBack = onNavigateBack,
                 guide = guide,
-                chrome = chrome,
+                barModifier = barModifier,
             )
         },
-    ) { innerPadding ->
+    ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = innerPadding.calculateBottomPadding() + 28.dp,
+            modifier = Modifier
+                .fillMaxSize()
+                .appHazeSource(),
+            contentPadding = collapsingTopBarContentPadding(
+                extra = PaddingValues(bottom = 28.dp),
             ),
             verticalArrangement = Arrangement.spacedBy(28.dp),
         ) {
@@ -333,7 +334,7 @@ private fun OrbsCollapsingTopBar(
     collapsedFraction: Float,
     onNavigateBack: () -> Unit,
     guide: DemoTrendGuide?,
-    chrome: OrbsChrome,
+    barModifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val nestedBackDispatcher = LocalNestedBackDispatcher.current
@@ -344,18 +345,14 @@ private fun OrbsCollapsingTopBar(
     )
     val subtitleAlpha = (1f - collapsedFraction * 1.35f).coerceIn(0f, 1f)
 
-    val scrolledSurface = scheme.surface.copy(alpha = if (chrome.isDark) 0.90f else 0.94f)
-
-    CollapsedTopAppBarBackdrop(
-        collapsedFraction = collapsedFraction,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        LargeTopAppBar(
-            modifier = Modifier.fillMaxWidth(),
-            scrollBehavior = scrollBehavior,
-            colors = rememberCollapsedTopAppBarColors(
+    LargeTopAppBar(
+        modifier = barModifier,
+        windowInsets = TopAppBarDefaults.windowInsets,
+        scrollBehavior = scrollBehavior,
+        colors = rememberCollapsedTopAppBarColors(
             collapsedFraction = collapsedFraction,
-            scrolledContainerColor = scrolledSurface,
+            containerColor = Color.Transparent,
+            scrolledContainerColor = scheme.surface,
             navigationIconContentColor = scheme.onSurface,
             titleContentColor = scheme.onSurface,
             actionIconContentColor = scheme.onSurface,
@@ -404,8 +401,7 @@ private fun OrbsCollapsingTopBar(
                 )
             }
         },
-        )
-    }
+    )
 }
 
 @Composable

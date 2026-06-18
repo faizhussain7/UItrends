@@ -9,6 +9,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mfhapps.trendingui.TrendingApplication
 import com.mfhapps.trendingui.launcher.LauncherIconViewModel
 import com.mfhapps.trendingui.launcher.installTrendingSplashScreen
 import com.mfhapps.trendingui.startup.AppStartupViewModel
@@ -24,6 +25,8 @@ import com.mfhapps.trendingui.ui.theme.resolveDarkTheme
 import com.mfhapps.trendingui.ui.theme.resolveLaunchSplashTheme
 import com.mfhapps.trendingui.ui.theme.resolvePostSplashTheme
 import com.mfhapps.trendingui.ui.theme.syncThemeAppearance
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import androidx.core.graphics.drawable.toDrawable
 
 class MainActivity : ComponentActivity() {
@@ -71,6 +74,7 @@ class MainActivity : ComponentActivity() {
                     onBrandAccentChange = themeViewModel::setBrandAccentColor,
                     onHomeLayoutChange = themeViewModel::setHomeLayoutStyle,
                     onBlurModalBackdropChange = themeViewModel::setBlurModalBackdrop,
+                    onSyncLauncherIconWithThemeChange = themeViewModel::setSyncLauncherIconWithTheme,
                     onLauncherIconChange = launcherIconViewModel::setLauncherIcon,
                 )
             }
@@ -93,7 +97,10 @@ class MainActivity : ComponentActivity() {
             ).toDrawable(),
         )
         if (themeMode == ThemeMode.System) {
-            syncThemeAppearance(themeMode)
+            val syncLauncherIcon = runBlocking(Dispatchers.IO) {
+                (application as TrendingApplication).container.themePreferences.syncLauncherIconWithThemeOnce()
+            }
+            syncThemeAppearance(themeMode, syncLauncherIcon)
         }
     }
 }

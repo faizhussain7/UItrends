@@ -24,10 +24,15 @@ internal class PretextVisionEngine(context: Context) {
     private val assets = context.assets
     private val maskScratch = ThreadLocal<FloatArray>()
     private val mediaPipeFaceLandmarker = PretextMediaPipeFaceLandmarker(context)
+    private val interpreterLock = Any()
 
+    @Volatile private var closed = false
     private var selfieInterpreter: Interpreter? = null
     private var faceInterpreter: Interpreter? = null
     private var ssdInterpreter: Interpreter? = null
+    private var selfieLoadFailed = false
+    private var faceLoadFailed = false
+    private var ssdLoadFailed = false
     private var ncnnReady = false
 
     init {
@@ -35,17 +40,21 @@ internal class PretextVisionEngine(context: Context) {
     }
 
     fun close() {
-        mediaPipeFaceLandmarker.close()
-        selfieInterpreter?.close()
-        faceInterpreter?.close()
-        ssdInterpreter?.close()
-        selfieInterpreter = null
-        faceInterpreter = null
-        ssdInterpreter = null
-        if (ncnnReady) {
-            PretextNativeVision.release()
+        synchronized(interpreterLock) {
+            if (closed) return
+            closed = true
+            mediaPipeFaceLandmarker.close()
+            selfieInterpreter?.close()
+            faceInterpreter?.close()
+            ssdInterpreter?.close()
+            selfieInterpreter = null
+            faceInterpreter = null
+            ssdInterpreter = null
+            if (ncnnReady) {
+                PretextNativeVision.release()
+            }
+            ncnnReady = false
         }
-        ncnnReady = false
     }
 
     fun detect(
@@ -53,6 +62,9 @@ internal class PretextVisionEngine(context: Context) {
         mode: VisionTrackMode,
         lensFacing: Int = CameraSelector.LENS_FACING_BACK,
     ): VisionDetectReport {
+        if (closed) {
+            return VisionDetectReport(null, "closed", note = "engine-closed")
+        }
         val frame = frameMetrics(imageProxy)
 
         if (mode == VisionTrackMode.Object) {
@@ -116,6 +128,9 @@ internal class PretextVisionEngine(context: Context) {
         lensFacing: Int = CameraSelector.LENS_FACING_BACK,
         maxShapes: Int = 3,
     ): AutoDetectBundle {
+        if (closed) {
+            return AutoDetectBundle(VisionDetectReport(null, "closed", note = "engine-closed"))
+        }
         val frame = frameMetrics(imageProxy)
         val rotation = frame.rotationDegrees
         val imageW = frame.analysisWidth
@@ -281,7 +296,11 @@ internal class PretextVisionEngine(context: Context) {
         }
 
         val fallback = traceSection("pretext:tflite:blazeface") {
-            PretextBlazeFaceDecoder.detectWithScore(rgb, rgbW, rgbH, faceInterpreter())
+            synchronized(interpreterLock) {
+                if (closed) return@traceSection null
+                val interpreter = faceInterpreter() ?: return@traceSection null
+                PretextBlazeFaceDecoder.detectWithScore(rgb, rgbW, rgbH, interpreter)
+            }
         }
         if (fallback == null) {
             return VisionDetectReport(null, "mediapipe-face-landmarker", note = "no-face")
@@ -384,7 +403,19 @@ internal class PretextVisionEngine(context: Context) {
     )
 
     private fun runSelfieSegmentation(rgb: ByteArray, width: Int, height: Int): MaskResult? {
-        val interpreter = selfieInterpreter()
+        synchronized(interpreterLock) {
+            if (closed) return null
+            val interpreter = selfieInterpreter() ?: return null
+            return runSelfieSegmentationLocked(interpreter, rgb, width, height)
+        }
+    }
+
+    private fun runSelfieSegmentationLocked(
+        interpreter: Interpreter,
+        rgb: ByteArray,
+        width: Int,
+        height: Int,
+    ): MaskResult? {
         val inTensor = interpreter.getInputTensor(0)
         val inShape = inTensor.shape()
         val inH = inShape.getOrNull(1) ?: inShape.getOrNull(2) ?: return null
@@ -463,7 +494,20 @@ internal class PretextVisionEngine(context: Context) {
     }
 
     private fun runSsdDetection(rgb: ByteArray, width: Int, height: Int, excludePerson: Boolean): SsdBox? {
-        val interpreter = ssdInterpreter()
+        synchronized(interpreterLock) {
+            if (closed) return null
+            val interpreter = ssdInterpreter() ?: return null
+            return runSsdDetectionLocked(interpreter, rgb, width, height, excludePerson)
+        }
+    }
+
+    private fun runSsdDetectionLocked(
+        interpreter: Interpreter,
+        rgb: ByteArray,
+        width: Int,
+        height: Int,
+        excludePerson: Boolean,
+    ): SsdBox? {
         val inTensor = interpreter.getInputTensor(0)
         val inShape = inTensor.shape()
         val inH = inShape[1]
@@ -541,19 +585,39 @@ internal class PretextVisionEngine(context: Context) {
         )
     }
 
-    private fun selfieInterpreter(): Interpreter =
-        selfieInterpreter ?: loadModel("vision/selfie_segmentation.tflite", 2).also { selfieInterpreter = it }
+    private fun selfieInterpreter(): Interpreter? {
+        if (selfieLoadFailed) return null
+        selfieInterpreter?.let { return it }
+        return runCatching { loadModel("vision/selfie_segmentation.tflite", 2) }
+            .onFailure { selfieLoadFailed = true }
+            .getOrNull()
+            ?.also { selfieInterpreter = it }
+    }
 
-    private fun faceInterpreter(): Interpreter =
-        faceInterpreter ?: loadModel("vision/blaze_face_short_range.tflite", 2).also { faceInterpreter = it }
+    private fun faceInterpreter(): Interpreter? {
+        if (faceLoadFailed) return null
+        faceInterpreter?.let { return it }
+        return runCatching { loadModel("vision/blaze_face_short_range.tflite", 2) }
+            .onFailure { faceLoadFailed = true }
+            .getOrNull()
+            ?.also { faceInterpreter = it }
+    }
 
-    private fun ssdInterpreter(): Interpreter =
-        ssdInterpreter ?: loadModel("vision/ssd_mobilenet_coco.tflite", 2).also { ssdInterpreter = it }
+    private fun ssdInterpreter(): Interpreter? {
+        if (ssdLoadFailed) return null
+        ssdInterpreter?.let { return it }
+        return runCatching { loadModel("vision/ssd_mobilenet_coco.tflite", 2) }
+            .onFailure { ssdLoadFailed = true }
+            .getOrNull()
+            ?.also { ssdInterpreter = it }
+    }
 
     private fun loadModel(assetPath: String, threads: Int): Interpreter {
         val buffer = loadAsset(assetPath)
-        val opts = Interpreter.Options().apply { setNumThreads(threads) }
-        return Interpreter(buffer, opts)
+        val opts = Interpreter.Options().apply { setNumThreads(threads.coerceIn(1, 2)) }
+        val interpreter = Interpreter(buffer, opts)
+        require(interpreter.inputTensorCount > 0) { "Model has no inputs: $assetPath" }
+        return interpreter
     }
 
     private fun loadAsset(path: String): MappedByteBuffer {

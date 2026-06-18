@@ -125,6 +125,7 @@ import com.mfhapps.trendingui.core.text.PositionedTextLayout
 import com.mfhapps.trendingui.core.text.PreparedText
 import com.mfhapps.trendingui.core.text.TextMeasurementEngine
 import com.mfhapps.trendingui.native.PretextNativeGeometry
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.LoadingIndicator
 import com.mfhapps.trendingui.ui.components.PretextPositionedCanvas
 import com.mfhapps.trendingui.ui.components.SwitchListItem
@@ -303,8 +304,8 @@ fun PretextCameraPanel(
     DisposableEffect(Unit) {
         onDispose {
             previewLayoutCache.detach()
-            cameraSession.close()
             pipeline.close()
+            cameraSession.close()
             PretextVisionLog.resetSession()
         }
     }
@@ -345,6 +346,7 @@ fun PretextCameraPanel(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
+            .appHazeSource()
             .pretextCameraHudRevealOnTap(hud),
     ) {
         val wPx = with(density) { maxWidth.roundToPx().toFloat() }

@@ -17,7 +17,6 @@ object LauncherIconManager {
         val active = findEnabled(packageManager, packageName)
 
         if (active?.icon == target && active.darkTheme == darkTheme) {
-            disableLegacyAliases(packageManager, packageName)
             return
         }
 
@@ -49,23 +48,36 @@ object LauncherIconManager {
         packageName: String,
     ): ActiveLauncherIcon? {
         AppLauncherIcon.entries.forEach { icon ->
-            if (aliasState(packageManager, packageName, icon.lightAliasClassName) ==
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            ) {
+            if (isAliasEnabled(packageManager, packageName, icon.lightAliasClassName)) {
                 return ActiveLauncherIcon(icon, darkTheme = false)
             }
-            if (aliasState(packageManager, packageName, icon.darkAliasClassName) ==
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            ) {
+            if (isAliasEnabled(packageManager, packageName, icon.darkAliasClassName)) {
                 return ActiveLauncherIcon(icon, darkTheme = true)
-            }
-            if (aliasState(packageManager, packageName, icon.legacyAliasClassName) ==
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            ) {
-                return ActiveLauncherIcon(icon, darkTheme = false)
             }
         }
         return null
+    }
+
+    private fun isAliasEnabled(
+        packageManager: PackageManager,
+        packageName: String,
+        className: String,
+    ): Boolean {
+        val component = ComponentName(packageName, className)
+        return when (packageManager.getComponentEnabledSetting(component)) {
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED -> true
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED -> false
+            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT -> {
+                try {
+                    packageManager
+                        .getActivityInfo(component, PackageManager.MATCH_DISABLED_COMPONENTS)
+                        .enabled
+                } catch (_: PackageManager.NameNotFoundException) {
+                    false
+                }
+            }
+            else -> false
+        }
     }
 
     private fun disableAllAliases(packageManager: PackageManager, packageName: String) {
@@ -74,39 +86,16 @@ object LauncherIconManager {
                 packageManager,
                 packageName,
                 icon.lightAliasClassName,
-                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
             )
             setAliasState(
                 packageManager,
                 packageName,
                 icon.darkAliasClassName,
-                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-            )
-            setAliasState(
-                packageManager,
-                packageName,
-                icon.legacyAliasClassName,
-                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
             )
         }
     }
-
-    private fun disableLegacyAliases(packageManager: PackageManager, packageName: String) {
-        AppLauncherIcon.entries.forEach { icon ->
-            setAliasState(
-                packageManager,
-                packageName,
-                icon.legacyAliasClassName,
-                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-            )
-        }
-    }
-
-    private fun aliasState(
-        packageManager: PackageManager,
-        packageName: String,
-        className: String,
-    ): Int = packageManager.getComponentEnabledSetting(ComponentName(packageName, className))
 
     private fun setAliasState(
         packageManager: PackageManager,
@@ -123,4 +112,10 @@ object LauncherIconManager {
             PackageManager.DONT_KILL_APP,
         )
     }
+
+    private fun aliasState(
+        packageManager: PackageManager,
+        packageName: String,
+        className: String,
+    ): Int = packageManager.getComponentEnabledSetting(ComponentName(packageName, className))
 }

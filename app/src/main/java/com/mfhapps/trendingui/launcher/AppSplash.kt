@@ -72,5 +72,5 @@ private fun remainingIconAnimationMs(provider: SplashScreenViewProvider): Long {
     if (duration <= 0L) return 0L
     val elapsed = SystemClock.uptimeMillis() - provider.iconAnimationStartMillis
     val remaining = duration - elapsed
-    return remaining.coerceIn(0L, SplashScreenTiming.CROSSFADE_MS)
+    return remaining.coerceIn(0L, SplashScreenTiming.crossfadeMs)
 }

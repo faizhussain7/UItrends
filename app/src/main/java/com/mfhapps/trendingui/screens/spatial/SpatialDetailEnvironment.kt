@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.theme.launcherIconGradientBackground
 
@@ -31,7 +32,7 @@ fun ProvideSpatialDetailEnvironment(
     content: @Composable () -> Unit,
 ) {
     Box(modifier.fillMaxSize()) {
-        SpatialDepthBackdrop(Modifier.matchParentSize())
+        SpatialDepthBackdrop(Modifier.matchParentSize().appHazeSource())
         content()
     }
 }

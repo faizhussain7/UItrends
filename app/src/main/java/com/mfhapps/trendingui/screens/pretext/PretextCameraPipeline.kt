@@ -26,6 +26,7 @@ class PretextCameraPipeline(
 ) : ImageAnalysis.Analyzer {
 
     private val processing = AtomicBoolean(false)
+    private val closed = AtomicBoolean(false)
     private val activeMode = AtomicReference<VisionTrackMode?>(null)
     private val vision = PretextVisionEngine(appContext.applicationContext)
     private val tracker = PretextShapeTracker(maxConsecutiveMisses = 30)
@@ -50,130 +51,131 @@ class PretextCameraPipeline(
     }
 
     private fun analyzeFrame(imageProxy: ImageProxy) {
-        val now = System.currentTimeMillis()
         if (!processing.compareAndSet(false, true)) {
             droppedCount++
             imageProxy.close()
             return
         }
-        if (imageProxy.image == null) {
-            finishFrame(
-                imageProxy,
-                CameraVisionFrame(
-                    primary = null,
-                    report = VisionDetectReport(null, "none", note = "null-image"),
-                ),
-                0L,
-            )
-            return
-        }
+        try {
+            if (closed.get()) return
 
-        processedCount++
-        reportTelemetry(now)
-
-        val mode = trackModeProvider()
-        val previous = activeMode.getAndSet(mode)
-        if (previous != null && previous != mode) {
-            PretextNativeGeometry.resetSmoothing()
-            tracker.clear()
-            PretextVisionLog.resetSession()
-        }
-
-        val stage = stageProvider()
-        val useAutoMulti = stage.supportsMultiObstacle && mode == VisionTrackMode.Auto
-
-        val detectStart = SystemClock.elapsedRealtime()
-        val detectResult = try {
-            if (useAutoMulti) {
-                val bundle = vision.detectAutoMulti(imageProxy, lensFacingProvider(), maxShapes = 3)
-                DetectResult(bundle.primary, bundle.extras)
-            } else {
-                DetectResult(vision.detect(imageProxy, mode, lensFacingProvider()), emptyList())
-            }
-        } catch (e: Exception) {
-            DetectResult(VisionDetectReport(null, "error", note = e.javaClass.simpleName), emptyList())
-        }
-        val detectMs = SystemClock.elapsedRealtime() - detectStart
-        lastDetectMs = detectMs
-        val report = detectResult.primary
-        val contour = report.contour
-
-        var accuracy: VisionAccuracySnapshot? = null
-        var layoutMissing = false
-
-        val shape = when {
-            contour != null && report.isBlobBoxFallback() && tracker.currentShape != null -> {
-                val held = tracker.onWeakMiss()
-                accuracy = VisionAccuracySnapshot(
-                    tracking = tracker.trackingState,
-                    backend = report.backend,
-                    score = report.score,
-                    normBBoxArea = 0f,
-                    viewBBoxAreaRatio = 0f,
-                    polygonVertices = 0,
-                    boundsFullyInView = false,
-                    iouVsPrevious = null,
-                    centerDriftNorm = null,
-                    detectMs = detectMs,
-                    mapMs = 0L,
-                    note = report.note ?: "blob-fallback-held",
+            val now = System.currentTimeMillis()
+            if (imageProxy.image == null) {
+                onVisionFrame(
+                    CameraVisionFrame(
+                        primary = null,
+                        report = VisionDetectReport(null, "none", note = "null-image"),
+                    ),
                 )
-                lastAccuracy = accuracy
-                recordAccuracyWindow(accuracy, hit = false)
-                held
+                return
             }
-            contour != null -> {
-                val mapped = mapContourToTrackedShape(contour, report, detectMs)
-                accuracy = mapped.accuracy
-                layoutMissing = mapped.layoutMissing
-                mapped.shape
+
+            processedCount++
+            reportTelemetry(now)
+
+            val mode = trackModeProvider()
+            val previous = activeMode.getAndSet(mode)
+            if (previous != null && previous != mode) {
+                PretextNativeGeometry.resetSmoothing()
+                tracker.clear()
+                PretextVisionLog.resetSession()
             }
-            else -> {
-                val held = when {
-                    report.note in SOFT_HOLD_NOTES && tracker.currentShape != null ->
-                        tracker.onWeakMiss()
-                    report.note in SOFT_HOLD_NOTES -> null
-                    else -> tracker.onMiss()
+
+            val stage = stageProvider()
+            val useAutoMulti = stage.supportsMultiObstacle && mode == VisionTrackMode.Auto
+
+            val detectStart = SystemClock.elapsedRealtime()
+            val detectResult = try {
+                if (useAutoMulti) {
+                    val bundle = vision.detectAutoMulti(imageProxy, lensFacingProvider(), maxShapes = 3)
+                    DetectResult(bundle.primary, bundle.extras)
+                } else {
+                    DetectResult(vision.detect(imageProxy, mode, lensFacingProvider()), emptyList())
                 }
-                accuracy = VisionAccuracySnapshot(
-                    tracking = tracker.trackingState,
-                    backend = report.backend,
-                    score = report.score,
-                    normBBoxArea = 0f,
-                    viewBBoxAreaRatio = 0f,
-                    polygonVertices = 0,
-                    boundsFullyInView = false,
-                    iouVsPrevious = null,
-                    centerDriftNorm = null,
-                    detectMs = detectMs,
-                    mapMs = 0L,
-                    note = report.note ?: "miss",
-                )
-                lastAccuracy = accuracy
-                recordAccuracyWindow(accuracy, hit = false)
-                held
+            } catch (e: Exception) {
+                DetectResult(VisionDetectReport(null, "error", note = e.javaClass.simpleName), emptyList())
             }
-        }
+            val detectMs = SystemClock.elapsedRealtime() - detectStart
+            lastDetectMs = detectMs
+            val report = detectResult.primary
+            val contour = report.contour
 
-        val extraShapes = detectResult.extras.mapNotNull { extra ->
-            val c = extra.contour ?: return@mapNotNull null
-            mapContourToViewShape(c, extra, detectMs, useTracker = false)
-        }
+            var accuracy: VisionAccuracySnapshot? = null
 
-        if (shape != null) {
-            lastPublishedSource = shape.source
-        } else if (extraShapes.isNotEmpty()) {
-            lastPublishedSource = extraShapes.first().source
-        }
+            val shape = when {
+                contour != null && report.isBlobBoxFallback() && tracker.currentShape != null -> {
+                    val held = tracker.onWeakMiss()
+                    accuracy = VisionAccuracySnapshot(
+                        tracking = tracker.trackingState,
+                        backend = report.backend,
+                        score = report.score,
+                        normBBoxArea = 0f,
+                        viewBBoxAreaRatio = 0f,
+                        polygonVertices = 0,
+                        boundsFullyInView = false,
+                        iouVsPrevious = null,
+                        centerDriftNorm = null,
+                        detectMs = detectMs,
+                        mapMs = 0L,
+                        note = report.note ?: "blob-fallback-held",
+                    )
+                    lastAccuracy = accuracy
+                    recordAccuracyWindow(accuracy, hit = false)
+                    held
+                }
+                contour != null -> {
+                    val mapped = mapContourToTrackedShape(contour, report, detectMs)
+                    accuracy = mapped.accuracy
+                    mapped.shape
+                }
+                else -> {
+                    val held = when {
+                        report.note in SOFT_HOLD_NOTES && tracker.currentShape != null ->
+                            tracker.onWeakMiss()
+                        report.note in SOFT_HOLD_NOTES -> null
+                        else -> tracker.onMiss()
+                    }
+                    accuracy = VisionAccuracySnapshot(
+                        tracking = tracker.trackingState,
+                        backend = report.backend,
+                        score = report.score,
+                        normBBoxArea = 0f,
+                        viewBBoxAreaRatio = 0f,
+                        polygonVertices = 0,
+                        boundsFullyInView = false,
+                        iouVsPrevious = null,
+                        centerDriftNorm = null,
+                        detectMs = detectMs,
+                        mapMs = 0L,
+                        note = report.note ?: "miss",
+                    )
+                    lastAccuracy = accuracy
+                    recordAccuracyWindow(accuracy, hit = false)
+                    held
+                }
+            }
 
-        if (onPreviewBitmap != null && previewBitmapEnabledProvider()) {
-            maybePublishPreviewBitmap(imageProxy)
+            val extraShapes = detectResult.extras.mapNotNull { extra ->
+                val c = extra.contour ?: return@mapNotNull null
+                mapContourToViewShape(c, extra, detectMs, useTracker = false)
+            }
+
+            if (shape != null) {
+                lastPublishedSource = shape.source
+            } else if (extraShapes.isNotEmpty()) {
+                lastPublishedSource = extraShapes.first().source
+            }
+
+            if (onPreviewBitmap != null && previewBitmapEnabledProvider()) {
+                maybePublishPreviewBitmap(imageProxy)
+            }
+            onVisionFrame(
+                CameraVisionFrame(primary = shape, extraShapes = extraShapes, report = report),
+            )
+        } finally {
+            processing.set(false)
+            imageProxy.close()
         }
-        finishFrame(
-            imageProxy = imageProxy,
-            frame = CameraVisionFrame(primary = shape, extraShapes = extraShapes, report = report),
-            detectMs = detectMs,
-        )
     }
 
     private data class DetectResult(
@@ -249,16 +251,6 @@ class PretextCameraPipeline(
         }
     }
 
-    private fun finishFrame(
-        imageProxy: ImageProxy,
-        frame: CameraVisionFrame,
-        @Suppress("UNUSED_PARAMETER") detectMs: Long,
-    ) {
-        onVisionFrame(frame)
-        processing.set(false)
-        imageProxy.close()
-    }
-
     private fun reportTelemetry(now: Long) {
         val elapsed = now - fpsWindowStart
         if (elapsed >= 1000L) {
@@ -290,6 +282,11 @@ class PretextCameraPipeline(
     }
 
     fun close() {
+        if (!closed.compareAndSet(false, true)) return
+        val deadline = SystemClock.elapsedRealtime() + 3_000L
+        while (processing.get() && SystemClock.elapsedRealtime() < deadline) {
+            Thread.sleep(5)
+        }
         PretextNativeGeometry.resetSmoothing()
         vision.close()
         tracker.clear()

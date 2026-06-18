@@ -73,6 +73,7 @@ import com.mfhapps.trendingui.ui.components.PretextParagraphCanvas
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.detail.NestedBackEffect
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import kotlinx.coroutines.Dispatchers
@@ -382,7 +383,9 @@ private fun PretextPlaygroundContent(
     FpsOverlay(lastMeasureMs = lastMeasure) {
         LazyColumn(
             state = listState,
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier
+                .fillMaxSize()
+                .appHazeSource(),
             contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {

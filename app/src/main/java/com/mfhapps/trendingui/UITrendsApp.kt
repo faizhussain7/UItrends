@@ -19,6 +19,7 @@ fun UITrendsApp(
     onBrandAccentChange: (BrandAccentColor) -> Unit,
     onHomeLayoutChange: (HomeLayoutStyle) -> Unit,
     onBlurModalBackdropChange: (Boolean) -> Unit,
+    onSyncLauncherIconWithThemeChange: (Boolean) -> Unit,
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -32,6 +33,7 @@ fun UITrendsApp(
             onBrandAccentChange = onBrandAccentChange,
             onHomeLayoutChange = onHomeLayoutChange,
             onBlurModalBackdropChange = onBlurModalBackdropChange,
+            onSyncLauncherIconWithThemeChange = onSyncLauncherIconWithThemeChange,
             onLauncherIconChange = onLauncherIconChange,
         )
     }

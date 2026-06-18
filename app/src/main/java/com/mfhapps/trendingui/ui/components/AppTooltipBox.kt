@@ -36,12 +36,7 @@ fun rememberAppTooltipState(
     isPersistent: Boolean = true,
 ): TooltipState = rememberTooltipState(isPersistent = isPersistent)
 
-/**
- * Tooltip wrapper that registers the shared modal blur scrim (same as [AppAlertDialog] /
- * [AppModalBottomSheet]) while the tooltip is visible.
- *
- * The anchor composable is measured so the blur scrim starts below it — the icon/button stays sharp.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTooltipBox(
@@ -84,6 +79,7 @@ fun AppTooltipBox(
         visible = tooltipVisible,
         onDismiss = { currentDismiss() },
         excludeTop = excludeTop,
+        backdropEnabled = true,
     )
 
     NestedBackEffect(enabled = tooltipVisible, onBack = { currentDismiss() })
@@ -113,12 +109,7 @@ fun AppTooltipBox(
     }
 }
 
-/**
- * Programmatic reveal with a fixed on-screen duration.
- *
- * [TooltipState.show] suspends until the tooltip is dismissed, so the show call must run in a
- * child coroutine; otherwise a timed dismiss can never run.
- */
+
 @Composable
 fun AppTooltipTimedRevealEffect(
     state: TooltipState,

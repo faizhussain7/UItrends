@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Splash API: no icon background — default library size is 90dp; nudge up slightly. -->
-    <dimen name="splash_icon_display_size">98dp</dimen>
-    <!-- Legacy: unused inset hint (108 − 2×30 ≈ 48dp content). Prefer splash_frame scale in AVD. -->
+
+
+    <dimen name="splash_icon_display_size">176dp</dimen>
+
     <dimen name="splash_icon_inset">30dp</dimen>
 </resources>

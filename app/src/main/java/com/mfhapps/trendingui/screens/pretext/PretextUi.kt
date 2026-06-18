@@ -971,13 +971,7 @@ enum class TextScript(val label: String, val sample: String) {
     Mixed("Mixed", "Mixed: Hello 世界 مرحبا 🎉 — Latin + CJK + Arabic + emoji in one pass."),
 }
 
-/**
- * Tap-to-edit text field for demo playgrounds.
- *
- * Opts out of automatic focus traversal (detail pane open, lazy-list restore) via
- * [focusProperties]. A tap overlay enables editing; focus resets when the field loses
- * focus so scroll/IME dismiss can return to a neutral state.
- */
+
 @Composable
 fun PretextMeasureTextField(
     value: String,

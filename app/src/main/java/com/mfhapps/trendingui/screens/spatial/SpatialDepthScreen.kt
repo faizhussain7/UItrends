@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
@@ -63,7 +63,9 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
-import com.mfhapps.trendingui.ui.components.CollapsedTopAppBarBackdrop
+import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
+import com.mfhapps.trendingui.ui.components.appHazeSource
+import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
@@ -143,14 +145,13 @@ fun SpatialDepthScreen(
 
     BackHandler(enabled = canPopDetail) { popDetail() }
 
-    Scaffold(
+    CollapsingBlurTopBarLayout(
+        scrollBehavior = scrollBehavior,
+        collapsedFraction = collapsedFraction,
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = Color.Transparent,
-        contentColor = scheme.onSurface,
-        topBar = {
+            .navigationBarsPadding(),
+        topBar = { barModifier ->
             SpatialCollapsingTopBar(
                 scrollBehavior = scrollBehavior,
                 collapsedFraction = collapsedFraction,
@@ -158,13 +159,13 @@ fun SpatialDepthScreen(
                 onNavigateBack = onNavigateBack,
                 guide = guide,
                 chrome = chrome,
+                barModifier = barModifier,
             )
         },
-    ) { innerPadding ->
+    ) {
         ListDetailPaneScaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = 8.dp)
                 .padding(bottom = 8.dp),
             directive = navigator.scaffoldDirective,
@@ -176,6 +177,7 @@ fun SpatialDepthScreen(
                     chrome = chrome,
                     tilt = tilt,
                     onLayerSelected = onLayerSelected,
+                    nestedScrollConnection = scrollBehavior.nestedScrollConnection,
                 )
             },
             detailPane = {
@@ -206,6 +208,7 @@ private fun SpatialLayerList(
     chrome: SpatialChrome,
     tilt: SpatialTiltDegrees,
     onLayerSelected: (SpatialLayer) -> Unit,
+    nestedScrollConnection: NestedScrollConnection,
 ) {
     val listState = rememberLazyListState()
     val parallax by remember {
@@ -227,8 +230,13 @@ private fun SpatialLayerList(
     ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .appHazeSource()
+                .nestedScroll(nestedScrollConnection),
+            contentPadding = collapsingTopBarContentPadding(
+                extra = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
+            ),
             verticalArrangement = Arrangement.spacedBy(SpatialListItemSpacing),
         ) {
             items(
@@ -261,6 +269,7 @@ private fun SpatialCollapsingTopBar(
     onNavigateBack: () -> Unit,
     guide: DemoTrendGuide?,
     chrome: SpatialChrome,
+    barModifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val nestedBackDispatcher = LocalNestedBackDispatcher.current
@@ -271,18 +280,14 @@ private fun SpatialCollapsingTopBar(
     )
     val subtitleAlpha = (1f - collapsedFraction * 1.35f).coerceIn(0f, 1f)
 
-    val scrolledSurface = scheme.surface.copy(alpha = if (chrome.isDark) 0.90f else 0.94f)
-
-    CollapsedTopAppBarBackdrop(
-        collapsedFraction = collapsedFraction,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        LargeTopAppBar(
-            modifier = Modifier.fillMaxWidth(),
-            scrollBehavior = scrollBehavior,
-            colors = rememberCollapsedTopAppBarColors(
+    LargeTopAppBar(
+        modifier = barModifier,
+        windowInsets = TopAppBarDefaults.windowInsets,
+        scrollBehavior = scrollBehavior,
+        colors = rememberCollapsedTopAppBarColors(
             collapsedFraction = collapsedFraction,
-            scrolledContainerColor = scrolledSurface,
+            containerColor = Color.Transparent,
+            scrolledContainerColor = scheme.surface,
             navigationIconContentColor = scheme.onSurface,
             titleContentColor = scheme.onSurface,
             actionIconContentColor = scheme.onSurface,
@@ -331,8 +336,7 @@ private fun SpatialCollapsingTopBar(
                 )
             }
         },
-        )
-    }
+    )
 }
 
 @Composable

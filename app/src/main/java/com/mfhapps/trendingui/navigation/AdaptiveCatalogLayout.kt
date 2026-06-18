@@ -44,6 +44,7 @@ fun AdaptiveCatalogLayout(
     onBrandAccentChange: (BrandAccentColor) -> Unit,
     onHomeLayoutChange: (HomeLayoutStyle) -> Unit,
     onBlurModalBackdropChange: (Boolean) -> Unit,
+    onSyncLauncherIconWithThemeChange: (Boolean) -> Unit,
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -105,6 +106,7 @@ fun AdaptiveCatalogLayout(
                                     onBrandAccentChange = onBrandAccentChange,
                                     onHomeLayoutChange = onHomeLayoutChange,
                                     onBlurModalBackdropChange = onBlurModalBackdropChange,
+                                    onSyncLauncherIconWithThemeChange = onSyncLauncherIconWithThemeChange,
                                     onLauncherIconChange = onLauncherIconChange,
                                     onNavigateBack = {
                                             scope.launch {

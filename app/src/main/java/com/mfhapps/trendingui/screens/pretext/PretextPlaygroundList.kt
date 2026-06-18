@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.AppTooltipBox
 import com.mfhapps.trendingui.ui.components.AppTooltipTimedRevealEffect
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.HapticSlider
 import com.mfhapps.trendingui.ui.components.rememberAppTooltipState
 
@@ -67,7 +68,7 @@ object PretextPlaygroundListKeys {
     const val Benchmark = "benchmark"
 }
 
-/** Lazy-list indices for progressive sticky attach (must match PretextScreen item order). */
+
 object PretextPlaygroundStickyIndices {
     const val StickyStack = 4
     const val LivePreview = 5
@@ -81,21 +82,14 @@ data class PretextStickyAttachState(
     val runAttached: Boolean,
 )
 
-/**
- * True once [itemKey] at [itemIndex] has left the scroll body (scrolled above the sticky stack).
- * While the item is the first visible row below the sticky header, returns false so in-list
- * controls stay authoritative and sticky duplicates do not flash during reverse scroll.
- */
+
 internal fun LazyListState.isListItemScrolledPast(itemKey: Any, itemIndex: Int): Boolean {
     if (firstVisibleItemIndex > itemIndex) return true
     if (firstVisibleItemIndex < itemIndex) return false
     return layoutInfo.visibleItemsInfo.none { it.key == itemKey }
 }
 
-/**
- * Scroll-driven sticky stack state.
- * Controls attach with the field as soon as it pins; run attaches once the benchmark row is reached.
- */
+
 @Composable
 fun rememberPretextStickyAttachState(
     listState: LazyListState,
@@ -186,7 +180,9 @@ fun PretextPlaygroundLazyList(
 
     LazyColumn(
         state = listState,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .appHazeSource(),
         contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

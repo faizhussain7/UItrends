@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- M3 standard — on-screen transitions (cubic 0.2, 0, 0, 1). -->
+
 <pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
     android:controlX1="0.2"
     android:controlY1="0.0"

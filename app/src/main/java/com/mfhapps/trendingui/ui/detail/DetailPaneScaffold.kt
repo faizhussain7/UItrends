@@ -21,10 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import com.mfhapps.trendingui.ui.brutal.BrutalChromeIconButton
+import com.mfhapps.trendingui.ui.brutal.BrutalShapes
 import com.mfhapps.trendingui.ui.components.CollapsedTopAppBarBackdrop
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
-import com.mfhapps.trendingui.ui.brutal.BrutalShapes
 import com.mfhapps.trendingui.ui.neumorphism.NeuChromeIconButton
+import com.mfhapps.trendingui.screens.copilot.CopilotLiveStatusChip
 import com.mfhapps.trendingui.screens.glass.ProvideGlassDetailEnvironment
 import com.mfhapps.trendingui.screens.orbs.ProvideOrbsDetailEnvironment
 import com.mfhapps.trendingui.screens.spatial.ProvideSpatialDetailEnvironment
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 import androidx.compose.ui.unit.dp
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import com.mfhapps.trendingui.ui.theme.CatalogGradientChrome
 import com.mfhapps.trendingui.ui.theme.AdaptiveGradientIcon
@@ -75,10 +77,18 @@ fun DetailPaneScaffold(
     val copilotChrome = chromeStyle == DetailChromeStyle.Copilot
     val immersiveChrome = immersiveBackground && !useGradientTopBar
     val transparentTopBar = useGradientTopBar || immersiveChrome
+    val contentManagesBackdropBlur = hideCompactTopBar && contentOwnsTitle
     val topBarForeground = when {
         useGradientTopBar -> catalogColors.glassBarTitle
         immersiveChrome -> MaterialTheme.colorScheme.onSurface
         else -> MaterialTheme.colorScheme.onSurface
+    }
+
+    val immersiveCollapseState = remember { ImmersiveTopBarCollapseState() }
+    val immersiveCollapseFraction = if (immersiveChrome) {
+        immersiveCollapseState.collapsedFraction
+    } else {
+        0f
     }
 
     val scaffoldRoot: @Composable () -> Unit = {
@@ -86,6 +96,7 @@ fun DetailPaneScaffold(
         LocalDetailPaneActive provides true,
         LocalNestedBackDispatcher provides nestedBackDispatcher,
         LocalDetailChromeStyle provides chromeStyle,
+        LocalImmersiveTopBarCollapse provides if (immersiveChrome) immersiveCollapseState else null,
     ) {
         when {
             immersiveChrome -> ImmersiveDetailSystemBars()
@@ -96,12 +107,36 @@ fun DetailPaneScaffold(
             else -> DetailMaterialSystemBars()
         }
         val topBar: @Composable () -> Unit = {
-            CollapsedTopAppBarBackdrop(
-                collapsedFraction = if (transparentTopBar) 1f else 0f,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            val topBarColors = if (immersiveChrome) {
+                rememberCollapsedTopAppBarColors(
+                    collapsedFraction = immersiveCollapseFraction,
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent,
+                    titleContentColor = topBarForeground,
+                    navigationIconContentColor = topBarForeground,
+                    actionIconContentColor = topBarForeground,
+                )
+            } else {
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = when {
+                        transparentTopBar -> Color.Transparent
+                        neuChrome -> MaterialTheme.colorScheme.surfaceContainerLow
+                        else -> MaterialTheme.colorScheme.surface
+                    },
+                    scrolledContainerColor = when {
+                        transparentTopBar -> Color.Transparent
+                        neuChrome -> MaterialTheme.colorScheme.surfaceContainerLow
+                        else -> MaterialTheme.colorScheme.surface
+                    },
+                    titleContentColor = topBarForeground,
+                    navigationIconContentColor = topBarForeground,
+                    actionIconContentColor = topBarForeground,
+                )
+            }
+
+            val topBarContent: @Composable (Modifier) -> Unit = { barModifier ->
                 TopAppBar(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = barModifier,
                     title = {
                     if (!contentOwnsTitle) {
                         Column {
@@ -191,10 +226,15 @@ fun DetailPaneScaffold(
                         DetailPaneGuideAction(
                             guide = guide,
                             chromeStyle = chromeStyle,
-                            iconTint = if (immersiveChrome) {
-                                catalogColors.headerIcon
+                            iconTint = when {
+                                copilotChrome -> MaterialTheme.colorScheme.onSurface
+                                immersiveChrome -> catalogColors.headerIcon
+                                else -> MaterialTheme.colorScheme.primary
+                            },
+                            leading = if (copilotChrome) {
+                                { CopilotLiveStatusChip() }
                             } else {
-                                MaterialTheme.colorScheme.primary
+                                null
                             },
                             modifier = if (brutalChrome || neuChrome || glassChrome) {
                                 Modifier.padding(end = 8.dp, top = 4.dp, bottom = 4.dp)
@@ -204,23 +244,19 @@ fun DetailPaneScaffold(
                         )
                     }
                 },
-                colors = rememberCollapsedTopAppBarColors(
-                    collapsedFraction = if (transparentTopBar) 1f else 0f,
-                    containerColor = when {
-                        transparentTopBar -> Color.Transparent
-                        neuChrome -> MaterialTheme.colorScheme.surfaceContainerLow
-                        else -> MaterialTheme.colorScheme.surface
-                    },
-                    scrolledContainerColor = when {
-                        transparentTopBar -> Color.Transparent
-                        neuChrome -> MaterialTheme.colorScheme.surfaceContainerLow
-                        else -> MaterialTheme.colorScheme.surface
-                    },
-                    titleContentColor = topBarForeground,
-                    navigationIconContentColor = topBarForeground,
-                    actionIconContentColor = topBarForeground,
-                ),
+                colors = topBarColors,
                 )
+            }
+
+            if (immersiveChrome) {
+                CollapsedTopAppBarBackdrop(
+                    collapsedFraction = immersiveCollapseFraction,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { barModifier ->
+                    topBarContent(barModifier)
+                }
+            } else {
+                topBarContent(Modifier.fillMaxWidth())
             }
         }
 
@@ -238,21 +274,42 @@ fun DetailPaneScaffold(
                     containerColor = Color.Transparent,
                     topBar = topBar,
                 ) { innerPadding ->
-                    DetailPaneContentPadding(innerPadding) {
+                    DetailPaneContentPadding(
+                        innerPadding = innerPadding,
+                        registerHazeSource = !contentManagesBackdropBlur,
+                    ) {
                         content()
                     }
                 }
             } else if (compact) {
-                DetailPaneContentPadding(PaddingValues(0.dp)) {
+                DetailPaneContentPadding(
+                    innerPadding = PaddingValues(0.dp),
+                    registerHazeSource = !contentManagesBackdropBlur,
+                ) {
                     content()
                 }
             } else {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (contentManagesBackdropBlur) {
+                                Modifier
+                            } else {
+                                Modifier.appHazeSource()
+                            },
+                        ),
+                ) {
                     content()
                     if (guide != null) {
                         DetailPaneGuideAction(
                             guide = guide,
                             chromeStyle = chromeStyle,
+                            leading = if (copilotChrome) {
+                                { CopilotLiveStatusChip() }
+                            } else {
+                                null
+                            },
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(12.dp),
@@ -322,11 +379,13 @@ fun DetailPaneScaffold(
 @Composable
 private fun DetailPaneContentPadding(
     innerPadding: PaddingValues,
+    registerHazeSource: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     Box(
         Modifier
             .fillMaxSize()
+            .then(if (registerHazeSource) Modifier.appHazeSource() else Modifier)
             .padding(innerPadding),
     ) {
         content()

@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 
 @Composable
@@ -24,7 +25,7 @@ fun ProvideOrbsDetailEnvironment(
     content: @Composable () -> Unit,
 ) {
     Box(modifier.fillMaxSize()) {
-        OrbsDetailBackdrop(Modifier.matchParentSize())
+        OrbsDetailBackdrop(Modifier.matchParentSize().appHazeSource())
         content()
     }
 }

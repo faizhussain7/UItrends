@@ -4,6 +4,9 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +16,6 @@ import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -34,6 +36,9 @@ import com.mfhapps.trendingui.ui.settings.SettingsAboutPanel
 import com.mfhapps.trendingui.ui.settings.SettingsAppInfoOverscrollHaptics
 import com.mfhapps.trendingui.ui.settings.SettingsCardContent
 import com.mfhapps.trendingui.ui.settings.SettingsChipCollapseOnScrollEffect
+import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
+import com.mfhapps.trendingui.ui.components.appHazeSource
+import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
 import com.mfhapps.trendingui.ui.settings.SettingsCollapsingTopBar
 import com.mfhapps.trendingui.ui.settings.SettingsExpressiveDefaults
@@ -67,6 +72,7 @@ fun SettingsScreen(
     onBrandAccentChange: (BrandAccentColor) -> Unit,
     onHomeLayoutChange: (HomeLayoutStyle) -> Unit,
     onBlurModalBackdropChange: (Boolean) -> Unit,
+    onSyncLauncherIconWithThemeChange: (Boolean) -> Unit,
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -115,13 +121,12 @@ fun SettingsScreen(
     )
     SettingsScreenBackground(modifier = modifier) {
         SettingsAppInfoOverscrollHaptics(stretchFraction = stretchFraction)
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            containerColor = Color.Transparent,
-            contentColor = scheme.onSurface,
-            topBar = {
+        val bottomInset = WindowInsets.navigationBars.asPaddingValues()
+        CollapsingBlurTopBarLayout(
+            scrollBehavior = scrollBehavior,
+            collapsedFraction = collapsedFraction,
+            modifier = Modifier.fillMaxSize(),
+            topBar = { barModifier ->
                 SettingsCollapsingTopBar(
                     scrollBehavior = scrollBehavior,
                     collapsedFraction = collapsedFraction,
@@ -144,18 +149,22 @@ fun SettingsScreen(
                     },
                     guide = guide,
                     colors = topBarColors,
+                    barModifier = barModifier,
                 )
             },
-        ) { innerPadding ->
+        ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .appHazeSource()
                     .nestedScroll(chipCollapseOnScroll)
                     .nestedScroll(topOverscroll.pullNestedScrollConnection),
                 state = listState,
-                contentPadding = PaddingValues(
-                    top = innerPadding.calculateTopPadding(),
-                    bottom = innerPadding.calculateBottomPadding() + SettingsExpressiveDefaults.sectionSpacing,
+                contentPadding = collapsingTopBarContentPadding(
+                    extra = PaddingValues(
+                        bottom = bottomInset.calculateBottomPadding() +
+                            SettingsExpressiveDefaults.sectionSpacing,
+                    ),
                 ),
                 verticalArrangement = Arrangement.spacedBy(SettingsExpressiveDefaults.sectionSpacing),
             ) {
@@ -235,6 +244,7 @@ fun SettingsScreen(
                         preferences = preferences,
                         selectedLauncherIcon = selectedLauncherIcon,
                         onLayoutChange = onHomeLayoutChange,
+                        onSyncLauncherIconWithThemeChange = onSyncLauncherIconWithThemeChange,
                         onLauncherIconChange = onLauncherIconChange,
                     )
                 }

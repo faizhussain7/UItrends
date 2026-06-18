@@ -53,10 +53,12 @@ target_link_options(
 )
 
 find_library(log-lib log)
+find_library(android-lib android)
 
 target_link_libraries(
     pretext_geometry
     ${log-lib}
+    ${android-lib}
 )
 
 if(PRETEXT_USE_NCNN)
@@ -67,7 +69,6 @@ if(PRETEXT_USE_NCNN)
     target_link_libraries(
         pretext_geometry
         "${NCNN_LIB}"
-        android
         jnigraphics
     )
 endif()

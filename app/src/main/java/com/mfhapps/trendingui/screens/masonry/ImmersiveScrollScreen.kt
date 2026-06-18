@@ -46,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -72,7 +73,9 @@ import coil.compose.AsyncImage
 import com.mfhapps.trendingui.navigation.demoSharedElement
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.ZoomableImage
+import com.mfhapps.trendingui.ui.detail.LocalImmersiveTopBarCollapse
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.theme.AdaptiveGradientText
 import com.mfhapps.trendingui.ui.theme.GradientForegroundRole
 import com.mfhapps.trendingui.ui.theme.LocalHomeCatalogColors
@@ -235,6 +238,11 @@ private fun MasonryFeedGrid(
         }
     }
 
+    val immersiveTopBarCollapse = LocalImmersiveTopBarCollapse.current
+    SideEffect(scrollCollapse) {
+        immersiveTopBarCollapse?.collapsedFraction = scrollCollapse
+    }
+
     val feedProgress by remember(gridState) {
         derivedStateOf {
             val info = gridState.layoutInfo
@@ -289,6 +297,7 @@ private fun MasonryFeedGrid(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .appHazeSource()
             .drawBehind {
                 drawRect(brush = backgroundLayers.outgoing)
                 drawRect(
@@ -671,10 +680,15 @@ private fun MasonryItemDetail(
     val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + TopBarHeight
     val imageHeight = 340.dp
     var isZoomed by remember { mutableStateOf(false) }
+    val immersiveTopBarCollapse = LocalImmersiveTopBarCollapse.current
+    SideEffect(Unit) {
+        immersiveTopBarCollapse?.collapsedFraction = 1f
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .appHazeSource()
             .drawBehind {
                 drawRect(brush = backgroundLayers.outgoing)
                 drawRect(

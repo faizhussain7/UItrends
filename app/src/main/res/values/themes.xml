@@ -21,6 +21,7 @@
         <item name="android:windowSplashScreenBackground">@color/splash_background</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_catalog_static</item>
+        <item name="splashScreenIconSize">@dimen/splash_icon_display_size</item>
         <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
         <item name="postSplashScreenTheme">@style/Theme.Trendinguipatterns</item>
     </style>
@@ -31,6 +32,7 @@
         <item name="android:windowSplashScreenBackground">@color/splash_background_dark</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_catalog_static</item>
+        <item name="splashScreenIconSize">@dimen/splash_icon_display_size</item>
         <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
         <item name="postSplashScreenTheme">@style/Theme.Trendinguipatterns.Dark</item>
     </style>

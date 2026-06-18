@@ -41,13 +41,13 @@ fun MarkdownText(
             if (index > 0) Spacer(Modifier.height(6.dp))
             when (block) {
                 is MdBlock.Heading -> Text(
-                    text = renderInline(block.text),
+                    text = renderInline(block.text, scheme.onSurface),
                     style = if (block.level <= 1) MaterialTheme.typography.titleLarge
                     else MaterialTheme.typography.titleMedium,
                     color = scheme.onSurface,
                 )
                 is MdBlock.Paragraph -> Text(
-                    text = renderInline(block.text),
+                    text = renderInline(block.text, scheme.onSurface),
                     style = MaterialTheme.typography.bodyMedium,
                     color = scheme.onSurface,
                 )
@@ -60,7 +60,7 @@ fun MarkdownText(
                         color = scheme.primary,
                     )
                     Text(
-                        renderInline(block.text),
+                        renderInline(block.text, scheme.onSurface),
                         style = MaterialTheme.typography.bodyMedium,
                         color = scheme.onSurface,
                     )
@@ -138,7 +138,7 @@ private fun parseBlocks(input: String): List<MdBlock> {
 }
 
 
-private fun renderInline(input: String): AnnotatedString = buildAnnotatedString {
+private fun renderInline(input: String, defaultColor: Color): AnnotatedString = buildAnnotatedString {
     var i = 0
     while (i < input.length) {
         val rest = input.substring(i)
@@ -146,7 +146,7 @@ private fun renderInline(input: String): AnnotatedString = buildAnnotatedString 
             rest.startsWith("**") -> {
                 val end = input.indexOf("**", i + 2)
                 if (end >= 0) {
-                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = defaultColor)) {
                         append(input.substring(i + 2, end))
                     }
                     i = end + 2
@@ -162,6 +162,7 @@ private fun renderInline(input: String): AnnotatedString = buildAnnotatedString 
                             fontFamily = FontFamily.Monospace,
                             background = Color(0x22808080),
                             fontSize = 14.sp,
+                            color = defaultColor,
                         ),
                     ) {
                         append(input.substring(i + 1, end))
@@ -174,7 +175,7 @@ private fun renderInline(input: String): AnnotatedString = buildAnnotatedString 
             rest.startsWith("*") && rest.length > 1 && rest[1] != '*' -> {
                 val end = input.indexOf("*", i + 1)
                 if (end >= 0) {
-                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic, color = defaultColor)) {
                         append(input.substring(i + 1, end))
                     }
                     i = end + 1
@@ -183,7 +184,10 @@ private fun renderInline(input: String): AnnotatedString = buildAnnotatedString 
                 }
             }
             else -> {
-                append(input[i]); i++
+                withStyle(SpanStyle(color = defaultColor)) {
+                    append(input[i])
+                }
+                i++
             }
         }
     }

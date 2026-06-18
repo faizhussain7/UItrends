@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -28,7 +29,12 @@ class PretextCameraSession(
 ) {
     private var cameraProvider: ProcessCameraProvider? = null
     private var camera: Camera? = null
-    private var analysisExecutor: ExecutorService? = null
+    private val analysisExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "PretextCamera-Analysis").apply {
+            priority = Thread.NORM_PRIORITY
+        }
+    }
+    @Volatile private var closed = false
 
     var lensFacing: Int = CameraSelector.LENS_FACING_BACK
         private set
@@ -47,16 +53,11 @@ class PretextCameraSession(
         lifecycleOwner: LifecycleOwner,
         analyzer: ImageAnalysis.Analyzer,
     ) {
+        if (closed) return
         val provider = cameraProvider ?: obtainProvider()
         val viewport = awaitViewPort(previewView)
 
-        analysisExecutor?.shutdown()
-        val executor = Executors.newSingleThreadExecutor { runnable ->
-            Thread(runnable, "PretextCamera-Analysis").apply {
-                priority = Thread.NORM_PRIORITY
-            }
-        }
-        analysisExecutor = executor
+        runCatching { provider.unbindAll() }
 
         val preview = Preview.Builder()
             .setResolutionSelector(resolutionSelector)
@@ -68,7 +69,7 @@ class PretextCameraSession(
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
             .setResolutionSelector(resolutionSelector)
             .build()
-            .also { it.setAnalyzer(executor, analyzer) }
+            .also { it.setAnalyzer(analysisExecutor, analyzer) }
 
         val useCaseGroup = UseCaseGroup.Builder()
             .setViewPort(viewport)
@@ -105,10 +106,12 @@ class PretextCameraSession(
     fun hasTorch(): Boolean = camera?.cameraInfo?.hasFlashUnit() == true
 
     fun close() {
-        analysisExecutor?.shutdown()
-        analysisExecutor = null
+        if (closed) return
+        closed = true
         runCatching { cameraProvider?.unbindAll() }
         camera = null
+        analysisExecutor.shutdown()
+        runCatching { analysisExecutor.awaitTermination(5, TimeUnit.SECONDS) }
     }
 
     private suspend fun obtainProvider(): ProcessCameraProvider = suspendCoroutine { cont ->

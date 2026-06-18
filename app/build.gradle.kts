@@ -64,7 +64,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.animation)
-    // Keep compose-animation on the BOM; material3 expressive is pinned separately below.
+
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.ui.graphics)
@@ -108,6 +108,20 @@ tasks.register<Exec>("downloadPretextVisionAssets") {
 
 tasks.named("preBuild").configure {
     dependsOn("downloadPretextVisionAssets")
+}
+
+listOf("installDebug", "installRelease").forEach { taskName ->
+    tasks.matching { it.name == taskName }.configureEach {
+        finalizedBy("resetLauncherAliases")
+    }
+}
+
+tasks.register<Exec>("resetLauncherAliases") {
+    group = "install"
+    description = "Reset activity-alias enabled state so IDE launch works after icon switches"
+    workingDir = rootProject.projectDir
+    commandLine("bash", "scripts/reset_launcher_aliases.sh")
+    isIgnoreExitValue = true
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

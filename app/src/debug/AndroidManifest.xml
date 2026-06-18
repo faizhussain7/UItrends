@@ -1,7 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Do not add LAUNCHER to MainActivity here — that creates duplicate home-screen icons.
-  The default enabled activity-alias in main/AndroidManifest.xml is the launcher entry.
-  Android Studio run config launches MainActivity directly (see .idea/runConfigurations/app.xml).
--->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" />

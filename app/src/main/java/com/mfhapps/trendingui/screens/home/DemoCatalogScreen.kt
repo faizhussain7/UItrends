@@ -89,6 +89,7 @@ import com.mfhapps.trendingui.navigation.toDemoPaneKey
 import com.mfhapps.trendingui.ui.accessibility.DecorativeIcon
 import com.mfhapps.trendingui.ui.components.BrandMark
 import com.mfhapps.trendingui.ui.components.CollapsedHeaderBackdrop
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.ShapeClickableSurface
 import com.mfhapps.trendingui.ui.components.rememberCatalogCardColors
 import com.mfhapps.trendingui.ui.theme.CatalogColorMath
@@ -298,7 +299,9 @@ private fun FeaturedCatalogList(
 ) {
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .appHazeSource(),
         contentPadding = PaddingValues(
             bottom = contentPadding.calculateBottomPadding() + 16.dp,
         ),
@@ -382,7 +385,9 @@ private fun BentoCatalogGrid(
     LazyVerticalStaggeredGrid(
         state = gridState,
         columns = StaggeredGridCells.Adaptive(168.dp),
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .appHazeSource(),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
@@ -463,7 +468,9 @@ private fun CompactCatalogGrid(
     }
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .appHazeSource(),
         contentPadding = PaddingValues(bottom = bottomPadding + 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

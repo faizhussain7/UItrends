@@ -63,9 +63,12 @@ fun Activity.applyThemeNightMode(themeMode: ThemeMode) {
 }
 
 
-fun Context.syncThemeAppearance(themeMode: ThemeMode) {
+fun Context.syncThemeAppearance(
+    themeMode: ThemeMode,
+    syncLauncherIconWithTheme: Boolean,
+) {
     applyThemeNightMode(themeMode)
-    LauncherIconCoordinator.syncTheme(this)
+    LauncherIconCoordinator.syncTheme(this, syncLauncherIconWithTheme)
 }
 
 fun ComponentActivity.enableActivityEdgeToEdge(appDark: Boolean) {

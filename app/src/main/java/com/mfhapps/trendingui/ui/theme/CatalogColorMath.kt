@@ -107,10 +107,7 @@ internal object CatalogColorMath {
         )
     }
 
-    /**
-     * Frosted chip on top of a gradient (or any multi-stop backdrop). Container and label are
-     * resolved against the composited chip surface, not the raw gradient behind it.
-     */
+
     fun resolveOnGradientChip(
         backdrops: List<Color>,
         colorScheme: androidx.compose.material3.ColorScheme,

@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
+import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.theme.LocalHomeCatalogColors
 import com.mfhapps.trendingui.ui.theme.launcherIconGradientBackground
 import kotlinx.coroutines.delay
@@ -119,6 +120,7 @@ fun KineticTypographyScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .appHazeSource()
             .background(scheme.background)
             .navigationBarsPadding()
             .verticalScroll(scroll),

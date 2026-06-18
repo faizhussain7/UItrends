@@ -101,7 +101,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.snapshotFlow
 import com.mfhapps.trendingui.ui.components.SwitchListItem
-import com.mfhapps.trendingui.ui.components.CollapsedTopAppBarBackdrop
 import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 
@@ -440,6 +439,7 @@ fun SettingsCollapsingTopBar(
     followOverscrollFinger: Boolean,
     onAppInfoClick: () -> Unit,
     modifier: Modifier = Modifier,
+    barModifier: Modifier = Modifier,
     title: String = "Settings",
     guide: DemoTrendGuide? = null,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
@@ -470,13 +470,9 @@ fun SettingsCollapsingTopBar(
         fraction = collapsedFraction.coerceIn(0f, 1f),
     )
 
-    CollapsedTopAppBarBackdrop(
-        collapsedFraction = collapsedFraction,
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        LargeTopAppBar(
-            modifier = Modifier.fillMaxWidth(),
-            windowInsets = TopAppBarDefaults.windowInsets,
+    LargeTopAppBar(
+        modifier = barModifier.then(modifier),
+        windowInsets = TopAppBarDefaults.windowInsets,
         title = {
             Text(
                 text = title,
@@ -529,8 +525,7 @@ fun SettingsCollapsingTopBar(
         },
         scrollBehavior = scrollBehavior,
         colors = colors,
-        )
-    }
+    )
 }
 
 @Composable
