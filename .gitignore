@@ -18,8 +18,8 @@ local.properties
 app/src/main/cpp/third_party/ncnn/
 docs/
 UITrends_Android_Prompt.md
-scripts/
-!scripts/download_pretext_vision_assets.sh
+/scripts/*
+!/scripts/download_pretext_vision_assets.sh
 
 # Signing — never commit keystores; use GitHub Actions secrets in CI
 *.jks
