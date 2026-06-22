@@ -15,4 +15,5 @@
     <color name="launcher_bg_end">@color/splash_background</color>
     <color name="launcher_wave_light">#38D42D6A</color>
     <color name="launcher_wave_dark">#454F6D95</color>
+    <color name="launcher_glow">#30D42D6A</color>
 </resources>
