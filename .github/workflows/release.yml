@@ -162,7 +162,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add release/version.properties release/whatsnew release/RELEASE_NOTES.md
+          git add release/version.properties release/whatsnew/
           git diff --staged --quiet && echo "No version changes to commit." && exit 0
           git commit -m "chore(release): v${{ steps.version.outputs.version_name }} [skip ci]"
           git push origin HEAD
