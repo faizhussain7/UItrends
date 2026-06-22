@@ -58,7 +58,6 @@ android {
             isShrinkResources = true
             isDebuggable = false
             isJniDebuggable = false
-            isRenderscriptDebuggable = false
             isPseudoLocalesEnabled = false
             isCrunchPngs = true
 
@@ -90,9 +89,6 @@ android {
                 "META-INF/*.kotlin_module",
             )
         }
-    }
-    vcsInfo {
-        include = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
