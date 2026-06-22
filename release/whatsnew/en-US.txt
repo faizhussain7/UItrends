@@ -1,1 +1,12 @@
-Initial release.
+• Fix release workflow: do not commit generated RELEASE_NOTES.md
+• Add default launcher_glow color for lint/release build
+• Fix release build for AGP 9: remove unsupported DSL
+• Fix release CI: track bump script and vision asset downloader
+• Update release.yml
+• Add release workflow, signing and versioning
+• Launcher, splash timing, native link & Copilot UI
+• Update THIRD_PARTY_NOTICES.md
+• Updated Logos
+• Update README.md
+• Create gradle-daemon-jvm.properties
+• Docs: add README and third-party
