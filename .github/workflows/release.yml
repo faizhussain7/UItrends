@@ -1,0 +1,192 @@
+# Build signed release APK + AAB, publish GitHub Release, optional Play Store upload.
+#
+# Triggers:
+#   • Manual: Actions → Release → Run workflow (recommended)
+#   • Tag push v*: only when YOU push the tag (bot-created tags are ignored)
+#
+# Required secrets: RELEASE_KEYSTORE_BASE64, RELEASE_KEYSTORE_PASSWORD,
+#                   RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD
+# Optional: PLAY_STORE_SERVICE_ACCOUNT_JSON (when upload_play_store is enabled)
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump (auto reads conventional commits since last tag)
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
+      track:
+        description: Play Store track (only when upload is enabled)
+        type: choice
+        options: [internal, alpha, beta, production]
+        default: internal
+      upload_play_store:
+        description: Upload AAB to Google Play
+        type: boolean
+        default: false
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Skip the second run when this workflow creates the release tag via workflow_dispatch.
+    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PACKAGE_NAME: com.mfhapps.trendingui
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate signing secrets
+        run: |
+          missing=0
+          for name in RELEASE_KEYSTORE_BASE64 RELEASE_KEYSTORE_PASSWORD RELEASE_KEY_ALIAS RELEASE_KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing secret: ${name}"
+              missing=1
+            fi
+          done
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.upload_play_store }}" == "true" ]]; then
+            if [[ -z "${PLAY_STORE_SERVICE_ACCOUNT_JSON}" ]]; then
+              echo "::error::upload_play_store is enabled but PLAY_STORE_SERVICE_ACCOUNT_JSON is missing."
+              missing=1
+            fi
+          fi
+          exit "${missing}"
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          PLAY_STORE_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses >/dev/null 2>&1 || true
+
+      - name: Install CMake
+        run: sdkmanager --install "cmake;3.22.1"
+
+      - name: Bump version and write release notes
+        id: version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            python3 .github/scripts/bump_release_version.py --from-tag "${{ github.ref_name }}"
+          else
+            python3 .github/scripts/bump_release_version.py --bump "${{ inputs.bump }}"
+          fi
+
+      - name: Resolve release tag name
+        id: release_tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "value=${{ steps.version.outputs.release_tag }}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "value=${{ github.ref_name }}" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > "${RUNNER_TEMP}/release.keystore"
+          if [[ ! -s "${RUNNER_TEMP}/release.keystore" ]]; then
+            echo "::error::Decoded keystore is empty. Check RELEASE_KEYSTORE_BASE64 (use raw base64, no PEM headers)."
+            exit 1
+          fi
+          echo "RELEASE_KEYSTORE_PATH=${RUNNER_TEMP}/release.keystore" >> "${GITHUB_ENV}"
+
+      - name: Build release APK and AAB
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace bundleRelease assembleRelease
+
+      - name: Prepare versioned release artifacts
+        id: artifacts
+        run: |
+          VERSION="${{ steps.version.outputs.version_name }}"
+          OUT="${RUNNER_TEMP}/release-artifacts"
+          mkdir -p "${OUT}"
+          cp app/build/outputs/apk/release/app-release.apk "${OUT}/UITrends-${VERSION}.apk"
+          cp app/build/outputs/bundle/release/app-release.aab "${OUT}/UITrends-${VERSION}.aab"
+          RELEASE_FILES="${OUT}/UITrends-${VERSION}.apk
+          ${OUT}/UITrends-${VERSION}.aab"
+          if [[ -f app/build/outputs/mapping/release/mapping.txt ]]; then
+            cp app/build/outputs/mapping/release/mapping.txt "${OUT}/mapping-${VERSION}.txt"
+            RELEASE_FILES="${RELEASE_FILES}
+          ${OUT}/mapping-${VERSION}.txt"
+          fi
+          echo "artifact_dir=${OUT}" >> "${GITHUB_OUTPUT}"
+          {
+            echo "files<<EOF"
+            echo "${RELEASE_FILES}"
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+          ls -lh "${OUT}"
+
+      - name: Verify signed APK
+        run: |
+          APK="${{ steps.artifacts.outputs.artifact_dir }}/UITrends-${{ steps.version.outputs.version_name }}.apk"
+          APKSIGNER="$(find "${ANDROID_HOME}/build-tools" -name apksigner | sort -V | tail -n 1)"
+          "${APKSIGNER}" verify --verbose "${APK}"
+
+      - name: Commit version bump
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release/version.properties release/whatsnew release/RELEASE_NOTES.md
+          git diff --staged --quiet && echo "No version changes to commit." && exit 0
+          git commit -m "chore(release): v${{ steps.version.outputs.version_name }} [skip ci]"
+          git push origin HEAD
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.value }}
+          name: UITrends ${{ steps.version.outputs.version_name }}
+          body_path: release/RELEASE_NOTES.md
+          files: ${{ steps.artifacts.outputs.files }}
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version_name, 'beta') || contains(steps.version.outputs.version_name, 'alpha') }}
+          fail_on_unmatched_files: true
+          make_latest: true
+
+      - name: Upload to Google Play
+        if: github.event_name == 'workflow_dispatch' && inputs.upload_play_store
+        uses: r0adkll/upload-google-play@v1.3.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: ${{ steps.artifacts.outputs.artifact_dir }}/UITrends-${{ steps.version.outputs.version_name }}.aab
+          track: ${{ inputs.track }}
+          whatsNewDirectory: release/whatsnew
+          mappingFile: app/build/outputs/mapping/release/mapping.txt
+          status: completed

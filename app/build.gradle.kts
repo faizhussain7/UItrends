@@ -1,5 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -10,14 +12,40 @@ android {
     namespace = "com.mfhapps.trendingui"
     compileSdk = 37
 
+    val versionPropertiesFile = rootProject.file("release/version.properties")
+    val versionProperties = Properties().apply {
+        if (versionPropertiesFile.exists()) {
+            versionPropertiesFile.inputStream().use { load(it) }
+        }
+    }
+    val releaseVersionCode =
+        versionProperties.getProperty("versionCode")?.toIntOrNull() ?: 1
+    val releaseVersionName =
+        versionProperties.getProperty("versionName") ?: "1.0.0"
+
     defaultConfig {
         applicationId = "com.mfhapps.trendingui"
         minSdk = 28
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = releaseVersionCode
+        versionName = releaseVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
+    }
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
+            if (!keystorePath.isNullOrBlank()) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
     }
     externalNativeBuild {
         cmake {
@@ -28,11 +56,43 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
+            isJniDebuggable = false
+            isRenderscriptDebuggable = false
+            isPseudoLocalesEnabled = false
+            isCrunchPngs = true
+
+            val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
+            if (!keystorePath.isNullOrBlank()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
+    }
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/AL2.0",
+                "META-INF/LGPL2.1",
+                "META-INF/*.kotlin_module",
+            )
+        }
+    }
+    vcsInfo {
+        include = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

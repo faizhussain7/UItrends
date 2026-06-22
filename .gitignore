@@ -17,5 +17,13 @@ local.properties
 .superpowers/
 app/src/main/cpp/third_party/ncnn/
 docs/
-scripts/
 UITrends_Android_Prompt.md
+scripts/
+!scripts/download_pretext_vision_assets.sh
+
+# Signing — never commit keystores; use GitHub Actions secrets in CI
+*.jks
+*.keystore
+release/keystore/
+release/play-account.json
+release/RELEASE_NOTES.md
