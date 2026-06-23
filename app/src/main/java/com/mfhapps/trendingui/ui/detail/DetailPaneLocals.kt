@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 
 val LocalDetailPaneActive = staticCompositionLocalOf { false }
 
+val LocalDemoSourceCodeUrl = staticCompositionLocalOf<String?> { null }
+
 
 @Composable
 fun Modifier.demoDetailScrollInsets(): Modifier {

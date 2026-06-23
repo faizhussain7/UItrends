@@ -14,7 +14,7 @@ Versions are pinned in [`gradle/libs.versions.toml`](gradle/libs.versions.toml).
 
 | Component | Maven coordinates (summary) | License | Notes |
 | --- | --- | --- | --- |
-| **Android Gradle Plugin** | `com.android.application` 9.1.1 | Apache-2.0 | Build-time only |
+| **Android Gradle Plugin** | `com.android.application` 9.2.1 | Apache-2.0 | Build-time only |
 | **Kotlin** | `org.jetbrains.kotlin` 2.0.21 | Apache-2.0 | Language + Compose plugin |
 | **AndroidX Core** | `androidx.core:core-ktx` 1.18.0 | Apache-2.0 | |
 | **Core Splashscreen** | `androidx.core:core-splashscreen` 1.0.1 | Apache-2.0 | |
@@ -32,10 +32,10 @@ Versions are pinned in [`gradle/libs.versions.toml`](gradle/libs.versions.toml).
 | **Coil** | `io.coil-kt:coil-compose` 2.7.0 | Apache-2.0 | Image loading |
 | **Haze** | `dev.chrisbanes.haze:haze` 1.7.2 | MIT | Blur / frosted glass |
 | **Haze Materials** | `dev.chrisbanes.haze:haze-materials` 1.7.2 | MIT | Material-tinted haze styles |
-| **TensorFlow Lite** | `org.tensorflow:tensorflow-lite` 2.17.0 | Apache-2.0 | On-device inference |
+| **LiteRT** | `com.google.ai.edge.litert:litert` 1.4.2 | Apache-2.0 | On-device inference (16 KB page-size compatible) |
 | **MediaPipe Tasks Vision** | `com.google.mediapipe:tasks-vision` 0.10.26 | Apache-2.0 | Face landmarker API |
 
-Upstream sources: [Google Maven](https://maven.google.com/) · [Maven Central](https://central.sonatype.com/) · [Haze](https://github.com/chrisbanes/haze) · [Coil](https://github.com/coil-kt/coil) · [TensorFlow](https://github.com/tensorflow/tensorflow) · [MediaPipe](https://github.com/google/mediapipe)
+Upstream sources: [Google Maven](https://maven.google.com/) · [Maven Central](https://central.sonatype.com/) · [Haze](https://github.com/chrisbanes/haze) · [Coil](https://github.com/coil-kt/coil) · [LiteRT](https://github.com/google-ai-edge/LiteRT) · [MediaPipe](https://github.com/google/mediapipe)
 
 ---
 
@@ -78,7 +78,7 @@ Fetched into `app/src/main/assets/vision/` on first build. See also [`app/src/ma
 | `face_landmarker.task` | Face / Auto | [MediaPipe face landmarker](https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task) | Apache-2.0 (MediaPipe) |
 | `blaze_face_short_range.tflite` | Face fallback | [MediaPipe BlazeFace](https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite) | Apache-2.0 (MediaPipe) |
 | `face_detection_short_range.tflite` | Downloaded; legacy spare asset | [MediaPipe assets](https://storage.googleapis.com/mediapipe-assets/face_detection_short_range.tflite) | Apache-2.0 (MediaPipe) |
-| `ssd_mobilenet_coco.tflite` | Object fallback (no NCNN) | [TensorFlow Lite Support testdata](https://github.com/tensorflow/tflite-support) | Apache-2.0 |
+| `ssd_mobilenet_coco.tflite` | Object fallback (no NCNN) | [TensorFlow Lite Support testdata](https://github.com/tensorflow/tflite-support) | Apache-2.0 (inference via LiteRT) |
 | `yolov8n.param` / `yolov8n.bin` | Object (NCNN) | [nihui/ncnn-assets](https://github.com/nihui/ncnn-assets) YOLOv8n NCNN export | **See YOLOv8 note below** |
 
 ### YOLOv8 weights — important
@@ -89,7 +89,7 @@ If you ship these weights in a **closed-source commercial app**, review Ultralyt
 
 - obtain a suitable license,
 - replace the model with one whose license fits your distribution, or
-- remove NCNN object detection (TFLite SSD fallback remains, with different accuracy).
+- remove NCNN object detection (LiteRT SSD MobileNet fallback remains, with different accuracy).
 
 The **NCNN conversion scripts/assets** (nihui/ncnn-assets) do not replace the underlying model license.
 
@@ -99,16 +99,16 @@ The **NCNN conversion scripts/assets** (nihui/ncnn-assets) do not replace the un
 
 | Mode | Primary backend | Fallback | Native contour |
 | --- | --- | --- | --- |
-| Person | TFLite selfie mask | Mask blob → box | `pretext_geometry` (MIT) |
-| Face | MediaPipe landmarker | BlazeFace TFLite | `pretext_geometry` (MIT) |
-| Object | NCNN YOLOv8n | TFLite SSD MobileNet | `pretext_geometry` (MIT) |
+| Person | LiteRT selfie segmentation (.tflite) | Mask blob → box | `pretext_geometry` (MIT) |
+| Face | MediaPipe landmarker | BlazeFace via LiteRT (.tflite) | `pretext_geometry` (MIT) |
+| Object | NCNN YOLOv8n | LiteRT SSD MobileNet (.tflite) | `pretext_geometry` (MIT) |
 
 ---
 
 ## Compliance checklist
 
 - [ ] Include **MIT** notice for MFH Apps code when redistributing source ([LICENSE](LICENSE)).
-- [ ] Retain **Apache-2.0** notices for AndroidX, TFLite, MediaPipe, Coil, etc. (usually via packaged `NOTICE` files from dependencies — verify your release build).
+- [ ] Retain **Apache-2.0** notices for AndroidX, LiteRT, MediaPipe, Coil, etc. (usually via packaged `NOTICE` files from dependencies — verify your release build).
 - [ ] Retain **MIT** notice for Haze if required by upstream.
 - [ ] Retain **BSD-3-Clause** notice for NCNN if linked in your APK.
 - [ ] Review **YOLOv8 / AGPL** before shipping `yolov8n.*` in production.

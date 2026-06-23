@@ -13,14 +13,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,7 +31,6 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.PhoneAndroid
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -60,11 +55,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,8 +69,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.graphics.Color
@@ -88,7 +81,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.lerp as lerpTextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -108,16 +100,15 @@ object SettingsExpressiveDefaults {
     val screenHorizontalPadding = 20.dp
     val sectionSpacing = 16.dp
     val cardCornerRadius = 24.dp
-    val scrollBottomExtra = 24.dp
     val appInfoChipHorizontalPadding = 12.dp
     val appInfoChipItemSpacing = 8.dp
     val appInfoChipVerticalPadding = 8.dp
     val guideActionWidth = 48.dp
     val navIconRowWidth = 56.dp
     val topOverscrollMaxPull = 72.dp
-    const val overscrollStartThreshold = 0.08f
-    const val overscrollMidThreshold = 0.5f
-    const val overscrollMaxThreshold = 0.95f
+    const val OVERSCROLLSTARTTHRESHOLD = 0.08f
+    const val OVERSCROLLMIDTHRESHOLD = 0.5f
+    const val OVERSCROLLMAXTHRESHOLD = 0.95f
 }
 
 private fun settingsPullResistance(currentPullPx: Float, maxPullPx: Float): Float {
@@ -146,7 +137,6 @@ fun rememberSettingsAppInfoChipSizing(): SettingsAppInfoChipSizing {
     val titleSmall = MaterialTheme.typography.titleSmall
     val labelSmall = MaterialTheme.typography.labelSmall
     val horizontalPadding = SettingsExpressiveDefaults.appInfoChipHorizontalPadding * 2
-    val itemSpacing = SettingsExpressiveDefaults.appInfoChipItemSpacing
 
     fun measureText(text: String, style: androidx.compose.ui.text.TextStyle) =
         textMeasurer.measure(
@@ -157,7 +147,6 @@ fun rememberSettingsAppInfoChipSizing(): SettingsAppInfoChipSizing {
         ).size.width
 
     val horizontalPaddingPx = with(density) { horizontalPadding.roundToPx() }
-    val itemSpacingPx = with(density) { itemSpacing.roundToPx() }
     val logoSize = with(density) {
         titleSmall.lineHeight.toDp() * 0.85f
     }
@@ -180,9 +169,9 @@ fun rememberSettingsAppInfoChipSizing(): SettingsAppInfoChipSizing {
     }
 }
 
-private val settingsScrollToTopSpring = spring<Float>(
+private val settingsAppBarMotionSpring = spring<Float>(
     dampingRatio = Spring.DampingRatioNoBouncy,
-    stiffness = Spring.StiffnessHigh,
+    stiffness = Spring.StiffnessMediumLow,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -194,7 +183,7 @@ suspend fun animateSettingsAppBarExpand(state: TopAppBarState) {
             animate(
                 initialValue = state.heightOffset,
                 targetValue = 0f,
-                animationSpec = settingsScrollToTopSpring,
+                animationSpec = settingsAppBarMotionSpring,
             ) { value, _ ->
                 state.heightOffset = value
             }
@@ -204,7 +193,7 @@ suspend fun animateSettingsAppBarExpand(state: TopAppBarState) {
                 animate(
                     initialValue = state.contentOffset,
                     targetValue = 0f,
-                    animationSpec = settingsScrollToTopSpring,
+                    animationSpec = settingsAppBarMotionSpring,
                 ) { value, _ ->
                     state.contentOffset = value
                 }
@@ -218,15 +207,10 @@ suspend fun scrollSettingsToTop(
     listState: LazyListState,
     topAppBarState: TopAppBarState,
 ) {
-    coroutineScope {
-        launch {
-            if (!listState.atSettingsContentTop()) {
-                listState.animateScrollToItem(index = 0, scrollOffset = 0)
-            }
-        }
-        launch {
-            animateSettingsAppBarExpand(topAppBarState)
-        }
+    if (!listState.atSettingsContentTop()) {
+        listState.animateScrollToItem(index = 0, scrollOffset = 0)
+    } else {
+        animateSettingsAppBarExpand(topAppBarState)
     }
 }
 
@@ -529,14 +513,6 @@ fun SettingsCollapsingTopBar(
 }
 
 @Composable
-fun rememberSettingsBottomPadding(extra: Dp = SettingsExpressiveDefaults.scrollBottomExtra): Dp {
-    val navigationBars = WindowInsets.navigationBars.asPaddingValues()
-    return remember(navigationBars, extra) {
-        navigationBars.calculateBottomPadding() + extra
-    }
-}
-
-@Composable
 fun SettingsScreenBackground(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -605,9 +581,7 @@ fun SettingsSectionCard(
 @Composable
 fun SettingsSectionDivider(modifier: Modifier = Modifier) {
     HorizontalDivider(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
     )
 }
@@ -865,20 +839,20 @@ fun SettingsAppInfoOverscrollHaptics(
         val previous = previousStretch
         val current = stretchFraction.coerceIn(0f, 1f)
         when {
-            previous < SettingsExpressiveDefaults.overscrollStartThreshold &&
-                current >= SettingsExpressiveDefaults.overscrollStartThreshold -> {
+            previous < SettingsExpressiveDefaults.OVERSCROLLSTARTTHRESHOLD &&
+                current >= SettingsExpressiveDefaults.OVERSCROLLSTARTTHRESHOLD -> {
                 haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
             }
-            previous < SettingsExpressiveDefaults.overscrollMidThreshold &&
-                current >= SettingsExpressiveDefaults.overscrollMidThreshold -> {
+            previous < SettingsExpressiveDefaults.OVERSCROLLMIDTHRESHOLD &&
+                current >= SettingsExpressiveDefaults.OVERSCROLLMIDTHRESHOLD -> {
                 haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
             }
-            previous < SettingsExpressiveDefaults.overscrollMaxThreshold &&
-                current >= SettingsExpressiveDefaults.overscrollMaxThreshold -> {
+            previous < SettingsExpressiveDefaults.OVERSCROLLMAXTHRESHOLD &&
+                current >= SettingsExpressiveDefaults.OVERSCROLLMAXTHRESHOLD -> {
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
             }
-            previous > SettingsExpressiveDefaults.overscrollStartThreshold &&
-                current < SettingsExpressiveDefaults.overscrollStartThreshold -> {
+            previous > SettingsExpressiveDefaults.OVERSCROLLSTARTTHRESHOLD &&
+                current < SettingsExpressiveDefaults.OVERSCROLLSTARTTHRESHOLD -> {
                 haptics.performHapticFeedback(HapticFeedbackType.GestureEnd)
             }
         }

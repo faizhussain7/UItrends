@@ -82,7 +82,7 @@ import androidx.compose.ui.unit.sp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.SwitchPreferenceRow
 import com.mfhapps.trendingui.ui.components.appHazeSource
-import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
+import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.detail.LocalDetailPaneActive
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 
@@ -377,7 +377,7 @@ fun CalmUiScreen(
     val inDetailPane = LocalDetailPaneActive.current
     val compact = isCompactWindowWidth()
     val showBackInTopBar = inDetailPane && compact
-    val showGuideInTopBar = guide != null && compact
+    val showTopBarActions = compact
     val section = CalmSections[sectionIndex]
     val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
@@ -469,7 +469,7 @@ fun CalmUiScreen(
                                         eInk = eInk,
                                         eInkVariantLabel = eInkVariantLabel,
                                         guide = guide,
-                                        showGuide = showGuideInTopBar,
+                                        showTopBarActions = showTopBarActions,
                                     )
                                 }
                             }
@@ -711,7 +711,7 @@ private fun CalmReaderTopBar(
     eInk: Boolean,
     eInkVariantLabel: String,
     guide: DemoTrendGuide?,
-    showGuide: Boolean,
+    showTopBarActions: Boolean,
 ) {
     val scheme = MaterialTheme.colorScheme
     TopAppBar(
@@ -739,8 +739,8 @@ private fun CalmReaderTopBar(
             }
         },
         actions = {
-            if (showGuide && guide != null) {
-                DetailPaneGuideAction(
+            if (showTopBarActions) {
+                DetailPaneTopBarActions(
                     guide = guide,
                     iconTint = scheme.onBackground,
                 )

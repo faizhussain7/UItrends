@@ -7,6 +7,7 @@ import com.mfhapps.trendingui.navigation.AdaptiveCatalogLayout
 import com.mfhapps.trendingui.ui.components.ProvideAppModalBackdrop
 import com.mfhapps.trendingui.ui.theme.BrandAccentColor
 import com.mfhapps.trendingui.ui.theme.HomeLayoutStyle
+import com.mfhapps.trendingui.ui.theme.ModalBackdropStyle
 import com.mfhapps.trendingui.ui.theme.ThemeMode
 import com.mfhapps.trendingui.ui.theme.ThemePreferences
 
@@ -19,11 +20,15 @@ fun UITrendsApp(
     onBrandAccentChange: (BrandAccentColor) -> Unit,
     onHomeLayoutChange: (HomeLayoutStyle) -> Unit,
     onBlurModalBackdropChange: (Boolean) -> Unit,
+    onModalBackdropStyleChange: (ModalBackdropStyle) -> Unit,
     onSyncLauncherIconWithThemeChange: (Boolean) -> Unit,
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ProvideAppModalBackdrop(blurEnabled = themePreferences.blurModalBackdrop) {
+    ProvideAppModalBackdrop(
+        blurEnabled = themePreferences.blurModalBackdrop,
+        backdropStyle = themePreferences.modalBackdropStyle,
+    ) {
         AdaptiveCatalogLayout(
             modifier = modifier,
             themePreferences = themePreferences,
@@ -33,6 +38,7 @@ fun UITrendsApp(
             onBrandAccentChange = onBrandAccentChange,
             onHomeLayoutChange = onHomeLayoutChange,
             onBlurModalBackdropChange = onBlurModalBackdropChange,
+            onModalBackdropStyleChange = onModalBackdropStyleChange,
             onSyncLauncherIconWithThemeChange = onSyncLauncherIconWithThemeChange,
             onLauncherIconChange = onLauncherIconChange,
         )

@@ -26,7 +26,6 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -58,12 +57,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.lerp as lerpTextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
-import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
+import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
+import com.mfhapps.trendingui.ui.components.LocalCollapsingTopBarHeight
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
@@ -106,7 +109,7 @@ fun SpatialDepthScreen(
 
     val subtitle = when {
         canPopDetail && isCompact ->
-            "Detail open · swipe back or use the button below"
+            "Detail open · swipe back to return"
         isCompact ->
             "Tilt for perspective · tap a layer to open detail"
         else ->
@@ -177,7 +180,6 @@ fun SpatialDepthScreen(
                     chrome = chrome,
                     tilt = tilt,
                     onLayerSelected = onLayerSelected,
-                    nestedScrollConnection = scrollBehavior.nestedScrollConnection,
                 )
             },
             detailPane = {
@@ -189,11 +191,8 @@ fun SpatialDepthScreen(
                         layer = layer,
                         tilt = tilt,
                         chrome = chrome,
-                        showBackToList = canPopDetail,
-                        onBackToList = popDetail,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(12.dp),
+                        nestedScrollConnection = scrollBehavior.nestedScrollConnection,
+                        modifier = Modifier.fillMaxSize(),
                     )
                 }
             },
@@ -208,7 +207,6 @@ private fun SpatialLayerList(
     chrome: SpatialChrome,
     tilt: SpatialTiltDegrees,
     onLayerSelected: (SpatialLayer) -> Unit,
-    nestedScrollConnection: NestedScrollConnection,
 ) {
     val listState = rememberLazyListState()
     val parallax by remember {
@@ -232,10 +230,9 @@ private fun SpatialLayerList(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .appHazeSource()
-                .nestedScroll(nestedScrollConnection),
+                .appHazeSource(),
             contentPadding = collapsingTopBarContentPadding(
-                extra = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
+                extra = PaddingValues(bottom = 4.dp),
             ),
             verticalArrangement = Arrangement.spacedBy(SpatialListItemSpacing),
         ) {
@@ -329,12 +326,10 @@ private fun SpatialCollapsingTopBar(
             }
         },
         actions = {
-            if (guide != null) {
-                DetailPaneGuideAction(
-                    guide = guide,
-                    iconTint = scheme.onSurface,
-                )
-            }
+            DetailPaneTopBarActions(
+                guide = guide,
+                iconTint = scheme.onSurface,
+            )
         },
     )
 }
@@ -345,29 +340,32 @@ private fun SpatialDetailPlaceholder(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val topInset = LocalCollapsingTopBarHeight.current
     Surface(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(12.dp),
+        modifier = modifier.fillMaxSize(),
         shape = SpatialCardShape,
         color = chrome.readableSurface,
+        border = BorderStroke(SpatialCardBorderWidth, scheme.outlineVariant.copy(alpha = 0.35f)),
         tonalElevation = 0.dp,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(top = topInset)
                 .padding(24.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            SpatialDepthBadge(label = "Z—", chrome = chrome)
             Text(
                 text = "Select a layer",
                 style = MaterialTheme.typography.titleLarge,
                 color = scheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 16.dp),
             )
             Text(
-                text = "The detail pane mirrors list perspective on wide screens.",
+                text = "Pick a card on the left to preview depth, parallax, and pane adaptivity on this screen.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = scheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
@@ -381,53 +379,42 @@ private fun SpatialDetailPane(
     layer: SpatialLayer,
     tilt: SpatialTiltDegrees,
     chrome: SpatialChrome,
-    showBackToList: Boolean,
-    onBackToList: () -> Unit,
+    nestedScrollConnection: NestedScrollConnection,
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val depthFactor = spatialDepthFactor(layer.id)
+    val scrollState = rememberScrollState()
+    val topInset = LocalCollapsingTopBarHeight.current
 
     Surface(
         modifier = modifier
+            .padding(top = topInset)
             .spatialPerspective(
                 if (tilt.enabled) {
                     tilt.copy(
-                        pitch = tilt.pitch * depthFactor * 1.1f,
-                        roll = tilt.roll * depthFactor * 1.1f,
+                        pitch = tilt.pitch * depthFactor * 0.85f,
+                        roll = tilt.roll * depthFactor * 0.85f,
                     )
                 } else {
                     tilt
                 },
-            )
-            .graphicsLayer {
-                translationY = (-6).dp.toPx()
-                scaleX = 1.02f
-                scaleY = 1.02f
-            },
+            ),
         shape = SpatialCardShape,
         color = chrome.readableSurfaceStrong,
-        shadowElevation = if (chrome.isDark) 18.dp else 14.dp,
+        border = BorderStroke(
+            width = SpatialCardBorderWidth,
+            color = scheme.primary.copy(alpha = 0.28f),
+        ),
+        shadowElevation = if (chrome.isDark) 10.dp else 6.dp,
         tonalElevation = 0.dp,
     ) {
-        Column(Modifier.padding(20.dp)) {
-            if (showBackToList) {
-                TextButton(
-                    onClick = onBackToList,
-                    modifier = Modifier.padding(bottom = 4.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
-                        tint = scheme.primary,
-                    )
-                    Text(
-                        text = "Back to layers",
-                        color = scheme.primary,
-                        modifier = Modifier.padding(start = 4.dp),
-                    )
-                }
-            }
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .nestedScroll(nestedScrollConnection)
+                .padding(20.dp),
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -445,19 +432,83 @@ private fun SpatialDetailPane(
                     chrome = chrome,
                 )
             }
+
             Text(
-                text = "Depth tier ${layer.depthTier + 1} · parallax scale ${"%.2f".format(depthFactor)}×",
+                text = "Depth tier ${layer.depthTier + 1} · parallax ${"%.2f".format(depthFactor)}×",
                 style = MaterialTheme.typography.labelLarge,
                 color = scheme.primary,
                 modifier = Modifier.padding(top = 8.dp),
             )
+
+            SpatialDepthMeter(
+                activeTier = layer.depthTier,
+                chrome = chrome,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+            )
+
+            Text(
+                text = "Perspective",
+                style = MaterialTheme.typography.titleSmall,
+                color = scheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 20.dp),
+            )
             Text(
                 text = "This pane shares the same gyro-driven perspective as the list. " +
-                    "On phones, system back returns to layers; on wide layouts both panes stay visible.",
+                    "Tilt your device to feel the card float in Z-space—motion is subtle and respects reduce motion.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = scheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 12.dp),
+                modifier = Modifier.padding(top = 8.dp),
             )
+
+            Text(
+                text = "Adaptivity",
+                style = MaterialTheme.typography.titleSmall,
+                color = scheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 20.dp),
+            )
+            Text(
+                text = "On phones the detail pane replaces the list and stays below the collapsing header. " +
+                    "On wide screens both panes stay visible with matched depth styling.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = scheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SpatialDepthMeter(
+    activeTier: Int,
+    chrome: SpatialChrome,
+    modifier: Modifier = Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val tierCount = 5
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        repeat(tierCount) { tier ->
+            val active = tier == activeTier
+            val barHeight = (32 + tier * 12).dp
+            Surface(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(barHeight),
+                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 4.dp, bottomEnd = 4.dp),
+                color = if (active) {
+                    scheme.primary.copy(alpha = if (chrome.isDark) 0.85f else 0.72f)
+                } else {
+                    scheme.surfaceContainerHigh
+                },
+                tonalElevation = 0.dp,
+            ) {}
         }
     }
 }

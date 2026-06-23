@@ -71,7 +71,7 @@ import com.mfhapps.trendingui.ui.components.MeasuredTextBlock
 import com.mfhapps.trendingui.ui.components.PretextLineCanvas
 import com.mfhapps.trendingui.ui.components.PretextParagraphCanvas
 import androidx.compose.runtime.saveable.rememberSaveable
-import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
+import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.detail.NestedBackEffect
@@ -137,7 +137,7 @@ fun PretextScreen(
                 }
             }
 
-            PretextScreenMode.Playground -> PretextPlaygroundScaffold(
+            PretextScreenMode.Playground ->             PretextPlaygroundScaffold(
                 screenMode = screenMode,
                 onScreenModeChange = { screenMode = it },
                 onNavigateBack = onNavigateBack,
@@ -201,12 +201,10 @@ private fun PretextPlaygroundScaffold(
                         onClick = { onScreenModeChange(PretextScreenMode.Camera) },
                         blurBackdropEnabled = tooltipBlurEnabled,
                     )
-                    if (guide != null) {
-                        DetailPaneGuideAction(
-                            guide = guide,
-                            iconTint = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
+                    DetailPaneTopBarActions(
+                        guide = guide,
+                        iconTint = MaterialTheme.colorScheme.onSurface,
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,

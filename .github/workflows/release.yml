@@ -89,8 +89,13 @@ jobs:
       - name: Accept SDK licenses
         run: yes | sdkmanager --licenses >/dev/null 2>&1 || true
 
-      - name: Install CMake
-        run: sdkmanager --install "cmake;3.22.1"
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install \
+            "cmdline-tools;latest" \
+            "platform-tools" \
+            "platforms;android-37" \
+            "build-tools;36.0.0"
 
       - name: Bump version and write release notes
         id: version

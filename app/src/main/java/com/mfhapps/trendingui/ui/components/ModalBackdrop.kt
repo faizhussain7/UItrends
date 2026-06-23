@@ -47,13 +47,19 @@ import com.mfhapps.trendingui.screens.glass.LocalGlassBackdrop
 import com.mfhapps.trendingui.ui.platform.supportsBackdropBlur
 import com.mfhapps.trendingui.ui.theme.LocalCatalogHazeEnabled
 import com.mfhapps.trendingui.ui.theme.LocalCatalogHazeState
-import dev.chrisbanes.haze.HazeDefaults
+import com.mfhapps.trendingui.ui.theme.ModalBackdropStyle
+import com.mfhapps.trendingui.ui.theme.toCollapsedHeaderHazeStyle
+import com.mfhapps.trendingui.ui.theme.toHazeStyle
+import com.mfhapps.trendingui.ui.theme.ModalBackdropBlurType
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 
 val LocalModalBackdropBlurEnabled = compositionLocalOf { false }
+
+val LocalModalBackdropStyle = compositionLocalOf { ModalBackdropStyle.Default }
 
 @Composable
 internal fun ClearDialogWindowDim() {
@@ -121,6 +127,7 @@ fun rememberModalBackdropController(): ModalBackdropController = remember { Moda
 @Composable
 fun ProvideAppModalBackdrop(
     blurEnabled: Boolean,
+    backdropStyle: ModalBackdropStyle = ModalBackdropStyle.Default,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
@@ -132,6 +139,7 @@ fun ProvideAppModalBackdrop(
 
     CompositionLocalProvider(
         LocalModalBackdropBlurEnabled provides effectiveBlur,
+        LocalModalBackdropStyle provides backdropStyle.normalized(),
         LocalAppHazeState provides hazeState,
         LocalModalBackdropController provides controller,
     ) {
@@ -156,11 +164,11 @@ internal fun ModalBackdropScrim(
     if (hazeState == null || !isVisible) return
 
     val excludeTop = registrations.maxOfOrNull { it.excludeTop } ?: 0.dp
-    val style = rememberModalBackdropHazeStyle()
     val dismissInteraction = remember { MutableInteractionSource() }
+    val backdropStyle = LocalModalBackdropStyle.current
 
     val blurredModifier = Modifier
-        .hazeEffect(state = hazeState, style = style)
+        .modalBackdropHazeEffect(state = hazeState, style = backdropStyle)
         .clickable(
             indication = null,
             interactionSource = dismissInteraction,
@@ -236,41 +244,37 @@ internal fun RegisterModalBackdrop(
     }
 }
 
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
-private fun rememberModalBackdropHazeStyle() = run {
+fun rememberModalBackdropHazeStyle(
+    style: ModalBackdropStyle = LocalModalBackdropStyle.current,
+) = run {
     val scheme = MaterialTheme.colorScheme
     val isDark = scheme.background.luminance() < 0.45f
-    remember(scheme, isDark) {
-        val tintColor = if (isDark) {
-            scheme.surface.copy(alpha = 0.55f)
-        } else {
-            scheme.surface.copy(alpha = 0.68f)
-        }
-        HazeDefaults.style(
-            backgroundColor = scheme.surface,
-            blurRadius = 32.dp,
-            tint = HazeDefaults.tint(tintColor),
-            noiseFactor = if (isDark) 0.06f else 0.05f,
-        )
+    val normalized = style.normalized()
+    val materialBase = when (normalized.blurType) {
+        ModalBackdropBlurType.Frosted -> HazeMaterials.thick(containerColor = scheme.surface)
+        else -> null
+    }
+    remember(normalized, scheme, isDark, materialBase) {
+        materialBase ?: normalized.toHazeStyle(scheme, isDark)
     }
 }
 
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
-internal fun rememberCollapsedHeaderHazeStyle() = run {
+internal fun rememberCollapsedHeaderHazeStyle(
+    style: ModalBackdropStyle = LocalModalBackdropStyle.current,
+) = run {
     val scheme = MaterialTheme.colorScheme
     val isDark = scheme.background.luminance() < 0.45f
-    remember(scheme, isDark) {
-        val tintColor = if (isDark) {
-            scheme.surface.copy(alpha = 0.42f)
-        } else {
-            scheme.surface.copy(alpha = 0.58f)
-        }
-        HazeDefaults.style(
-            backgroundColor = scheme.surface,
-            blurRadius = 20.dp,
-            tint = HazeDefaults.tint(tintColor),
-            noiseFactor = if (isDark) 0.04f else 0.03f,
-        )
+    val normalized = style.normalized().forCollapsedHeader()
+    val materialBase = when (normalized.blurType) {
+        ModalBackdropBlurType.Frosted -> HazeMaterials.regular(containerColor = scheme.surface)
+        else -> null
+    }
+    remember(normalized, scheme, isDark, materialBase) {
+        materialBase ?: normalized.toCollapsedHeaderHazeStyle(scheme, isDark)
     }
 }
 
@@ -299,11 +303,13 @@ fun Modifier.collapsedHeaderBlur(
 ): Modifier {
     val blurEnabled = collapsedHeaderBlurActive(collapsedFraction, collapseThreshold)
     val hazeState = activeAppHazeState()
+    val backdropStyle = LocalModalBackdropStyle.current
     return if (blurEnabled && hazeState != null) {
         then(
-            Modifier.hazeEffect(
+            Modifier.modalBackdropHazeEffect(
                 state = hazeState,
-                style = rememberCollapsedHeaderHazeStyle(),
+                style = backdropStyle,
+                collapsedHeader = true,
             ),
         )
     } else {

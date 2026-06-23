@@ -66,6 +66,7 @@ fun DetailPaneScaffold(
     content: @Composable () -> Unit,
 ) {
     val compact = isCompactWindowWidth()
+    val sourceCodeUrl = LocalDemoSourceCodeUrl.current
     val appearance = LocalCatalogAppearance.current
     val catalogColors = LocalHomeCatalogColors.current
     val nestedBackDispatcher = remember { NestedBackDispatcher() }
@@ -222,8 +223,8 @@ fun DetailPaneScaffold(
                     }
                 },
                 actions = {
-                    if (guide != null) {
-                        DetailPaneGuideAction(
+                    if (guide != null || sourceCodeUrl != null) {
+                        DetailPaneTopBarActions(
                             guide = guide,
                             chromeStyle = chromeStyle,
                             iconTint = when {
@@ -301,8 +302,8 @@ fun DetailPaneScaffold(
                         ),
                 ) {
                     content()
-                    if (guide != null) {
-                        DetailPaneGuideAction(
+                    if (guide != null || sourceCodeUrl != null) {
+                        DetailPaneTopBarActions(
                             guide = guide,
                             chromeStyle = chromeStyle,
                             leading = if (copilotChrome) {

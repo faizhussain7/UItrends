@@ -57,7 +57,7 @@ import com.mfhapps.trendingui.core.sensor.GyroTilt
 import com.mfhapps.trendingui.core.sensor.rememberGyroscopeTilt
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.demo.DemoAnimatedSection
-import com.mfhapps.trendingui.ui.detail.DetailPaneGuideAction
+import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
@@ -394,12 +394,10 @@ private fun OrbsCollapsingTopBar(
             }
         },
         actions = {
-            if (guide != null) {
-                DetailPaneGuideAction(
-                    guide = guide,
-                    iconTint = scheme.onSurface,
-                )
-            }
+            DetailPaneTopBarActions(
+                guide = guide,
+                iconTint = scheme.onSurface,
+            )
         },
     )
 }

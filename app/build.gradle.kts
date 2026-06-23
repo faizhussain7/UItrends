@@ -142,7 +142,7 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-    implementation(libs.tensorflow.lite)
+    implementation(libs.litert)
     implementation(libs.mediapipe.tasks.vision)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -188,6 +188,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
                 "-opt-in=androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi",
                 "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
+                "-opt-in=dev.chrisbanes.haze.ExperimentalHazeApi",
+                "-opt-in=dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi",
             ),
         )
     }

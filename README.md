@@ -368,8 +368,8 @@ app/src/main/assets/vision/  # TFLite / MediaPipe / NCNN (on-demand)
 | UI | Compose BOM · Material 3 Expressive · Navigation · Haze |
 | State | ViewModel · DataStore · Coroutines |
 | Media | CameraX · Coil |
-| Vision | TFLite · MediaPipe Tasks · `pretext_geometry` · optional NCNN |
-| Build | AGP 9 · Kotlin 2.0 · CMake 3.22 |
+| Vision | LiteRT · MediaPipe Tasks · `pretext_geometry` · optional NCNN |
+| Build | AGP 9.2 · Gradle 9.4 · Kotlin 2.0 · CMake 3.22 |
 
 ---
 
@@ -378,6 +378,6 @@ app/src/main/assets/vision/  # TFLite / MediaPipe / NCNN (on-demand)
 | Component | License |
 | --- | --- |
 | Kotlin app + C++ (`app/src/main/cpp/`) | [MIT](LICENSE) · **MFH Apps** |
-| Third-party libs & model weights | [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
+| LiteRT, MediaPipe, AndroidX, Coil, Haze, NCNN, and model weights | [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) (Apache-2.0, MIT, BSD, AGPL*, etc.) |
 
 **Copyright (c) 2026 MFH Apps**

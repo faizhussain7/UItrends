@@ -68,7 +68,7 @@
 }
 -keep class com.mfhapps.trendingui.native.** { *; }
 
-# --- TensorFlow Lite (segmentation / BlazeFace) ---
+# --- LiteRT (.tflite inference: segmentation / BlazeFace) ---
 -keep class org.tensorflow.lite.** { *; }
 -keep class org.tensorflow.lite.gpu.** { *; }
 -dontwarn org.tensorflow.lite.**

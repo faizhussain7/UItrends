@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
                     onBrandAccentChange = themeViewModel::setBrandAccentColor,
                     onHomeLayoutChange = themeViewModel::setHomeLayoutStyle,
                     onBlurModalBackdropChange = themeViewModel::setBlurModalBackdrop,
+                    onModalBackdropStyleChange = themeViewModel::setModalBackdropStyle,
                     onSyncLauncherIconWithThemeChange = themeViewModel::setSyncLauncherIconWithTheme,
                     onLauncherIconChange = launcherIconViewModel::setLauncherIcon,
                 )

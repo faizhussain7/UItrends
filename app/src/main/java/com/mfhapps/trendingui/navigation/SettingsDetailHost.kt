@@ -8,6 +8,7 @@ import com.mfhapps.trendingui.ui.guide.settingsTrendGuide
 import com.mfhapps.trendingui.ui.theme.BrandAccentColor
 import com.mfhapps.trendingui.ui.theme.HomeLayoutStyle
 import com.mfhapps.trendingui.launcher.AppLauncherIcon
+import com.mfhapps.trendingui.ui.theme.ModalBackdropStyle
 import com.mfhapps.trendingui.ui.theme.ThemeMode
 import com.mfhapps.trendingui.ui.theme.ThemePreferences
 
@@ -20,6 +21,7 @@ fun SettingsDetailHost(
     onBrandAccentChange: (BrandAccentColor) -> Unit,
     onHomeLayoutChange: (HomeLayoutStyle) -> Unit,
     onBlurModalBackdropChange: (Boolean) -> Unit,
+    onModalBackdropStyleChange: (ModalBackdropStyle) -> Unit,
     onSyncLauncherIconWithThemeChange: (Boolean) -> Unit,
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     onNavigateBack: () -> Unit,
@@ -44,6 +46,7 @@ fun SettingsDetailHost(
             onBrandAccentChange = onBrandAccentChange,
             onHomeLayoutChange = onHomeLayoutChange,
             onBlurModalBackdropChange = onBlurModalBackdropChange,
+            onModalBackdropStyleChange = onModalBackdropStyleChange,
             onSyncLauncherIconWithThemeChange = onSyncLauncherIconWithThemeChange,
             onLauncherIconChange = onLauncherIconChange,
             onNavigateBack = onNavigateBack,

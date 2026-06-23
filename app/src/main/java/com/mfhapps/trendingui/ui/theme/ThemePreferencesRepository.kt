@@ -44,6 +44,15 @@ class ThemePreferencesRepository(
                 saturation = prefs[Keys.customSaturation] ?: DEFAULT_CUSTOM_GRADIENT_SATURATION,
             ).normalized(),
             blurModalBackdrop = prefs[Keys.blurModalBackdrop] ?: true,
+            modalBackdropStyle = ModalBackdropStyle(
+                blurRadiusDp = prefs[Keys.modalBlurRadiusDp] ?: DEFAULT_MODAL_BLUR_RADIUS_DP,
+                tintAlpha = prefs[Keys.modalBlurTintAlpha] ?: DEFAULT_MODAL_TINT_ALPHA,
+                tintHue = prefs[Keys.modalBlurTintHue] ?: DEFAULT_MODAL_TINT_HUE,
+                autoTint = prefs[Keys.modalBlurAutoTint] ?: true,
+                blurType = ModalBackdropBlurType.entries.firstOrNull {
+                    it.name == prefs[Keys.modalBlurType]
+                } ?: ModalBackdropBlurType.Default,
+            ).normalized(),
             syncLauncherIconWithTheme = prefs[Keys.syncLauncherIconWithTheme] ?: false,
         )
     }
@@ -80,6 +89,17 @@ class ThemePreferencesRepository(
         context.themeDataStore.edit { it[Keys.blurModalBackdrop] = enabled }
     }
 
+    suspend fun setModalBackdropStyle(style: ModalBackdropStyle) {
+        val normalized = style.normalized()
+        context.themeDataStore.edit {
+            it[Keys.modalBlurRadiusDp] = normalized.blurRadiusDp
+            it[Keys.modalBlurTintAlpha] = normalized.tintAlpha
+            it[Keys.modalBlurTintHue] = normalized.tintHue
+            it[Keys.modalBlurAutoTint] = normalized.autoTint
+            it[Keys.modalBlurType] = normalized.blurType.name
+        }
+    }
+
     suspend fun setSyncLauncherIconWithTheme(enabled: Boolean) {
         context.themeDataStore.edit { it[Keys.syncLauncherIconWithTheme] = enabled }
     }
@@ -89,6 +109,11 @@ class ThemePreferencesRepository(
         val brandAccent = stringPreferencesKey("brand_accent")
         val homeLayout = stringPreferencesKey("home_layout")
         val blurModalBackdrop = booleanPreferencesKey("blur_modal_backdrop")
+        val modalBlurRadiusDp = floatPreferencesKey("modal_blur_radius_dp")
+        val modalBlurTintAlpha = floatPreferencesKey("modal_blur_tint_alpha")
+        val modalBlurTintHue = floatPreferencesKey("modal_blur_tint_hue")
+        val modalBlurAutoTint = booleanPreferencesKey("modal_blur_auto_tint")
+        val modalBlurType = stringPreferencesKey("modal_blur_type")
         val syncLauncherIconWithTheme = booleanPreferencesKey("sync_launcher_icon_with_theme")
         val customStartHue = floatPreferencesKey("custom_gradient_start_hue")
         val customEndHue = floatPreferencesKey("custom_gradient_end_hue")

@@ -1,5 +1,6 @@
 package com.mfhapps.trendingui.ui.guide
 
+import com.mfhapps.trendingui.legal.AppLinks
 import com.mfhapps.trendingui.navigation.DemoPaneKey
 
 data class TrendGuideLink(
@@ -44,6 +45,7 @@ fun settingsTrendGuide(): DemoTrendGuide = DemoTrendGuide(
         "Test demos in both compact and expanded widths—adaptive layouts behave differently.",
     ),
     links = listOf(
+        TrendGuideLink("UITrends on GitHub", AppLinks.GITHUB_REPO),
         TrendGuideLink("Material Design 3", "https://m3.material.io/"),
         TrendGuideLink("Compose Material 3", "https://developer.android.com/develop/ui/compose/designsystems/material3"),
         TrendGuideLink("Adaptive layouts", "https://developer.android.com/develop/ui/compose/layouts/adaptive"),

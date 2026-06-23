@@ -48,6 +48,10 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { repository.setBlurModalBackdrop(enabled) }
     }
 
+    fun setModalBackdropStyle(style: ModalBackdropStyle) {
+        viewModelScope.launch { repository.setModalBackdropStyle(style) }
+    }
+
     fun setSyncLauncherIconWithTheme(enabled: Boolean) {
         viewModelScope.launch {
             repository.setSyncLauncherIconWithTheme(enabled)
