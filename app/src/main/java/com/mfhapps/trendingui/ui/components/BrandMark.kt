@@ -79,9 +79,9 @@ fun brandLogoDrawable(design: Int): Int = when (design) {
 }
 
 fun brandMonochromeDrawable(design: Int): Int = when (design) {
-    1 -> R.drawable.ic_launcher_monochrome
-    2 -> R.drawable.ic_launcher_monochrome_2
-    3 -> R.drawable.ic_launcher_monochrome_3
-    4 -> R.drawable.ic_launcher_monochrome_4
-    else -> R.drawable.ic_launcher_monochrome
+    1 -> R.drawable.ic_brand_logo_monochrome
+    2 -> R.drawable.ic_brand_logo_monochrome_2
+    3 -> R.drawable.ic_brand_logo_monochrome_3
+    4 -> R.drawable.ic_brand_logo_monochrome_4
+    else -> R.drawable.ic_brand_logo_monochrome
 }

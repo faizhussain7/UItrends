@@ -1,17 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M 54.00,26.00 L 73.80,34.20 L 82.00,54.00 L 73.80,73.80 L 54.00,82.00 L 34.20,73.80 L 26.00,54.00 L 34.20,34.20 Z"
-        android:strokeWidth="2.35"
-        android:strokeColor="#FF000000" />
-    <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M 54.00,32.00 L 57.49,45.58 L 69.56,38.44 L 62.42,50.51 L 76.00,54.00 L 62.42,57.49 L 69.56,69.56 L 57.49,62.42 L 54.00,76.00 L 50.51,62.42 L 38.44,69.56 L 45.58,57.49 L 32.00,54.00 L 45.58,50.51 L 38.44,38.44 L 50.51,45.58 Z"
-        android:strokeWidth="2.35"
-        android:strokeColor="#FF000000" />
-</vector>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_brand_logo_monochrome"
+    android:inset="14dp" />

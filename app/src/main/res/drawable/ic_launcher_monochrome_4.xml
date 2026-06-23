@@ -1,37 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M 54.00,22.50 L 76.27,31.73 L 85.50,54.00 L 76.27,76.27 L 54.00,85.50 L 31.73,76.27 L 22.50,54.00 L 31.73,31.73 Z"
-        android:strokeWidth="2.35"
-        android:strokeColor="#FF000000" />
-    <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M 34.00,34.00 L 74.00,34.00 L 74.00,74.00 L 34.00,74.00 Z"
-        android:strokeWidth="2.35"
-        android:strokeColor="#FF000000" />
-    <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M 54.00,34.00 L 54.00,17.52"
-        android:strokeWidth="2.35"
-        android:strokeColor="#FF000000" />
-    <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M 74.00,54.00 L 90.48,54.00"
-        android:strokeWidth="2.35"
-        android:strokeColor="#FF000000" />
-    <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M 54.00,74.00 L 54.00,90.48"
-        android:strokeWidth="2.35"
-        android:strokeColor="#FF000000" />
-    <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M 34.00,54.00 L 17.52,54.00"
-        android:strokeWidth="2.35"
-        android:strokeColor="#FF000000" />
-</vector>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_brand_logo_monochrome_4"
+    android:inset="14dp" />
