@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.mfhapps.trendingui.screens.bento
 
 import androidx.compose.animation.core.Spring
@@ -24,8 +26,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -174,7 +177,7 @@ private fun BentoCardContent(item: BentoItem) {
                     style = MaterialTheme.typography.bodyLarge)
             }
             BentoType.Weather -> {
-                Text(item.title, style = MaterialTheme.typography.titleLarge)
+                Text(item.title, style = MaterialTheme.typography.titleLargeEmphasized)
                 Text("72°F · Sunny", style = MaterialTheme.typography.bodyMedium)
             }
             BentoType.Music -> {
@@ -200,11 +203,11 @@ private fun BentoCardContent(item: BentoItem) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                LinearProgressIndicator(
+                @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                LinearWavyProgressIndicator(
                     progress = { 0.42f },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(4.dp)
                         .clip(CircleShape),
                 )
                 Text("Track 4 of 12", style = MaterialTheme.typography.labelMedium)
@@ -215,7 +218,7 @@ private fun BentoCardContent(item: BentoItem) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             BentoType.Calendar -> {
-                Text(item.title, style = MaterialTheme.typography.headlineMedium)
+                Text(item.title, style = MaterialTheme.typography.headlineMediumEmphasized)
                 Text("3 events today", style = MaterialTheme.typography.bodyMedium)
                 Text("Standup · Design review · Retro",
                     style = MaterialTheme.typography.bodySmall,

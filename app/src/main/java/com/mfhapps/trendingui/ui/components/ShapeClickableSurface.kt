@@ -1,21 +1,29 @@
 package com.mfhapps.trendingui.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.RoundedPolygon
 
 @Immutable
 data class CatalogCardColors(
@@ -47,12 +55,14 @@ fun rememberCatalogCardColors(selected: Boolean): CatalogCardColors {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ShapeClickableSurface(
     onClick: () -> Unit,
     shape: Shape,
     modifier: Modifier = Modifier,
+    morphRest: RoundedPolygon? = null,
+    morphPressed: RoundedPolygon? = null,
     color: Color = Color.Unspecified,
     contentColor: Color = Color.Unspecified,
     rippleColor: Color? = null,
@@ -60,6 +70,7 @@ fun ShapeClickableSurface(
     shadowElevation: Dp = 0.dp,
     border: BorderStroke? = null,
     enabled: Boolean = true,
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -74,6 +85,34 @@ fun ShapeClickableSurface(
     val rippleConfiguration = remember(resolvedRipple) {
         RippleConfiguration(color = resolvedRipple)
     }
+    val interaction = interactionSource ?: remember { MutableInteractionSource() }
+
+    val surfaceShape: Shape
+    val surfaceModifier: Modifier
+    if (morphRest != null) {
+        val pressed = morphPressed ?: ExpressiveMorphDefaults.cardPressed
+        val morph = rememberExpressiveMorphPress(
+            interactionSource = interaction,
+            rest = morphRest,
+            pressed = pressed,
+        )
+        surfaceShape = rememberDynamicPressShape(
+            displayShape = shape,
+            morph = morph,
+            morphRest = morphRest,
+            morphPressed = pressed,
+        )
+        surfaceModifier = modifier.scale(morph.scale)
+    } else {
+        val isPressed by interaction.collectIsPressedAsState()
+        val scale by animateFloatAsState(
+            targetValue = if (isPressed) 0.98f else 1f,
+            animationSpec = spring(stiffness = androidx.compose.animation.core.Spring.StiffnessHigh),
+            label = "catalogCardPressScale",
+        )
+        surfaceShape = shape
+        surfaceModifier = modifier.scale(scale)
+    }
 
     androidx.compose.runtime.CompositionLocalProvider(
         LocalRippleConfiguration provides rippleConfiguration,
@@ -81,13 +120,14 @@ fun ShapeClickableSurface(
         Surface(
             onClick = onClick,
             enabled = enabled,
-            modifier = modifier,
-            shape = shape,
+            modifier = surfaceModifier,
+            shape = surfaceShape,
             color = color,
             contentColor = resolvedContent,
             tonalElevation = tonalElevation,
             shadowElevation = shadowElevation,
             border = border,
+            interactionSource = interaction,
             content = content,
         )
     }

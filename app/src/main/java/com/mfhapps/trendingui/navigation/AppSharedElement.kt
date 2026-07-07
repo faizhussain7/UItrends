@@ -1,6 +1,7 @@
 package com.mfhapps.trendingui.navigation
 
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
@@ -16,5 +17,6 @@ fun Modifier.demoSharedElement(
     sharedElement(
         sharedContentState = rememberSharedContentState(key = key),
         animatedVisibilityScope = animatedVisibilityScope,
+        boundsTransform = BoundsTransform { _, _ -> sharedBoundsTransform() },
     )
 }

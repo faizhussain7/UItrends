@@ -19,16 +19,15 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mfhapps.trendingui.R
+import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.ui.accessibility.DecorativeImage
-
 
 @Composable
 fun BrandMark(
     modifier: Modifier = Modifier,
     size: Dp = 72.dp,
     animated: Boolean = true,
-    design: Int = 0,
+    launcherIcon: AppLauncherIcon = AppLauncherIcon.Default,
     contentColor: Color = Color.Unspecified,
     useMonochromeAsset: Boolean = false,
 ) {
@@ -49,9 +48,9 @@ fun BrandMark(
     }
 
     val drawableRes = if (useMonochromeAsset) {
-        brandMonochromeDrawable(design)
+        launcherIcon.brandMonochromeRes
     } else {
-        brandLogoDrawable(design)
+        launcherIcon.brandLogoRes
     }
     val colorFilter = if (contentColor != Color.Unspecified) {
         ColorFilter.tint(contentColor, BlendMode.SrcIn)
@@ -68,20 +67,4 @@ fun BrandMark(
             colorFilter = colorFilter,
         )
     }
-}
-
-fun brandLogoDrawable(design: Int): Int = when (design) {
-    1 -> R.drawable.ic_brand_logo_1
-    2 -> R.drawable.ic_brand_logo_2
-    3 -> R.drawable.ic_brand_logo_3
-    4 -> R.drawable.ic_brand_logo_4
-    else -> R.drawable.ic_brand_logo
-}
-
-fun brandMonochromeDrawable(design: Int): Int = when (design) {
-    1 -> R.drawable.ic_brand_logo_monochrome
-    2 -> R.drawable.ic_brand_logo_monochrome_2
-    3 -> R.drawable.ic_brand_logo_monochrome_3
-    4 -> R.drawable.ic_brand_logo_monochrome_4
-    else -> R.drawable.ic_brand_logo_monochrome
 }

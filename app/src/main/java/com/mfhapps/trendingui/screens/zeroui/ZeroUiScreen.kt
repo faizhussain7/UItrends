@@ -39,13 +39,14 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
+import com.mfhapps.trendingui.ui.components.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import com.mfhapps.trendingui.ui.components.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,7 +62,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -394,7 +394,8 @@ private fun TapRevealActionsDemo() {
                             }
                         }
                     }
-                    LinearProgressIndicator(
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                    LinearWavyProgressIndicator(
                         progress = { hideTimer.value.coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth(),
                         color = scheme.primary,
@@ -686,7 +687,8 @@ private fun IdleMediaChromeDemo() {
                 }
             }
 
-            LinearProgressIndicator(
+            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+            LinearWavyProgressIndicator(
                 progress = { 0.58f },
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -720,7 +722,8 @@ private fun IdleMediaChromeDemo() {
                             Icon(Icons.Default.SkipNext, contentDescription = "Next")
                         }
                     }
-                    LinearProgressIndicator(
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                    LinearWavyProgressIndicator(
                         progress = { hideTimer.value.coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth(),
                         color = scheme.error,

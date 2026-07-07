@@ -15,6 +15,7 @@ enum class AppLauncherIcon(
     @param:DrawableRes val darkRoundIconMipmap: Int,
     @param:DrawableRes val launcherForegroundRes: Int,
     @param:DrawableRes val brandLogoRes: Int,
+    @param:DrawableRes val brandMonochromeRes: Int,
 ) {
     Bijapur(
         design = 1,
@@ -27,6 +28,7 @@ enum class AppLauncherIcon(
         darkRoundIconMipmap = R.mipmap.ic_launcher_round_dark,
         launcherForegroundRes = R.drawable.ic_launcher_foreground,
         brandLogoRes = R.drawable.ic_brand_logo,
+        brandMonochromeRes = R.drawable.ic_brand_logo_monochrome,
     ),
     Golconda(
         design = 2,
@@ -39,6 +41,7 @@ enum class AppLauncherIcon(
         darkRoundIconMipmap = R.mipmap.ic_launcher_round_2_dark,
         launcherForegroundRes = R.drawable.ic_launcher_foreground_2,
         brandLogoRes = R.drawable.ic_brand_logo_2,
+        brandMonochromeRes = R.drawable.ic_brand_logo_monochrome_2,
     ),
     Rauza(
         design = 3,
@@ -51,6 +54,7 @@ enum class AppLauncherIcon(
         darkRoundIconMipmap = R.mipmap.ic_launcher_round_3_dark,
         launcherForegroundRes = R.drawable.ic_launcher_foreground_3,
         brandLogoRes = R.drawable.ic_brand_logo_3,
+        brandMonochromeRes = R.drawable.ic_brand_logo_monochrome_3,
     ),
     Hyderabad(
         design = 4,
@@ -63,6 +67,7 @@ enum class AppLauncherIcon(
         darkRoundIconMipmap = R.mipmap.ic_launcher_round_4_dark,
         launcherForegroundRes = R.drawable.ic_launcher_foreground_4,
         brandLogoRes = R.drawable.ic_brand_logo_4,
+        brandMonochromeRes = R.drawable.ic_brand_logo_monochrome_4,
     ),
     ;
 

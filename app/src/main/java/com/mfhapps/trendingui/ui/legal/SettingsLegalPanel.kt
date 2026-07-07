@@ -1,6 +1,7 @@
 package com.mfhapps.trendingui.ui.legal
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Gavel
+import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Policy
@@ -22,8 +24,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.mfhapps.trendingui.ui.components.expressiveClickable
+import com.mfhapps.trendingui.ui.components.rememberExpressiveMorphPress
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +47,7 @@ import com.mfhapps.trendingui.ui.settings.SettingsSectionDivider
 private sealed interface SettingsLegalAction {
     data class Document(val kind: LegalDocumentKind) : SettingsLegalAction
     data object Licenses : SettingsLegalAction
+    data object WhoMadeThis : SettingsLegalAction
     data class ExternalLink(val url: String) : SettingsLegalAction
 }
 
@@ -54,6 +60,13 @@ private data class SettingsLegalEntry(
 )
 
 private val settingsLegalEntries = listOf(
+    SettingsLegalEntry(
+        title = "Who made this",
+        subtitle = "Creator profile and contact information",
+        icon = Icons.Outlined.Face,
+        badgeColors = { it.primaryContainer to it.onPrimaryContainer },
+        action = SettingsLegalAction.WhoMadeThis,
+    ),
     SettingsLegalEntry(
         title = "How to use UITrends",
         subtitle = "Catalog, demos, settings, and accessibility",
@@ -100,6 +113,7 @@ private val settingsLegalEntries = listOf(
 
 @Composable
 fun SettingsLegalPanel(
+    onOpenWhoMadeThis: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showLicenses by rememberSaveable { mutableStateOf(false) }
@@ -125,6 +139,7 @@ fun SettingsLegalPanel(
                     when (val action = entry.action) {
                         is SettingsLegalAction.Document -> activeDocument = action.kind
                         SettingsLegalAction.Licenses -> showLicenses = true
+                        SettingsLegalAction.WhoMadeThis -> onOpenWhoMadeThis()
                         is SettingsLegalAction.ExternalLink -> uriHandler.openUri(action.url)
                     }
                 },
@@ -156,10 +171,17 @@ private fun SettingsLegalRow(
     trailingExternal: Boolean = false,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val interaction = remember { MutableInteractionSource() }
+    val morph = rememberExpressiveMorphPress(interactionSource = interaction)
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(role = Role.Button, onClick = onClick)
+            .expressiveClickable(
+                onClick = onClick,
+                role = Role.Button,
+                interactionSource = interaction,
+                morphPress = morph,
+            )
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -175,8 +197,7 @@ private fun SettingsLegalRow(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.bodyLargeEmphasized,
                 color = scheme.onSurface,
             )
             Text(

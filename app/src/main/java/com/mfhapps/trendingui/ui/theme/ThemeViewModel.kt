@@ -60,4 +60,8 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun setAppFontStyle(style: AppFontStyle) {
+        viewModelScope.launch { repository.setAppFontStyle(style) }
+    }
 }

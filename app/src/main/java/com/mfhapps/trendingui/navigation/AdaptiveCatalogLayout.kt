@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.screens.home.DemoCatalogScreen
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.accessibility.rememberReduceMotion
+import com.mfhapps.trendingui.ui.theme.AppFontStyle
 import com.mfhapps.trendingui.ui.theme.BrandAccentColor
 import com.mfhapps.trendingui.ui.theme.HomeLayoutStyle
 import com.mfhapps.trendingui.launcher.AppLauncherIcon
@@ -48,6 +49,7 @@ fun AdaptiveCatalogLayout(
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     onBrandAccentChange: (BrandAccentColor) -> Unit,
+    onAppFontStyleChange: (AppFontStyle) -> Unit,
     onHomeLayoutChange: (HomeLayoutStyle) -> Unit,
     onBlurModalBackdropChange: (Boolean) -> Unit,
     onModalBackdropStyleChange: (ModalBackdropStyle) -> Unit,
@@ -75,7 +77,7 @@ fun AdaptiveCatalogLayout(
                         ) {
                             DemoCatalogScreen(
                                 modifier = Modifier.fillMaxSize(),
-                                brandDesign = launcherIcon.design,
+                                launcherIcon = launcherIcon,
                                 selectedPaneKey = selectedDemoKey,
                                 onOpenDemo = { route ->
                                     val key = route.toDemoPaneKey() ?: return@DemoCatalogScreen
@@ -114,6 +116,7 @@ fun AdaptiveCatalogLayout(
                                             onThemeModeChange = onThemeModeChange,
                                             onDynamicColorChange = onDynamicColorChange,
                                             onBrandAccentChange = onBrandAccentChange,
+                                            onAppFontStyleChange = onAppFontStyleChange,
                                             onHomeLayoutChange = onHomeLayoutChange,
                                             onBlurModalBackdropChange = onBlurModalBackdropChange,
                                             onModalBackdropStyleChange = onModalBackdropStyleChange,

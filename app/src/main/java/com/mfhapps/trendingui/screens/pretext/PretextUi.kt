@@ -1,13 +1,11 @@
 package com.mfhapps.trendingui.screens.pretext
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,22 +17,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AspectRatio
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Balance
-import androidx.compose.material.icons.automirrored.outlined.CallSplit
 import androidx.compose.material.icons.automirrored.outlined.Chat
-import androidx.compose.material.icons.automirrored.outlined.ShortText
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.automirrored.outlined.WrapText
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.CenterFocusStrong
 import androidx.compose.material.icons.outlined.CropFree
 import androidx.compose.material.icons.outlined.Face
-import androidx.compose.material.icons.outlined.FormatSize
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.GridOn
@@ -127,33 +119,34 @@ fun PretextHeroCard(modifier: Modifier = Modifier) {
     )
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(36.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
     ) {
         Box(
             Modifier
                 .fillMaxWidth()
                 .background(brush)
-                .padding(20.dp),
+                .padding(28.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 ExpressiveShapeBadge(
                     icon = Icons.Outlined.AutoAwesome,
-                    modifier = Modifier.size(64.dp),
+                    modifier = Modifier.size(72.dp),
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.weight(1f)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
                     Text(
                         "Pretext text engine",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                     Text(
                         "Measure once. Layout in arithmetic. Reflow every frame.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.86f),
                     )
                 }
@@ -176,11 +169,10 @@ fun ExpressiveShapeBadge(
             val center = Offset(size.width / 2f, size.height / 2f)
             val path = Path()
             val petals = 9
-            val outer = radius
             val inner = radius * 0.86f
             for (i in 0 until petals * 2) {
                 val angle = (i / (petals * 2f)) * 2f * PI.toFloat() - PI.toFloat() / 2f
-                val r = if (i % 2 == 0) outer else inner
+                val r = if (i % 2 == 0) radius else inner
                 val x = center.x + r * cos(angle)
                 val y = center.y + r * sin(angle)
                 if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
@@ -250,27 +242,27 @@ fun PretextHowItWorksStrip(modifier: Modifier = Modifier) {
     )
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(32.dp),
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = 20.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             steps.forEachIndexed { index, (icon, label) ->
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    DecorativeIcon(icon, modifier = Modifier.size(18.dp))
-                    Text(label, style = MaterialTheme.typography.labelLarge)
+                    DecorativeIcon(icon, modifier = Modifier.size(20.dp))
+                    Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 }
                 if (index < steps.lastIndex) {
-                    Text("→", style = MaterialTheme.typography.labelMedium)
+                    Text("→", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -436,6 +428,7 @@ fun PretextStageSelector(
                             PretextCameraStage.Terminal -> Icons.Outlined.Terminal
                             PretextCameraStage.Generative -> Icons.Outlined.AutoAwesome
                             PretextCameraStage.Ascii -> Icons.Outlined.GridOn
+                            PretextCameraStage.VintageNews -> Icons.Outlined.Newspaper
                         },
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(22.dp),
@@ -529,9 +522,9 @@ fun PretextTrackModeSelector(
                 VisionTrackMode.Face ->
                     "MediaPipe face mesh → jawline contour for tight reflow."
                 VisionTrackMode.Object ->
-                    "Largest detected object in frame (NCNN / TFLite)."
+                    "Largest detected object in frame (NCNN YOLOv8n)."
                 VisionTrackMode.Auto ->
-                    "Picks face, body, or object each frame — face first."
+                    "Runs face, body, and object detectors each frame — picks the strongest match with sticky hysteresis."
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -555,6 +548,8 @@ fun PretextCameraOptions(
     onShowBlurChange: (Boolean) -> Unit,
     blurRadiusDp: Float,
     onBlurRadiusDpChange: (Float) -> Unit,
+    showHalftone: Boolean,
+    onShowHalftoneChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -639,6 +634,26 @@ fun PretextCameraOptions(
                         .padding(bottom = 8.dp),
                 )
             }
+
+            HorizontalDivider(
+                modifier = Modifier.pretextSheetInset(),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            )
+
+            SwitchListItem(
+                checked = showHalftone,
+                onCheckedChange = onShowHalftoneChange,
+                containerColor = Color.Transparent,
+                headlineContent = { Text("Newspaper Halftone") },
+                supportingContent = { Text("Apply a vintage newsprint effect to the camera.") },
+                leadingContent = {
+                    DecorativeIcon(
+                        Icons.Outlined.AutoAwesome,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
+                },
+            )
         }
     }
 }
@@ -770,7 +785,7 @@ fun PretextMetricTile(
     accent: Color = MaterialTheme.colorScheme.primary,
 ) {
     Card(
-        modifier = modifier.animateContentSize(),
+        modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -871,7 +886,7 @@ enum class PretextCameraStage(
     ),
     Studio(
         label = "Studio",
-        hint = "Camera hidden — soft silhouette on a paper-style reading surface.",
+        hint = "Paper surface with live camera visible inside the detected contour.",
         showsLivePreview = false,
         usesPaperBackdrop = true,
     ),
@@ -900,6 +915,11 @@ enum class PretextCameraStage(
         hint = "Live camera with a light character-grid overlay.",
         showsLivePreview = true,
         supportsAsciiOverlay = true,
+    ),
+    VintageNews(
+        label = "Vintage News",
+        hint = "Live camera with sepia halftone newsprint effect.",
+        showsLivePreview = true,
     ),
 }
 
@@ -964,7 +984,7 @@ enum class PretextFeature(val label: String, val hint: String) {
 }
 
 enum class TextScript(val label: String, val sample: String) {
-    Latin("Latin", "The quick brown fox jumps over the lazy dog. Pretext measures glyphs once, then layouts with pure arithmetic."),
+    Latin("Latin", "The quick brown fox jumps over the lazy dog. Pretext measures glyphs once, then layouts with pure arithmetic. "),
     Cjk("CJK", "中文测试：逐字断行与 Canvas 宽度缓存，layout() 可在动画帧中调用。"),
     Arabic("Arabic", "بدأت الرحلة في الصباح الباكر مع أصدقاء نحو المدينة."),
     Emoji("Emoji", "Launch 🚀🌍 to orbit — emoji segments use a width correction factor."),

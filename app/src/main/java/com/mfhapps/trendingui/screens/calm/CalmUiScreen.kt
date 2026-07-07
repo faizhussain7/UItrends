@@ -42,13 +42,14 @@ import androidx.compose.material.icons.outlined.DisplaySettings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.FilledTonalButton
+import com.mfhapps.trendingui.ui.components.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import com.mfhapps.trendingui.ui.components.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import com.mfhapps.trendingui.ui.components.OutlinedButton
 import com.mfhapps.trendingui.ui.components.HapticSlider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -1122,7 +1123,8 @@ private fun CalmReadingMeta(
             )
         }
         Spacer(Modifier.height(8.dp))
-        LinearProgressIndicator(
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        LinearWavyProgressIndicator(
             progress = { progress },
             modifier = Modifier.fillMaxWidth(),
             trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,

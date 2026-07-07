@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.mfhapps.trendingui.di.AppContainer
@@ -56,6 +57,9 @@ class TrendingApplication : Application(), ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader =
         ImageLoader.Builder(this)
+            .components {
+                add(SvgDecoder.Factory())
+            }
             .memoryCache {
                 MemoryCache.Builder(this)
                     .maxSizePercent(0.25)

@@ -57,7 +57,7 @@ import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.Button
+import com.mfhapps.trendingui.ui.components.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -139,7 +139,7 @@ private val PARAGRAPH = (
     "Point your camera at a person, face, or object. Pretext measures this paragraph once, " +
         "then reflows every line around the detected silhouette every frame. " +
         "Native Paint widths, pure-Kotlin layout arithmetic — closer to 0.0002 ms per layout. "
-    ).repeat(8)
+    ).repeat(15)
 
 @ExperimentalGetImage
 @Composable
@@ -179,11 +179,12 @@ fun PretextCameraPanel(
     var prepared by remember { mutableStateOf<PreparedText?>(null) }
     var headlinePrepared by remember { mutableStateOf<PreparedText?>(null) }
     var bodyPrepared by remember { mutableStateOf<PreparedText?>(null) }
-    var textLayoutStyle by remember { mutableStateOf(PretextCameraTextLayoutStyle.ColumnWrap) }
+    var textLayoutStyle by remember { mutableStateOf(PretextCameraTextLayoutStyle.Newspaper) }
     var showSpotlight by remember { mutableStateOf(false) }
     var spotlightStrength by remember { mutableFloatStateOf(0.55f) }
     var showBlur by remember { mutableStateOf(false) }
     var blurRadiusDp by remember { mutableFloatStateOf(16f) }
+    var showHalftone by remember { mutableStateOf(false) }
     var previewBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var previewView by remember { mutableStateOf<PreviewView?>(null) }
     val previewLayoutCache = remember { PretextPreviewLayoutCache() }
@@ -333,7 +334,7 @@ fun PretextCameraPanel(
         manualOverride = manualOverride,
         viewShape = viewShape,
         editorialOrbs = editorialOrbs,
-        trackMode = trackMode,
+        trackMode = trackModeState,
         telemetry = telemetry,
         stage = stage,
         stageTheme = stageTheme,
@@ -460,7 +461,7 @@ fun PretextCameraPanel(
         )
 
         val bmp = previewBitmap
-        if (showBlur && bmp != null && stage.showsLivePreview && stage != PretextCameraStage.Ascii) {
+        if (showBlur && bmp != null && stage.showsLivePreview && stage != PretextCameraStage.Ascii && stage != PretextCameraStage.VintageNews) {
             BlurredPreviewOverlay(
                 bitmap = bmp,
                 shape = viewShape,
@@ -470,8 +471,17 @@ fun PretextCameraPanel(
             )
         }
 
+        if ((showHalftone || stage == PretextCameraStage.VintageNews) && bmp != null && stage.showsLivePreview) {
+            HalftonePreviewOverlay(
+                bitmap = bmp,
+                alpha = previewVisibility,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
         if (stage.usesPaperBackdrop && previewVisibility < 0.99f) {
-            StudioBackdrop(
+            StudioPaperMaskOverlay(
+                shape = viewShape,
                 modifier = Modifier.fillMaxSize(),
                 alpha = 1f - previewVisibility,
             )
@@ -505,6 +515,7 @@ fun PretextCameraPanel(
                 shape = viewShape,
                 visibility = 1f - previewVisibility,
                 showOutline = showBoundingBox,
+                interiorFill = false,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -517,7 +528,7 @@ fun PretextCameraPanel(
             )
         }
 
-        if (stageTheme.showAsciiOverlay && previewVisibility > 0.01f) {
+        if (stage.supportsAsciiOverlay && previewVisibility > 0.01f) {
             AsciiScanOverlay(
                 modifier = Modifier.fillMaxSize().alpha(previewVisibility * 0.35f),
                 accent = stageTheme.accentCyan,
@@ -561,8 +572,13 @@ fun PretextCameraPanel(
             }
         }
 
-        if (stage.showsLivePreview && stage != PretextCameraStage.Ascii) {
-            if (showSpotlight) {
+        val contourOutlineAlpha = when {
+            stage.showsLivePreview -> outlineAlpha * previewVisibility
+            stage.usesPaperBackdrop -> outlineAlpha
+            else -> 0f
+        }
+        if ((stage.showsLivePreview || stage.usesPaperBackdrop) && stage != PretextCameraStage.Ascii) {
+            if (showSpotlight && stage.showsLivePreview) {
                 ShapeSpotlightOverlay(
                     shape = viewShape,
                     alpha = spotlightStrength.coerceIn(0f, 1f) * previewVisibility,
@@ -571,7 +587,7 @@ fun PretextCameraPanel(
             }
             TrackingOutline(
                 shape = viewShape,
-                alpha = outlineAlpha * previewVisibility,
+                alpha = contourOutlineAlpha,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -662,6 +678,8 @@ fun PretextCameraPanel(
             onShowBlurChange = { showBlur = it },
             blurRadiusDp = blurRadiusDp,
             onBlurRadiusDpChange = { blurRadiusDp = it },
+            showHalftone = showHalftone,
+            onShowHalftoneChange = { showHalftone = it },
             telemetry = telemetry,
             onDismiss = { hud.closeSettings() },
         )
@@ -690,26 +708,8 @@ private fun BlurredPreviewOverlay(
         )
         if (shape != null) {
             Canvas(Modifier.fillMaxSize()) {
-                val clip = Path()
-                val poly = shape.polygonPx?.points
-                if (poly != null && poly.size >= 3) {
-                    clip.moveTo(poly[0].first, poly[0].second)
-                    for (i in 1 until poly.size) clip.lineTo(poly[i].first, poly[i].second)
-                    clip.close()
-                } else {
-                    val b = shape.boundsPx
-                    clip.addRoundRect(
-                        RoundRect(
-                            left = b.left,
-                            top = b.top,
-                            right = b.right,
-                            bottom = b.bottom,
-                            cornerRadius = CornerRadius(b.width() * 0.28f, b.height() * 0.32f),
-                        ),
-                    )
-                }
                 drawPath(
-                    path = clip,
+                    path = buildShapeClipPath(shape),
                     color = Color.Transparent,
                     blendMode = BlendMode.Clear,
                 )
@@ -1185,6 +1185,30 @@ private fun AsciiScanOverlay(
 }
 
 @Composable
+private fun StudioPaperMaskOverlay(
+    shape: ViewShape?,
+    modifier: Modifier = Modifier,
+    alpha: Float = 1f,
+) {
+    if (alpha <= 0f) return
+    val surface = MaterialTheme.colorScheme.surface
+    val container = MaterialTheme.colorScheme.surfaceContainerLow
+    val brush = remember(surface, container) {
+        Brush.verticalGradient(listOf(surface, container))
+    }
+    Canvas(modifier = modifier.alpha(alpha)) {
+        val paperPath = Path().apply {
+            addRect(androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height))
+            if (shape != null) {
+                addPath(buildShapeClipPath(shape))
+            }
+            fillType = PathFillType.EvenOdd
+        }
+        drawPath(paperPath, brush = brush)
+    }
+}
+
+@Composable
 private fun StudioBackdrop(modifier: Modifier = Modifier, alpha: Float) {
     val surface = MaterialTheme.colorScheme.surface
     val container = MaterialTheme.colorScheme.surfaceContainerLow
@@ -1200,6 +1224,7 @@ private fun StudioSilhouette(
     visibility: Float,
     showOutline: Boolean,
     modifier: Modifier = Modifier,
+    interiorFill: Boolean = true,
 ) {
     val accent = MaterialTheme.colorScheme.primary
     val secondary = MaterialTheme.colorScheme.tertiary
@@ -1232,7 +1257,8 @@ private fun StudioSilhouette(
                 surface = surface,
                 glowOnly = false,
                 stroke = showOutline || hasShape,
-                fillAlpha = if (polygonPx != null) 0.34f else 0.20f,
+                fillAlpha = if (interiorFill && polygonPx != null) 0.34f else 0.20f,
+                drawInteriorFill = interiorFill,
             )
         }
     }
@@ -1247,6 +1273,7 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawContourLayers(
     glowOnly: Boolean,
     stroke: Boolean = true,
     fillAlpha: Float = 0.28f,
+    drawInteriorFill: Boolean = true,
 ) {
     val polygonPx = shape?.polygonPx
     if (polygonPx != null) {
@@ -1256,18 +1283,20 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawContourLayers(
             drawPath(path, color = accent.copy(alpha = 0.50f * visibility))
             drawPath(path, color = secondary.copy(alpha = 0.24f * visibility), style = Stroke(42f))
         } else {
-            drawPath(
-                path,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        accent.copy(alpha = fillAlpha * visibility),
-                        secondary.copy(alpha = fillAlpha * 0.55f * visibility),
-                        surface.copy(alpha = 0.02f * visibility),
+            if (drawInteriorFill) {
+                drawPath(
+                    path,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            accent.copy(alpha = fillAlpha * visibility),
+                            secondary.copy(alpha = fillAlpha * 0.55f * visibility),
+                            surface.copy(alpha = 0.02f * visibility),
+                        ),
+                        startY = bounds.top,
+                        endY = bounds.bottom,
                     ),
-                    startY = bounds.top,
-                    endY = bounds.bottom,
-                ),
-            )
+                )
+            }
             if (stroke) {
                 drawPath(path, color = accent.copy(alpha = 0.85f * visibility), style = Stroke(3f))
                 drawPath(path, color = Color.White.copy(alpha = 0.30f * visibility), style = Stroke(1.2f))
@@ -1383,6 +1412,8 @@ private fun CameraSettingsSheet(
     onShowBlurChange: (Boolean) -> Unit,
     blurRadiusDp: Float,
     onBlurRadiusDpChange: (Float) -> Unit,
+    showHalftone: Boolean,
+    onShowHalftoneChange: (Boolean) -> Unit,
     telemetry: VisionTelemetry,
     onDismiss: () -> Unit,
 ) {
@@ -1447,6 +1478,8 @@ private fun CameraSettingsSheet(
                 onShowBlurChange = onShowBlurChange,
                 blurRadiusDp = blurRadiusDp,
                 onBlurRadiusDpChange = onBlurRadiusDpChange,
+                showHalftone = showHalftone,
+                onShowHalftoneChange = onShowHalftoneChange,
             )
 
             Surface(
@@ -1604,4 +1637,75 @@ private fun buildPath(polygon: PolygonObstacle): Path = Path().apply {
         lineTo(x, y)
     }
     close()
+}
+
+private fun buildShapeClipPath(shape: ViewShape): Path {
+    val clip = Path()
+    val poly = shape.polygonPx?.points
+    if (poly != null && poly.size >= 3) {
+        clip.moveTo(poly[0].first, poly[0].second)
+        for (i in 1 until poly.size) clip.lineTo(poly[i].first, poly[i].second)
+        clip.close()
+    } else {
+        val b = shape.boundsPx
+        clip.addRoundRect(
+            RoundRect(
+                left = b.left,
+                top = b.top,
+                right = b.right,
+                bottom = b.bottom,
+                cornerRadius = CornerRadius(b.width() * 0.28f, b.height() * 0.32f),
+            ),
+        )
+    }
+    return clip
+}
+
+@Composable
+private fun HalftonePreviewOverlay(
+    bitmap: android.graphics.Bitmap,
+    alpha: Float,
+    modifier: Modifier = Modifier,
+) {
+    if (alpha <= 0f) return
+    val img = remember(bitmap) { bitmap.asImageBitmap() }
+    val colorMatrix = remember {
+        androidx.compose.ui.graphics.ColorMatrix(
+            floatArrayOf(
+                0.393f + 0.607f * 0.3f, 0.769f - 0.769f * 0.3f, 0.189f - 0.189f * 0.3f, 0f, 0f,
+                0.349f - 0.349f * 0.3f, 0.686f + 0.314f * 0.3f, 0.168f - 0.168f * 0.3f, 0f, 0f,
+                0.272f - 0.272f * 0.3f, 0.534f - 0.534f * 0.3f, 0.131f + 0.869f * 0.3f, 0f, 0f,
+                0f, 0f, 0f, 1f, 0f
+            )
+        )
+    }
+
+    Box(modifier = modifier.alpha(alpha)) {
+        Image(
+            bitmap = img,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            colorFilter = androidx.compose.ui.graphics.ColorFilter.colorMatrix(colorMatrix),
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+        )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val dotSpacing = 8f
+            val dotRadius = 1.5f
+            val dotColor = Color.Black.copy(alpha = 0.2f)
+
+            var x = 0f
+            while (x < size.width) {
+                var y = 0f
+                while (y < size.height) {
+                    drawCircle(
+                        color = dotColor,
+                        radius = dotRadius,
+                        center = Offset(x, y)
+                    )
+                    y += dotSpacing
+                }
+                x += dotSpacing
+            }
+        }
+    }
 }

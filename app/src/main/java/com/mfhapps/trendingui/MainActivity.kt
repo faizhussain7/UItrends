@@ -9,7 +9,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mfhapps.trendingui.TrendingApplication
 import com.mfhapps.trendingui.launcher.LauncherIconViewModel
 import com.mfhapps.trendingui.launcher.installTrendingSplashScreen
 import com.mfhapps.trendingui.startup.AppStartupViewModel
@@ -63,6 +62,7 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = prefs.useDynamicColor,
                 brandAccentColor = prefs.brandAccentColor,
                 homeLayoutStyle = prefs.homeLayoutStyle,
+                appFontStyle = prefs.appFontStyle,
                 splashHeld = holdSplash,
                 splashExitGeneration = splashExitGeneration,
             ) {
@@ -72,6 +72,7 @@ class MainActivity : ComponentActivity() {
                     onThemeModeChange = themeViewModel::setThemeMode,
                     onDynamicColorChange = themeViewModel::setUseDynamicColor,
                     onBrandAccentChange = themeViewModel::setBrandAccentColor,
+                    onAppFontStyleChange = themeViewModel::setAppFontStyle,
                     onHomeLayoutChange = themeViewModel::setHomeLayoutStyle,
                     onBlurModalBackdropChange = themeViewModel::setBlurModalBackdrop,
                     onModalBackdropStyleChange = themeViewModel::setModalBackdropStyle,

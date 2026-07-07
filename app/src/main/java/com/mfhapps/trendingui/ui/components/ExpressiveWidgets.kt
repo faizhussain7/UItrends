@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -14,9 +13,10 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -83,49 +83,17 @@ private class ButtonGroupScopeImpl(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingIndicator(
     modifier: Modifier = Modifier,
     indicatorSize: Dp = 40.dp,
     color: Color = MaterialTheme.colorScheme.primary,
 ) {
-    val transition = rememberInfiniteTransition(label = "loadingMorph")
-    val morph by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1400, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "morphPhase",
+    CircularWavyProgressIndicator(
+        modifier = modifier.size(indicatorSize),
+        color = color
     )
-    val spin by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "spin",
-    )
-
-    Canvas(modifier.size(indicatorSize)) {
-        val canvasSize = this.size
-        val phase = morph % 3f
-        val corner = when {
-            phase < 1f -> lerp(canvasSize.minDimension * 0.5f, canvasSize.minDimension * 0.2f, phase)
-            phase < 2f -> lerp(canvasSize.minDimension * 0.2f, 4f, phase - 1f)
-            else -> lerp(4f, canvasSize.minDimension * 0.5f, phase - 2f)
-        }
-        rotate(spin) {
-            drawRoundRect(
-                color = color,
-                topLeft = Offset(canvasSize.width * 0.15f, canvasSize.height * 0.15f),
-                size = Size(canvasSize.width * 0.7f, canvasSize.height * 0.7f),
-                cornerRadius = CornerRadius(corner, corner),
-            )
-        }
-    }
 }
 
 @Composable

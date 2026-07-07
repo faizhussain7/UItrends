@@ -54,6 +54,7 @@ class ThemePreferencesRepository(
                 } ?: ModalBackdropBlurType.Default,
             ).normalized(),
             syncLauncherIconWithTheme = prefs[Keys.syncLauncherIconWithTheme] ?: false,
+            appFontStyle = AppFontStyle.fromStoredName(prefs[Keys.appFontStyle]),
         )
     }
 
@@ -104,6 +105,10 @@ class ThemePreferencesRepository(
         context.themeDataStore.edit { it[Keys.syncLauncherIconWithTheme] = enabled }
     }
 
+    suspend fun setAppFontStyle(style: AppFontStyle) {
+        context.themeDataStore.edit { it[Keys.appFontStyle] = style.name }
+    }
+
     private companion object Keys {
         val dynamicColor = booleanPreferencesKey("dynamic_color")
         val brandAccent = stringPreferencesKey("brand_accent")
@@ -115,6 +120,7 @@ class ThemePreferencesRepository(
         val modalBlurAutoTint = booleanPreferencesKey("modal_blur_auto_tint")
         val modalBlurType = stringPreferencesKey("modal_blur_type")
         val syncLauncherIconWithTheme = booleanPreferencesKey("sync_launcher_icon_with_theme")
+        val appFontStyle = stringPreferencesKey("app_font_style")
         val customStartHue = floatPreferencesKey("custom_gradient_start_hue")
         val customEndHue = floatPreferencesKey("custom_gradient_end_hue")
         val customSaturation = floatPreferencesKey("custom_gradient_saturation")

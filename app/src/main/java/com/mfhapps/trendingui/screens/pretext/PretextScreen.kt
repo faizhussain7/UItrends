@@ -1,7 +1,11 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.mfhapps.trendingui.screens.pretext
 
 import android.graphics.Typeface
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,9 +19,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,12 +35,13 @@ import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.ViewAgenda
-import androidx.compose.material3.Button
+import com.mfhapps.trendingui.ui.components.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import com.mfhapps.trendingui.ui.components.HapticSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -48,7 +51,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -65,7 +70,7 @@ import com.mfhapps.trendingui.core.text.PrepareOptions
 import com.mfhapps.trendingui.core.text.TextMeasurementEngine
 import com.mfhapps.trendingui.core.text.WhiteSpaceMode
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.mfhapps.trendingui.ui.components.IconButton
 import com.mfhapps.trendingui.ui.components.ContainedLoadingIndicator
 import com.mfhapps.trendingui.ui.components.MeasuredTextBlock
 import com.mfhapps.trendingui.ui.components.PretextLineCanvas
@@ -82,6 +87,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.runtime.withFrameNanos
 import kotlin.math.abs
 import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
@@ -109,10 +115,13 @@ fun PretextScreen(
     AnimatedContent(
         targetState = screenMode,
         transitionSpec = {
-            if (targetState == PretextScreenMode.Camera) {
-                pretextModeEnterForward().togetherWith(pretextModeExitForward())
-            } else {
-                pretextModePopEnter().togetherWith(pretextModePopExit())
+            when {
+                initialState == targetState ->
+                    EnterTransition.None togetherWith ExitTransition.None
+                targetState == PretextScreenMode.Camera ->
+                    pretextModeEnterForward().togetherWith(pretextModeExitForward())
+                else ->
+                    pretextModePopEnter().togetherWith(pretextModePopExit())
             }
         },
         label = "pretext_screen_mode",
@@ -158,7 +167,7 @@ private fun PretextPlaygroundScaffold(
     tooltipBlurEnabled: Boolean,
 ) {
     val nestedBackDispatcher = LocalNestedBackDispatcher.current
-    val listState = rememberLazyListState()
+    val listState = rememberPretextPlaygroundListState()
     val showCameraInHeader by rememberPretextPlaygroundCameraInHeader(listState)
 
     Scaffold(
@@ -170,7 +179,7 @@ private fun PretextPlaygroundScaffold(
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
                             "Pretext",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleLargeEmphasized,
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
@@ -216,9 +225,9 @@ private fun PretextPlaygroundScaffold(
             listState = listState,
             screenMode = screenMode,
             onScreenModeChange = onScreenModeChange,
+            scaffoldPadding = innerPadding,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = 16.dp),
         )
     }
@@ -230,6 +239,7 @@ private fun PretextPlaygroundContent(
     listState: LazyListState,
     screenMode: PretextScreenMode,
     onScreenModeChange: (PretextScreenMode) -> Unit,
+    scaffoldPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -246,12 +256,25 @@ private fun PretextPlaygroundContent(
 
     var containerWidthDp by remember { mutableFloatStateOf(300f) }
     var obstacleFraction by remember { mutableFloatStateOf(0.55f) }
-    var prepared by remember { mutableStateOf<PreparedText?>(null) }
-    var liveLayout by remember { mutableStateOf<MeasuredTextLayout?>(null) }
-    var prepareMs by remember { mutableLongStateOf(0L) }
+    val fontSizePx = with(density) { 16.sp.toPx() }
+    val lineHeightPx = with(density) { 22.sp.toPx() }
+    val widthPx = with(density) { containerWidthDp.dp.roundToPx() }
+    val obstaclePx = (widthPx * obstacleFraction).toInt()
+
+    val openingSeed = remember(fontSizePx, widthPx, lineHeightPx) {
+        seedPlaygroundOpening(context, TextScript.Latin.sample, fontSizePx, widthPx, lineHeightPx, density.density)
+    }
+    var prepared by remember { mutableStateOf<PreparedText?>(openingSeed.prepared) }
+    var prepareMs by remember { mutableLongStateOf(openingSeed.prepareMs) }
+    var virtualItems by remember { mutableStateOf(openingSeed.virtualItems) }
+    var viewHeight by remember { mutableIntStateOf(openingSeed.viewHeight) }
+
+    val liveLayout = remember(prepared, widthPx, lineHeightPx, layoutMode, obstaclePx) {
+        prepared?.let { computeLayout(it, layoutMode, widthPx, lineHeightPx, obstaclePx) }
+    }
+    val engineHeight = liveLayout?.height ?: 0
+
     var layout10kNs by remember { mutableLongStateOf(0L) }
-    var engineHeight by remember { mutableIntStateOf(0) }
-    var viewHeight by remember { mutableIntStateOf(0) }
 
     var benchEngineMs by remember { mutableLongStateOf(0L) }
     var benchViewMs by remember { mutableLongStateOf(0L) }
@@ -259,24 +282,31 @@ private fun PretextPlaygroundContent(
     var running by remember { mutableStateOf(false) }
     var lastMeasure by remember { mutableLongStateOf(0L) }
 
-    val fontSizePx = with(density) { 16.sp.toPx() }
-    val lineHeightPx = with(density) { 22.sp.toPx() }
-    val widthPx = with(density) { containerWidthDp.dp.roundToPx() }
-    val obstaclePx = (widthPx * obstacleFraction).toInt()
-
     val benchmarkItems = remember {
         TextScript.entries.flatMap { script ->
             (0 until 100).map { i -> "${script.sample} #$i" }
         }
     }
 
-    var virtualItems by remember { mutableStateOf<List<MeasuredTextLayout>>(emptyList()) }
+    var dimensionsInitialized by remember { mutableStateOf(false) }
+    var benchTimingReady by remember { mutableStateOf(false) }
+
+    LaunchedEffect(fontSizePx, widthPx, lineHeightPx) {
+        virtualItems = buildVirtualLayouts(customText, fontSizePx, widthPx, lineHeightPx)
+    }
 
     LaunchedEffect(listState) {
+        repeat(PRETEXT_OPEN_SCROLL_ANCHOR_FRAMES) {
+            withFrameNanos { }
+        }
+        benchTimingReady = true
+    }
+
+    LaunchedEffect(listState, imeBottomPx) {
         snapshotFlow { listState.isScrollInProgress }
             .distinctUntilChanged()
             .collect { scrolling ->
-                if (scrolling) {
+                if (scrolling && imeBottomPx == 0) {
                     focusManager.clearFocus()
                     keyboardController?.hide()
                 }
@@ -292,38 +322,51 @@ private fun PretextPlaygroundContent(
         wasImeOpen = imeOpen
     }
 
-    LaunchedEffect(widthPx) {
-        virtualItems = withContext(Dispatchers.Default) {
-            TextMeasurementEngine.prepareBatch(benchmarkItems.take(30), fontSizePx, Typeface.DEFAULT)
-                .map { TextMeasurementEngine.layout(it, widthPx, lineHeightPx) }
-        }
-    }
-
     @OptIn(FlowPreview::class)
-    LaunchedEffect(fontSizePx) {
+    LaunchedEffect(fontSizePx, widthPx, lineHeightPx) {
         snapshotFlow { customText }
             .debounce(280)
             .distinctUntilChanged()
             .collect { text ->
-                val options = if (text.contains('\n')) {
-                    PrepareOptions(whiteSpace = WhiteSpaceMode.PreWrap)
-                } else {
-                    PrepareOptions()
+                if (text == prepared?.originalText) return@collect
+                val (prep, ms) = withContext(Dispatchers.Default) {
+                    prepareCustomText(text, fontSizePx)
                 }
-                val elapsed = measureTimeMillis {
-                    prepared = TextMeasurementEngine.prepare(text, fontSizePx, Typeface.DEFAULT, options)
+                prepared = prep
+                prepareMs = ms
+                virtualItems = buildVirtualLayouts(text, fontSizePx, widthPx, lineHeightPx)
+                viewHeight = withContext(Dispatchers.Default) {
+                    TextMeasurementEngine.measureViewHeight(
+                        context,
+                        text,
+                        fontSizePx / density.density,
+                        widthPx,
+                    )
                 }
-                prepareMs = elapsed
             }
     }
 
-    LaunchedEffect(prepared, widthPx, lineHeightPx, layoutMode, obstaclePx) {
-        val prep = prepared ?: return@LaunchedEffect
-        val layout = withContext(Dispatchers.Default) {
-            computeLayout(prep, layoutMode, widthPx, lineHeightPx, obstaclePx)
+    LaunchedEffect(widthPx, lineHeightPx, fontSizePx) {
+        if (!dimensionsInitialized) {
+            dimensionsInitialized = true
+            return@LaunchedEffect
         }
-        liveLayout = layout
-        engineHeight = layout.height
+        virtualItems = buildVirtualLayouts(customText, fontSizePx, widthPx, lineHeightPx)
+        prepared?.let { prep ->
+            viewHeight = withContext(Dispatchers.Default) {
+                TextMeasurementEngine.measureViewHeight(
+                    context,
+                    prep.originalText,
+                    fontSizePx / density.density,
+                    widthPx,
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(prepared, widthPx, lineHeightPx, layoutMode, obstaclePx, benchTimingReady) {
+        if (!benchTimingReady) return@LaunchedEffect
+        val prep = prepared ?: return@LaunchedEffect
         val ns = withContext(Dispatchers.Default) {
             measureNanoTime {
                 repeat(10_000) {
@@ -332,14 +375,6 @@ private fun PretextPlaygroundContent(
             }
         }
         layout10kNs = ns
-        viewHeight = withContext(Dispatchers.Default) {
-            TextMeasurementEngine.measureViewHeight(
-                context,
-                prep.originalText,
-                fontSizePx / density.density,
-                widthPx,
-            )
-        }
         lastMeasure = prepareMs + (ns / 1_000_000 / 10)
     }
 
@@ -379,14 +414,22 @@ private fun PretextPlaygroundContent(
     }
 
     FpsOverlay(lastMeasureMs = lastMeasure) {
-        LazyColumn(
-            state = listState,
+        Box(
             modifier = modifier
                 .fillMaxSize()
-                .appHazeSource(),
-            contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(top = scaffoldPadding.calculateTopPadding()),
         ) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .appHazeSource(),
+                contentPadding = PaddingValues(
+                    top = 4.dp,
+                    bottom = scaffoldPadding.calculateBottomPadding() + 24.dp,
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
             item(key = "intro") {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -395,7 +438,7 @@ private fun PretextPlaygroundContent(
                     PretextHeroCard()
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
+                        shape = RoundedCornerShape(32.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerLow,
                         tonalElevation = 1.dp,
                     ) {
@@ -434,9 +477,9 @@ private fun PretextPlaygroundContent(
                 )
             }
 
-            stickyHeader(key = PretextPlaygroundListKeys.StickyStack) {
+            item(key = PretextPlaygroundListKeys.StickyStack) {
                 PretextPlaygroundStickyStack(
-                    attachState = attachState,
+                    attachState = attachState.copy(isPinned = false, controlsAttached = false, runAttached = false),
                     customText = customText,
                     onCustomTextChange = { customText = it },
                     containerWidthDp = containerWidthDp,
@@ -450,8 +493,8 @@ private fun PretextPlaygroundContent(
             }
 
             item(key = PretextPlaygroundListKeys.LivePreview) {
-                ElevatedCard(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp)) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ElevatedCard(Modifier.fillMaxWidth(), shape = RoundedCornerShape(32.dp)) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         PretextSectionTitle(
                             title = "Live preview",
                             subtitle = layoutMode.hint,
@@ -488,7 +531,11 @@ private fun PretextPlaygroundContent(
                                 "Lines" to "${liveLayout?.lineCount ?: 0}",
                                 "Height" to "${engineHeight}px",
                                 "prepare" to "${prepareMs}ms",
-                                "layout()" to "${perLayoutMicroseconds}µs",
+                                "layout()" to if (perLayoutMicroseconds > 0L) {
+                                    "${perLayoutMicroseconds}µs"
+                                } else {
+                                    "—"
+                                },
                                 "Engine vs View" to
                                     "${engineHeight}px / ${viewHeight}px",
                                 "Δ" to "${abs(engineHeight - viewHeight)}px",
@@ -556,8 +603,8 @@ private fun PretextPlaygroundContent(
             }
 
             item(key = PretextPlaygroundListKeys.Benchmark) {
-                ElevatedCard(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp)) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                ElevatedCard(Modifier.fillMaxWidth(), shape = RoundedCornerShape(32.dp)) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         PretextSectionTitle(
                             title = "500-block benchmark",
                             subtitle = "prepareBatch() + layout() vs View.measure on the same strings.",
@@ -593,15 +640,109 @@ private fun PretextPlaygroundContent(
                 )
             }
 
-            itemsIndexed(
-                items = virtualItems,
-                key = { index, _ -> "virtual_$index" },
-                contentType = { _, _ -> "virtual_block" },
-            ) { _, layout ->
-                MeasuredTextBlock(layout = layout)
+            item(key = "virtual_list_blocks") {
+                if (virtualItems.isNotEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        virtualItems.forEach { layout ->
+                            MeasuredTextBlock(
+                                layout = layout,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+            if (attachState.isPinned) {
+                PretextPlaygroundStickyStack(
+                    attachState = attachState,
+                    customText = customText,
+                    onCustomTextChange = { customText = it },
+                    containerWidthDp = containerWidthDp,
+                    onContainerWidthChange = { containerWidthDp = it },
+                    layoutMode = layoutMode,
+                    obstacleFraction = obstacleFraction,
+                    onObstacleFractionChange = { obstacleFraction = it },
+                    running = running,
+                    onRunBenchmark = runBenchmark,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .zIndex(1f),
+                )
             }
         }
     }
+}
+
+@Immutable
+private data class PretextPlaygroundSeed(
+    val prepared: PreparedText,
+    val prepareMs: Long,
+    val virtualItems: List<MeasuredTextLayout>,
+    val viewHeight: Int,
+)
+
+private fun seedPlaygroundOpening(
+    context: android.content.Context,
+    text: String,
+    fontSizePx: Float,
+    widthPx: Int,
+    lineHeightPx: Float,
+    density: Float,
+): PretextPlaygroundSeed {
+    val (prepared, prepareMs) = prepareCustomText(text, fontSizePx)
+    val virtualItems = buildVirtualLayoutsSync(text, fontSizePx, widthPx, lineHeightPx)
+    val viewHeight = TextMeasurementEngine.measureViewHeight(
+        context,
+        text,
+        fontSizePx / density,
+        widthPx,
+    )
+    return PretextPlaygroundSeed(
+        prepared = prepared,
+        prepareMs = prepareMs,
+        virtualItems = virtualItems,
+        viewHeight = viewHeight,
+    )
+}
+
+private fun buildVirtualLayoutsSync(
+    text: String,
+    fontSizePx: Float,
+    widthPx: Int,
+    lineHeightPx: Float,
+): List<MeasuredTextLayout> {
+    if (text.isEmpty()) return emptyList()
+    val items = (0 until 30).map { index -> "$text #$index" }
+    return TextMeasurementEngine.prepareBatch(items, fontSizePx, Typeface.DEFAULT)
+        .map { TextMeasurementEngine.layout(it, widthPx, lineHeightPx) }
+}
+
+private suspend fun buildVirtualLayouts(
+    text: String,
+    fontSizePx: Float,
+    widthPx: Int,
+    lineHeightPx: Float,
+): List<MeasuredTextLayout> = withContext(Dispatchers.Default) {
+    buildVirtualLayoutsSync(text, fontSizePx, widthPx, lineHeightPx)
+}
+
+private fun prepareOptionsFor(text: String): PrepareOptions =
+    if (text.contains('\n')) {
+        PrepareOptions(whiteSpace = WhiteSpaceMode.PreWrap)
+    } else {
+        PrepareOptions()
+    }
+
+private fun prepareCustomText(text: String, fontSizePx: Float): Pair<PreparedText, Long> {
+    val options = prepareOptionsFor(text)
+    lateinit var prepared: PreparedText
+    val elapsed = measureTimeMillis {
+        prepared = TextMeasurementEngine.prepareSync(text, fontSizePx, Typeface.DEFAULT, options)
+    }
+    return prepared to elapsed
 }
 
 private fun computeLayout(

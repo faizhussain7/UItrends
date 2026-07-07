@@ -4,10 +4,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -20,16 +20,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.mfhapps.trendingui.ui.components.IconButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Videocam
-import androidx.compose.material3.Button
+import com.mfhapps.trendingui.ui.components.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,6 +77,25 @@ object PretextPlaygroundStickyIndices {
     const val Benchmark = 9
 }
 
+internal const val PRETEXT_OPEN_SCROLL_ANCHOR_FRAMES = 6
+
+@Composable
+fun rememberPretextPlaygroundListState(): LazyListState {
+    val listState = rememberLazyListState()
+    LaunchedEffect(Unit) {
+        repeat(PRETEXT_OPEN_SCROLL_ANCHOR_FRAMES) {
+            withFrameNanos { }
+            if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
+                return@repeat
+            }
+            if (listState.firstVisibleItemIndex == 0) {
+                listState.scrollToItem(0, 0)
+            }
+        }
+    }
+    return listState
+}
+
 @Immutable
 data class PretextStickyAttachState(
     val isPinned: Boolean,
@@ -99,7 +120,10 @@ fun rememberPretextStickyAttachState(
 
     val runAttached by remember(listState, runRevealIndex, isPinned) {
         derivedStateOf {
-            isPinned && listState.firstVisibleItemIndex >= runRevealIndex
+            isPinned && listState.isListItemScrolledPast(
+                itemKey = PretextPlaygroundListKeys.Benchmark,
+                itemIndex = runRevealIndex,
+            )
         }
     }
 
@@ -116,7 +140,10 @@ fun rememberPretextPlaygroundCameraInHeader(
     revealFromIndex: Int = PretextPlaygroundStickyIndices.StickyStack,
 ): State<Boolean> = remember(listState, revealFromIndex) {
     derivedStateOf {
-        listState.firstVisibleItemIndex >= revealFromIndex
+        listState.isListItemScrolledPast(
+            itemKey = PretextPlaygroundListKeys.StickyStack,
+            itemIndex = revealFromIndex,
+        )
     }
 }
 
@@ -126,28 +153,12 @@ fun rememberPretextStickyPinned(
     stickyKey: Any,
     stackedAfterKey: Any? = null,
     activateFromIndex: Int = 0,
-): State<Boolean> = remember(listState, stickyKey, stackedAfterKey, activateFromIndex) {
+): State<Boolean> = remember(listState, stickyKey, activateFromIndex) {
     derivedStateOf {
-        val layoutInfo = listState.layoutInfo
-        val stickyItem = layoutInfo.visibleItemsInfo.find { it.key == stickyKey }
-            ?: return@derivedStateOf false
-
-        if (listState.firstVisibleItemIndex < activateFromIndex) return@derivedStateOf false
-
-        val anchorAbove = stackedAfterKey?.let { key ->
-            layoutInfo.visibleItemsInfo.find { it.key == key }
-        }
-
-        when (anchorAbove) {
-            null -> stickyItem.offset <= 0
-            else -> {
-                if (anchorAbove.offset <= 0) {
-                    stickyItem.offset <= anchorAbove.size + 1
-                } else {
-                    stickyItem.offset <= 0
-                }
-            }
-        }
+        listState.isListItemScrolledPast(
+            itemKey = stickyKey,
+            itemIndex = activateFromIndex,
+        )
     }
 }
 
@@ -158,7 +169,7 @@ fun rememberPretextMeasureFieldPinned(
 ): State<Boolean> = rememberPretextStickyPinned(
     listState = listState,
     stickyKey = measureFieldKey,
-    activateFromIndex = 3,
+    activateFromIndex = PretextPlaygroundStickyIndices.StickyStack,
 )
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -301,36 +312,29 @@ fun PretextPlaygroundStickyStack(
 
     val shadowElevation by animateDpAsState(
         targetValue = if (isPinned) 8.dp else 0.dp,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMediumLow,
-        ),
+        animationSpec = if (isPinned) {
+            spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMediumLow,
+            )
+        } else {
+            snap()
+        },
         label = "pretext_sticky_shadow",
     )
     val dividerAlpha by animateFloatAsState(
         targetValue = if (isPinned) 1f else 0f,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        animationSpec = if (isPinned) spring(stiffness = Spring.StiffnessMedium) else snap(),
         label = "pretext_sticky_divider",
     )
-    val outerPadding by animateDpAsState(
-        targetValue = if (isPinned) 6.dp else 0.dp,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy),
-        label = "pretext_sticky_outer_padding",
-    )
-    val sectionPaddingH = 16.dp
-    val sectionPaddingV = outerPadding.coerceAtLeast(0.dp)
+    val sectionPaddingH = 0.dp
+    val sectionPaddingV = 0.dp
 
     Column(modifier = modifier.fillMaxWidth()) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .clipToBounds()
-                .animateContentSize(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioNoBouncy,
-                        stiffness = Spring.StiffnessMedium,
-                    ),
-                ),
+                .clipToBounds(),
             color = MaterialTheme.colorScheme.background,
             shadowElevation = shadowElevation.coerceAtLeast(0.dp),
             tonalElevation = 0.dp,

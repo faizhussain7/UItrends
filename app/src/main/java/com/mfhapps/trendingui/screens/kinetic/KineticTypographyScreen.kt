@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.mfhapps.trendingui.screens.kinetic
 
 import androidx.compose.animation.core.Animatable
@@ -250,7 +252,7 @@ fun KineticTypographyScreen() {
             )
             Text(
                 text = "CHROMATIC SHIFT",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineMediumEmphasized,
                 color = lerp(scheme.primary, scheme.tertiary, t),
                 letterSpacing = ((1f - t) * 4f).sp,
                 fontWeight = FontWeight.Bold,

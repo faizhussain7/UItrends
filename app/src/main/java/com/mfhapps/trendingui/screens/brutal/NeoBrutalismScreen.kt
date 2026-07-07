@@ -25,9 +25,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Favorite
@@ -55,30 +53,40 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
-import com.mfhapps.trendingui.ui.detail.demoDetailScrollBottomGap
-import com.mfhapps.trendingui.ui.detail.demoDetailScrollInsets
+import com.mfhapps.trendingui.ui.detail.DemoCollapsingHeaderMode
+import com.mfhapps.trendingui.ui.detail.DemoCollapsingScrollScaffold
+import com.mfhapps.trendingui.ui.detail.DetailChromeStyle
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import com.mfhapps.trendingui.ui.brutal.BrutalShapes
+
+private const val BrutalScreenTitle = "Neo-Brutalism"
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun NeoBrutalismScreen() {
+fun NeoBrutalismScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
     val scheme = MaterialTheme.colorScheme
     val ink = scheme.onSurface
     var segment by remember { mutableIntStateOf(0) }
 
     MaterialTheme(shapes = BrutalShapes) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(scheme.background)
-                .demoDetailScrollInsets()
-                .verticalScroll(rememberScrollState())
-                .demoDetailScrollBottomGap(),
+        DemoCollapsingScrollScaffold(
+            title = BrutalScreenTitle,
+            subtitle = "",
+            chromeStyle = DetailChromeStyle.NeoBrutal,
+            headerMode = DemoCollapsingHeaderMode.HeroTitle,
+            heroTitleThresholdDp = 220.dp,
+            onNavigateBack = onNavigateBack,
+            guide = guide,
+            modifier = Modifier.background(scheme.background),
         ) {
             DemoAnimatedSection(index = 0) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
                         .background(scheme.tertiaryContainer)
                         .border(3.dp, ink)
                         .padding(20.dp),
@@ -91,7 +99,7 @@ fun NeoBrutalismScreen() {
                             fontWeight = FontWeight.Black,
                         )
                         Text(
-                            text = "Hard edges · offset shadows · unapologetic contrast",
+                            text = "Press surfaces move into the shadow — tactile, not soft.",
                             style = MaterialTheme.typography.titleMedium,
                             color = scheme.onTertiaryContainer.copy(alpha = 0.9f),
                         )
@@ -102,8 +110,7 @@ fun NeoBrutalismScreen() {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(top = 20.dp, bottom = 8.dp),
+                    .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(28.dp),
             ) {
                 DemoAnimatedSection(index = 1) {

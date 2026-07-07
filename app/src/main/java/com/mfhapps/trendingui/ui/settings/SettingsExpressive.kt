@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.mfhapps.trendingui.ui.settings
 
 import androidx.compose.animation.core.Spring
@@ -32,9 +34,10 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.mfhapps.trendingui.ui.components.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.LargeTopAppBar
@@ -73,8 +76,11 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -85,6 +91,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
+import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.ui.components.BrandMark
 import com.mfhapps.trendingui.ui.theme.ThemeMode
 import com.mfhapps.trendingui.ui.theme.resolveDarkTheme
@@ -134,7 +141,8 @@ data class SettingsAppInfoChipSizing(
 fun rememberSettingsAppInfoChipSizing(): SettingsAppInfoChipSizing {
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
-    val titleSmall = MaterialTheme.typography.titleSmall
+    val collapsedStyle = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
+    val expandedTitleStyle = MaterialTheme.typography.titleSmallEmphasized
     val labelSmall = MaterialTheme.typography.labelSmall
     val horizontalPadding = SettingsExpressiveDefaults.appInfoChipHorizontalPadding * 2
 
@@ -148,19 +156,19 @@ fun rememberSettingsAppInfoChipSizing(): SettingsAppInfoChipSizing {
 
     val horizontalPaddingPx = with(density) { horizontalPadding.roundToPx() }
     val logoSize = with(density) {
-        titleSmall.lineHeight.toDp() * 0.85f
+        collapsedStyle.lineHeight.toDp() * 0.85f
     }
-    val collapsedPx = measureText("UITrends", titleSmall) + horizontalPaddingPx
+    val collapsedPx = measureText("UITrends", collapsedStyle) + horizontalPaddingPx
 
     val collapsed = with(density) { collapsedPx.toDp() }
     val height = with(density) {
         maxOf(
-            titleSmall.lineHeight.toDp(),
-            labelSmall.lineHeight.toDp(),
+            collapsedStyle.lineHeight.toDp(),
+            expandedTitleStyle.lineHeight.toDp() + labelSmall.lineHeight.toDp() + 2.dp,
         ) + SettingsExpressiveDefaults.appInfoChipVerticalPadding * 2
     }
 
-    return remember(collapsed, height, logoSize) {
+    return remember(density.fontScale, collapsed, height, logoSize) {
         SettingsAppInfoChipSizing(
             collapsed = collapsed,
             height = height,
@@ -427,6 +435,7 @@ fun SettingsCollapsingTopBar(
     title: String = "Settings",
     guide: DemoTrendGuide? = null,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
+    launcherIcon: AppLauncherIcon = AppLauncherIcon.Default,
 ) {
     val chipSizing = rememberSettingsAppInfoChipSizing()
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -449,8 +458,8 @@ fun SettingsCollapsingTopBar(
         lerp(chipSizing.collapsed, maxChipBand, reveal) + guideSlot + 4.dp
     }
     val titleStyle = lerpTextStyle(
-        start = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-        stop = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+        start = MaterialTheme.typography.headlineLargeEmphasized,
+        stop = MaterialTheme.typography.titleLargeEmphasized,
         fraction = collapsedFraction.coerceIn(0f, 1f),
     )
 
@@ -497,6 +506,7 @@ fun SettingsCollapsingTopBar(
                     expandedWidth = chipExpandedTarget,
                     height = chipSizing.height,
                     logoSize = chipSizing.logoSize,
+                    launcherIcon = launcherIcon,
                     onClick = onAppInfoClick,
                 )
                 if (guide != null) {
@@ -517,10 +527,22 @@ fun SettingsScreenBackground(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    val scheme = MaterialTheme.colorScheme
+    val wash = remember(scheme) {
+        Brush.verticalGradient(
+            colors = listOf(
+                scheme.primary.copy(alpha = 0.07f),
+                scheme.tertiary.copy(alpha = 0.04f),
+                scheme.background,
+            ),
+            startY = 0f,
+            endY = 720f,
+        )
+    }
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(wash),
         content = { content() },
     )
 }
@@ -540,8 +562,7 @@ fun SettingsSectionTitle(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleLargeEmphasized,
             color = scheme.onBackground,
         )
         if (subtitle != null) {
@@ -564,10 +585,11 @@ fun SettingsSectionCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = SettingsExpressiveDefaults.screenHorizontalPadding),
-        shape = RoundedCornerShape(SettingsExpressiveDefaults.cardCornerRadius),
-        color = scheme.surfaceContainer,
+        shape = MaterialTheme.shapes.extraLargeIncreased,
+        color = scheme.surfaceContainerLow,
         contentColor = scheme.onSurface,
-        tonalElevation = 1.dp,
+        tonalElevation = 2.dp,
+        shadowElevation = 0.dp,
     ) {
         Column(
             modifier = Modifier
@@ -613,7 +635,7 @@ fun SettingsSwitchRow(
         headlineContent = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLargeEmphasized,
                 color = scheme.onSurface,
             )
         },
@@ -657,8 +679,7 @@ fun SettingsSubsectionLabel(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleSmallEmphasized,
                 color = scheme.onSurface,
             )
             if (subtitle != null) {
@@ -718,8 +739,7 @@ fun SettingsThemeModePicker(
         ) {
             Text(
                 text = "Active: $activeLabel",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.labelLargeEmphasized,
                 color = scheme.primary,
             )
         }
@@ -815,8 +835,7 @@ fun SettingsAboutRow(
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.titleMediumEmphasized,
                 color = scheme.onSurface,
             )
         }
@@ -868,13 +887,14 @@ fun SettingsAppInfoChip(
     expandedWidth: Dp,
     height: Dp,
     logoSize: Dp,
+    launcherIcon: AppLauncherIcon,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
     val reduceMotion = LocalReduceMotion.current
     val scheme = MaterialTheme.colorScheme
-    val chipShape = RoundedCornerShape(20.dp)
+    val chipShape = MaterialTheme.shapes.extraLargeIncreased
     val targetProgress = revealProgress.coerceIn(0f, 1f)
     val collapseSpec = snap<Float>()
     val expandSpec = spring<Float>(
@@ -936,13 +956,13 @@ fun SettingsAppInfoChip(
                 BrandMark(
                     size = logoSize,
                     animated = false,
+                    launcherIcon = launcherIcon,
                     modifier = Modifier.alpha(expandedAlpha),
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "UITrends",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.titleSmallEmphasized,
                         color = scheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -966,10 +986,11 @@ fun SettingsAppInfoChip(
             } else {
                 Text(
                     text = "UITrends",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                     color = scheme.onSurface,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
@@ -983,19 +1004,20 @@ fun SettingsIconBadge(
     contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(containerColor),
-        contentAlignment = Alignment.Center,
+    Surface(
+        modifier = modifier.size(40.dp),
+        shape = MaterialShapes.Gem.toShape(),
+        color = containerColor,
+        contentColor = contentColor,
+        tonalElevation = 1.dp,
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.size(20.dp),
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
 }
 
@@ -1009,6 +1031,11 @@ fun SettingsAccentSwatch(
     contentDescription: String,
 ) {
     val ringColor = MaterialTheme.colorScheme.primary
+    val swatchShape = if (selected) {
+        MaterialShapes.SoftBoom.toShape()
+    } else {
+        CircleShape
+    }
     Box(
         modifier = modifier
             .size(36.dp)
@@ -1028,11 +1055,11 @@ fun SettingsAccentSwatch(
         Box(
             modifier = Modifier
                 .size(if (selected) 30.dp else 28.dp)
-                .clip(CircleShape)
+                .clip(swatchShape)
                 .background(color)
                 .then(
                     if (selected) {
-                        Modifier.border(2.dp, ringColor, CircleShape)
+                        Modifier.border(2.dp, ringColor, swatchShape)
                     } else {
                         Modifier
                     },

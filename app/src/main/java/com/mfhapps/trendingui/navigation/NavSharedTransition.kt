@@ -5,13 +5,14 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.DecorativeIcon
@@ -25,6 +26,7 @@ fun DemoSharedIcon(
     contentKey: String,
     icon: ImageVector,
     modifier: Modifier = Modifier,
+    shape: Shape = androidx.compose.foundation.shape.RoundedCornerShape(13.dp),
     sharedTransitionScope: SharedTransitionScope? = LocalSharedTransitionScope.current,
     animatedVisibilityScope: AnimatedVisibilityScope? = LocalNavAnimatedVisibilityScope.current,
 ) {
@@ -44,7 +46,7 @@ fun DemoSharedIcon(
                     Modifier
                 },
             ),
-        shape = RoundedCornerShape(13.dp),
+        shape = shape,
         color = MaterialTheme.colorScheme.primaryContainer,
     ) {
         Box(contentAlignment = Alignment.Center) {

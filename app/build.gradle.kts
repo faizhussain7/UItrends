@@ -2,6 +2,18 @@
 
 import java.util.Properties
 
+fun String.asBuildConfigString(): String =
+    "\"" + replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
+fun Properties.creatorValue(propertyKey: String, envKey: String): String {
+    System.getenv(envKey)?.takeIf { it.isNotBlank() }?.let { return it.trim() }
+    return getProperty(propertyKey)?.trim()
+        ?: error(
+            "Missing creator config '$propertyKey'. " +
+                "Set release/creator.properties or env $envKey.",
+        )
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -23,12 +35,82 @@ android {
     val releaseVersionName =
         versionProperties.getProperty("versionName") ?: "1.0.0"
 
+    val creatorPropertiesFile = rootProject.file("release/creator.properties")
+    val creatorProperties = Properties().apply {
+        if (creatorPropertiesFile.exists()) {
+            creatorPropertiesFile.inputStream().use { load(it) }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.mfhapps.trendingui"
         minSdk = 28
         targetSdk = 37
         versionCode = releaseVersionCode
         versionName = releaseVersionName
+
+        val creatorGithubUsername =
+            creatorProperties.creatorValue("githubUsername", "CREATOR_GITHUB_USERNAME")
+        val creatorLinkedinHandle =
+            creatorProperties.creatorValue("linkedinHandle", "CREATOR_LINKEDIN_HANDLE")
+        val creatorLinkedinProfile =
+            creatorProperties.creatorValue("linkedinProfile", "CREATOR_LINKEDIN_PROFILE")
+        val creatorXHandle =
+            creatorProperties.creatorValue("xHandle", "CREATOR_X_HANDLE")
+        val creatorEmail =
+            creatorProperties.creatorValue("email", "CREATOR_EMAIL")
+        val creatorWhatsappIndiaE164 =
+            creatorProperties.creatorValue("whatsappIndiaE164", "CREATOR_WHATSAPP_INDIA_E164")
+        val creatorWhatsappSaudiE164 =
+            creatorProperties.creatorValue("whatsappSaudiE164", "CREATOR_WHATSAPP_SAUDI_E164")
+        val creatorWhatsappIndiaDisplay =
+            creatorProperties.creatorValue("whatsappIndiaDisplay", "CREATOR_WHATSAPP_INDIA_DISPLAY")
+        val creatorWhatsappSaudiDisplay =
+            creatorProperties.creatorValue("whatsappSaudiDisplay", "CREATOR_WHATSAPP_SAUDI_DISPLAY")
+        val creatorLinkedinUserAgent =
+            creatorProperties.creatorValue("linkedinFetchUserAgent", "CREATOR_LINKEDIN_FETCH_USER_AGENT")
+
+        buildConfigField("String", "CREATOR_GITHUB_USERNAME", creatorGithubUsername.asBuildConfigString())
+        buildConfigField(
+            "String",
+            "CREATOR_GITHUB_PROFILE",
+            "https://github.com/$creatorGithubUsername".asBuildConfigString(),
+        )
+        buildConfigField(
+            "String",
+            "CREATOR_GITHUB_API",
+            "https://api.github.com/users/$creatorGithubUsername".asBuildConfigString(),
+        )
+        buildConfigField("String", "CREATOR_LINKEDIN_PROFILE", creatorLinkedinProfile.asBuildConfigString())
+        buildConfigField("String", "CREATOR_LINKEDIN_HANDLE", creatorLinkedinHandle.asBuildConfigString())
+        buildConfigField(
+            "String",
+            "CREATOR_LINKEDIN_AVATAR_URL",
+            "https://unavatar.io/linkedin/$creatorLinkedinHandle".asBuildConfigString(),
+        )
+        buildConfigField("String", "CREATOR_LINKEDIN_FETCH_USER_AGENT", creatorLinkedinUserAgent.asBuildConfigString())
+        buildConfigField(
+            "String",
+            "CREATOR_X_PROFILE",
+            "https://x.com/$creatorXHandle".asBuildConfigString(),
+        )
+        buildConfigField("String", "CREATOR_X_HANDLE", creatorXHandle.asBuildConfigString())
+        buildConfigField("String", "CREATOR_EMAIL", creatorEmail.asBuildConfigString())
+        buildConfigField("String", "CREATOR_EMAIL_URL", "mailto:$creatorEmail".asBuildConfigString())
+        buildConfigField("String", "CREATOR_WHATSAPP_INDIA_E164", creatorWhatsappIndiaE164.asBuildConfigString())
+        buildConfigField("String", "CREATOR_WHATSAPP_SAUDI_E164", creatorWhatsappSaudiE164.asBuildConfigString())
+        buildConfigField("String", "CREATOR_WHATSAPP_INDIA_DISPLAY", creatorWhatsappIndiaDisplay.asBuildConfigString())
+        buildConfigField("String", "CREATOR_WHATSAPP_SAUDI_DISPLAY", creatorWhatsappSaudiDisplay.asBuildConfigString())
+        buildConfigField(
+            "String",
+            "CREATOR_WHATSAPP_INDIA_URL",
+            "https://wa.me/$creatorWhatsappIndiaE164".asBuildConfigString(),
+        )
+        buildConfigField(
+            "String",
+            "CREATOR_WHATSAPP_SAUDI_URL",
+            "https://wa.me/$creatorWhatsappSaudiE164".asBuildConfigString(),
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -134,6 +216,7 @@ dependencies {
     implementation(libs.androidx.compose.material3.adaptive.navigation)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
     implementation(libs.haze)
     implementation(libs.haze.materials)
     implementation(libs.kotlinx.coroutines.android)
@@ -154,16 +237,25 @@ dependencies {
 }
 
 tasks.register<Exec>("downloadPretextVisionAssets") {
+    group = "pretext"
+    description = "One-time setup: download NCNN libs and vision models (run manually on fresh clone)."
     workingDir = rootProject.projectDir
     commandLine("bash", "scripts/download_pretext_vision_assets.sh")
-    onlyIf {
-        !file("src/main/assets/vision/selfie_segmentation.tflite").exists() ||
-            !file("src/main/assets/vision/face_landmarker.task").exists()
+}
+
+tasks.register("assertNcnnLibsPresent") {
+    group = "pretext"
+    description = "Fail fast when NCNN static libs are missing (required for Object mode)."
+    doLast {
+        val lib = file("src/main/cpp/third_party/ncnn/arm64-v8a/lib/libncnn.a")
+        check(lib.isFile && lib.length() > 0L) {
+            "NCNN static lib missing at ${lib.path}. Run: ./gradlew downloadPretextVisionAssets"
+        }
     }
 }
 
-tasks.named("preBuild").configure {
-    dependsOn("downloadPretextVisionAssets")
+tasks.matching { it.name.startsWith("configureCMake") }.configureEach {
+    dependsOn("assertNcnnLibsPresent")
 }
 
 listOf("installDebug", "installRelease").forEach { taskName ->

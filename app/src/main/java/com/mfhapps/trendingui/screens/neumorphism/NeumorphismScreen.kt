@@ -22,15 +22,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import com.mfhapps.trendingui.ui.detail.demoDetailScrollBottomGap
-import com.mfhapps.trendingui.ui.detail.demoDetailScrollInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
@@ -81,8 +77,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.demo.DemoAnimatedSection
+import com.mfhapps.trendingui.ui.detail.DemoCollapsingScrollScaffold
+import com.mfhapps.trendingui.ui.detail.DetailChromeStyle
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import com.mfhapps.trendingui.ui.neumorphism.NeuShadows
 import com.mfhapps.trendingui.ui.neumorphism.rememberNeuShadows
+
+private const val NeuScreenTitle = "Neumorphism"
+private const val NeuScreenSubtitle = "Soft extruded surfaces with animated press depth"
 
 private val NeuPressSpring = spring<Float>(dampingRatio = 0.72f, stiffness = 420f)
 private val NeuToggleSpring = spring<Float>(dampingRatio = 0.62f, stiffness = 360f)
@@ -94,7 +96,10 @@ private val NeuRaisedShadowInset = 8.dp
 private val NeuRaisedContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
 
 @Composable
-fun NeumorphismScreen() {
+fun NeumorphismScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
     val scheme = MaterialTheme.colorScheme
     val neu = rememberNeuShadows()
     val reduceMotion = LocalReduceMotion.current
@@ -109,7 +114,7 @@ fun NeumorphismScreen() {
         label = "neuBgPulse",
     )
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .drawBehind {
@@ -124,63 +129,55 @@ fun NeumorphismScreen() {
                         radius = size.maxDimension,
                     ),
                 )
-            }
-            .demoDetailScrollInsets()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-            .padding(top = 16.dp)
-            .demoDetailScrollBottomGap(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            },
     ) {
-        DemoAnimatedSection(index = 0) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = "Neumorphism",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = scheme.onBackground,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = "Soft extruded surfaces with animated press depth",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = scheme.onSurfaceVariant,
-                )
-            }
-        }
-
-        DemoAnimatedSection(index = 1) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                NeuSection(title = "Raised card", body = "Tap — shadows invert with a spring.")
-                NeuCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(128.dp)
-                        .semantics { contentDescription = "Neumorphic card" },
-                    neu = neu,
-                ) {
-                    Text(
-                        text = "Soft UI card",
-                        modifier = Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = scheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = "Dual blur shadows · spring press",
-                        modifier = Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = scheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+        DemoCollapsingScrollScaffold(
+            title = NeuScreenTitle,
+            subtitle = NeuScreenSubtitle,
+            chromeStyle = DetailChromeStyle.Neumorphism,
+            onNavigateBack = onNavigateBack,
+            guide = guide,
+            verticalSpacing = 20.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
+                DemoAnimatedSection(index = 1) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        NeuSection(title = "Raised card", body = "Tap — shadows invert with a spring.")
+                        NeuCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(128.dp)
+                                .semantics { contentDescription = "Neumorphic card" },
+                            neu = neu,
+                        ) {
+                            Text(
+                                text = "Soft UI card",
+                                modifier = Modifier.fillMaxWidth(),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = scheme.onSurface,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                text = "Dual blur shadows · spring press",
+                                modifier = Modifier.fillMaxWidth(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = scheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
                 }
-            }
-        }
 
-        DemoAnimatedSection(index = 2) {
+                DemoAnimatedSection(index = 2) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 NeuSection(title = "Toggle & slider", body = "Thumb and fill animate with spring physics.")
                 NeuToggle(
@@ -265,10 +262,11 @@ fun NeumorphismScreen() {
             }
         }
 
-        DemoAnimatedSection(index = 7) {
-            NeuProgressRing(progress = 0.72f, neu = neu, modifier = Modifier.fillMaxWidth())
+                DemoAnimatedSection(index = 7) {
+                    NeuProgressRing(progress = 0.72f, neu = neu, modifier = Modifier.fillMaxWidth())
+                }
+            }
         }
-
     }
 }
 

@@ -15,7 +15,6 @@ import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 @ExperimentalGetImage
@@ -29,10 +28,8 @@ internal class PretextVisionEngine(context: Context) {
     @Volatile private var closed = false
     private var selfieInterpreter: Interpreter? = null
     private var faceInterpreter: Interpreter? = null
-    private var ssdInterpreter: Interpreter? = null
     private var selfieLoadFailed = false
     private var faceLoadFailed = false
-    private var ssdLoadFailed = false
     private var ncnnReady = false
 
     init {
@@ -46,10 +43,8 @@ internal class PretextVisionEngine(context: Context) {
             mediaPipeFaceLandmarker.close()
             selfieInterpreter?.close()
             faceInterpreter?.close()
-            ssdInterpreter?.close()
             selfieInterpreter = null
             faceInterpreter = null
-            ssdInterpreter = null
             if (ncnnReady) {
                 PretextNativeVision.release()
             }
@@ -118,7 +113,7 @@ internal class PretextVisionEngine(context: Context) {
             vPixelStride = v.pixelStride,
         ) ?: return VisionDetectReport(null, "native-yuv-ncnn", note = "empty-packet")
         val score = if (packet.size > 2) packet[2] else null
-        val contour = VisionContour.fromNativeVisionPacket(packet, SSD_LABELS, frame)
+        val contour = VisionContour.fromNativeVisionPacket(packet, OBJECT_LABELS, frame)
             ?: return VisionDetectReport(null, "native-yuv-ncnn", note = "bad-packet")
         return VisionDetectReport(contour, "native-yuv-ncnn", score = score)
     }
@@ -165,7 +160,7 @@ internal class PretextVisionEngine(context: Context) {
             SKIPPED_OBJECT_REPORT
         } else {
             runCatching { detectObject(rgb, rgbW, rgbH, frame) }
-                .getOrElse { VisionDetectReport(null, "tflite-ssd", note = it.javaClass.simpleName) }
+                .getOrElse { VisionDetectReport(null, "ncnn", note = it.javaClass.simpleName) }
         }
         val multi = PretextAutoSelector.pickMulti(face, person, obj, maxShapes)
         val primaryPick = multi.primary
@@ -191,7 +186,7 @@ internal class PretextVisionEngine(context: Context) {
             .getOrElse { VisionDetectReport(null, "tflite-selfie", note = it.javaClass.simpleName) }
         PretextAutoSelector.pickPrimary(face, person, SKIPPED_OBJECT_REPORT)?.let { return it.report }
         val obj = runCatching { detectObject(rgb, rgbW, rgbH, frame) }
-            .getOrElse { VisionDetectReport(null, "tflite-ssd", note = it.javaClass.simpleName) }
+            .getOrElse { VisionDetectReport(null, "ncnn", note = it.javaClass.simpleName) }
         val pick = PretextAutoSelector.pickPrimary(face, person, obj)
         return pick?.report ?: VisionDetectReport(null, "auto", note = "no-pick")
     }
@@ -375,32 +370,10 @@ internal class PretextVisionEngine(context: Context) {
             }
         }
 
-        val ssd = traceSection("pretext:tflite:object") {
-            runSsdDetection(rgb, rgbW, rgbH, excludePerson = true)
-        } ?: return VisionDetectReport(null, "tflite-ssd", note = "no-object")
-        val contour = traceSection("pretext:native:object") {
-            PretextContourExtractor.fromBox(
-                ssd.left, ssd.top, ssd.right, ssd.bottom, frame.analysisWidth, frame.analysisHeight,
-            )
-        }
-        val vision = contour?.toVisionContour(VisionSource.Object, ssd.label, frame)
-        return VisionDetectReport(
-            contour = vision,
-            backend = "tflite-ssd+cpp-contour",
-            score = ssd.score,
-            note = if (vision == null) "contour-failed" else null,
-        )
+        return VisionDetectReport(null, "ncnn", note = "no-object")
     }
 
     private data class MaskResult(val data: FloatArray, val width: Int, val height: Int)
-    private data class SsdBox(
-        val left: Float,
-        val top: Float,
-        val right: Float,
-        val bottom: Float,
-        val label: String,
-        val score: Float,
-    )
 
     private fun runSelfieSegmentation(rgb: ByteArray, width: Int, height: Int): MaskResult? {
         synchronized(interpreterLock) {
@@ -493,98 +466,6 @@ internal class PretextVisionEngine(context: Context) {
         return MaskResult(floats, outW, outH)
     }
 
-    private fun runSsdDetection(rgb: ByteArray, width: Int, height: Int, excludePerson: Boolean): SsdBox? {
-        synchronized(interpreterLock) {
-            if (closed) return null
-            val interpreter = ssdInterpreter() ?: return null
-            return runSsdDetectionLocked(interpreter, rgb, width, height, excludePerson)
-        }
-    }
-
-    private fun runSsdDetectionLocked(
-        interpreter: Interpreter,
-        rgb: ByteArray,
-        width: Int,
-        height: Int,
-        excludePerson: Boolean,
-    ): SsdBox? {
-        val inTensor = interpreter.getInputTensor(0)
-        val inShape = inTensor.shape()
-        val inH = inShape[1]
-        val inW = inShape[2]
-        val isUint8 = inTensor.dataType() == DataType.UINT8
-
-        val input = ByteBuffer.allocateDirect(tensorByteCount(inTensor))
-            .order(ByteOrder.nativeOrder())
-
-        for (y in 0 until inH) {
-            val sy = y * height / inH
-            for (x in 0 until inW) {
-                val sx = x * width / inW
-                val i = (sy * width + sx) * 3
-                val r = rgb[i].toInt() and 0xff
-                val g = rgb[i + 1].toInt() and 0xff
-                val b = rgb[i + 2].toInt() and 0xff
-                if (isUint8) {
-                    input.put(r.toByte())
-                    input.put(g.toByte())
-                    input.put(b.toByte())
-                } else {
-                    input.putFloat(r / 255f)
-                    input.putFloat(g / 255f)
-                    input.putFloat(b / 255f)
-                }
-            }
-        }
-        input.rewind()
-
-        val boxes = Array(1) { Array(10) { FloatArray(4) } }
-        val classes = Array(1) { FloatArray(10) }
-        val scores = Array(1) { FloatArray(10) }
-        val count = Array(1) { FloatArray(1) }
-        val outputMap = mutableMapOf<Int, Any>()
-        for (i in 0 until interpreter.outputTensorCount) {
-            val name = interpreter.getOutputTensor(i).name()?.lowercase() ?: ""
-            when {
-                name.contains("box") || name.contains("location") -> outputMap[i] = boxes
-                name.contains("class") -> outputMap[i] = classes
-                name.contains("score") -> outputMap[i] = scores
-                name.contains("num") -> outputMap[i] = count
-            }
-        }
-        if (outputMap.size < 3) {
-            outputMap[0] = boxes
-            outputMap[1] = classes
-            outputMap[2] = scores
-            outputMap[3] = count
-        }
-        interpreter.runForMultipleInputsOutputs(arrayOf(input), outputMap)
-
-        val n = min(10, count[0][0].roundToInt().coerceAtLeast(0))
-        var bestIdx = -1
-        var bestScore = 0.25f
-        for (i in 0 until n) {
-            val classId = classes[0][i].roundToInt().coerceIn(0, SSD_LABELS.lastIndex)
-            if (excludePerson && classId == 0) continue
-            if (scores[0][i] > bestScore) {
-                bestScore = scores[0][i]
-                bestIdx = i
-            }
-        }
-        if (bestIdx < 0) return null
-
-        val b = boxes[0][bestIdx]
-        val classId = classes[0][bestIdx].roundToInt().coerceIn(0, SSD_LABELS.lastIndex)
-        return SsdBox(
-            left = b[1] * width,
-            top = b[0] * height,
-            right = b[3] * width,
-            bottom = b[2] * height,
-            label = SSD_LABELS[classId],
-            score = bestScore,
-        )
-    }
-
     private fun selfieInterpreter(): Interpreter? {
         if (selfieLoadFailed) return null
         selfieInterpreter?.let { return it }
@@ -601,15 +482,6 @@ internal class PretextVisionEngine(context: Context) {
             .onFailure { faceLoadFailed = true }
             .getOrNull()
             ?.also { faceInterpreter = it }
-    }
-
-    private fun ssdInterpreter(): Interpreter? {
-        if (ssdLoadFailed) return null
-        ssdInterpreter?.let { return it }
-        return runCatching { loadModel("vision/ssd_mobilenet_coco.tflite", 2) }
-            .onFailure { ssdLoadFailed = true }
-            .getOrNull()
-            ?.also { ssdInterpreter = it }
     }
 
     private fun loadModel(assetPath: String, threads: Int): Interpreter {
@@ -646,7 +518,7 @@ internal class PretextVisionEngine(context: Context) {
 
         private val SKIPPED_OBJECT_REPORT = VisionDetectReport(null, "auto-skip", note = "object-skipped")
 
-        private val SSD_LABELS = arrayOf(
+        private val OBJECT_LABELS = arrayOf(
             "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
             "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
             "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack",

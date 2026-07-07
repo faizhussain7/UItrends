@@ -365,10 +365,7 @@ fun CollapsedHeaderBackdrop(
 
 val LocalCollapsingTopBarHeight = compositionLocalOf { 0.dp }
 
-/**
- * Haze recipe: [hazeSource] on scroll content, [hazeEffect] on the top bar overlay.
- * https://chrisbanes.github.io/haze/1.7.2/usage
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollapsingBlurTopBarLayout(

@@ -54,7 +54,10 @@ fun DemoDetailHost(
             hideCompactTopBar = paneKey == DemoPaneKey.Calm ||
                 paneKey == DemoPaneKey.Orbs ||
                 paneKey == DemoPaneKey.Spatial ||
-                paneKey == DemoPaneKey.Pretext,
+                paneKey == DemoPaneKey.Pretext ||
+                paneKey == DemoPaneKey.Glass ||
+                paneKey == DemoPaneKey.Brutal ||
+                paneKey == DemoPaneKey.Neumorphism,
             contentOwnsTitle = paneKey == DemoPaneKey.Masonry ||
                 paneKey == DemoPaneKey.Kinetic ||
                 paneKey == DemoPaneKey.Brutal ||
@@ -93,14 +96,23 @@ private fun DemoScreenForPane(
         )
         DemoPaneKey.Chat -> VirtualChatScreen()
         DemoPaneKey.Bento -> BentoGridScreen()
-        DemoPaneKey.Glass -> GlassmorphismScreen()
+        DemoPaneKey.Glass -> GlassmorphismScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.Glass),
+        )
         DemoPaneKey.Orbs -> OrbsMeshScreen(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Orbs),
         )
         DemoPaneKey.Kinetic -> KineticTypographyScreen()
-        DemoPaneKey.Brutal -> NeoBrutalismScreen()
-        DemoPaneKey.Neumorphism -> NeumorphismScreen()
+        DemoPaneKey.Brutal -> NeoBrutalismScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.Brutal),
+        )
+        DemoPaneKey.Neumorphism -> NeumorphismScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.Neumorphism),
+        )
         DemoPaneKey.ZeroUi -> ZeroUiScreen()
         DemoPaneKey.Spatial -> SpatialDepthScreen(
             onNavigateBack = onNavigateBack,

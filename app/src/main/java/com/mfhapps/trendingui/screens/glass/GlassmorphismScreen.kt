@@ -4,58 +4,41 @@ import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.demo.DemoAnimatedSection
+import com.mfhapps.trendingui.ui.detail.DemoCollapsingScrollScaffold
+import com.mfhapps.trendingui.ui.detail.DetailChromeStyle
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
+
+private const val GlassScreenTitle = "Glassmorphism"
+private const val GlassScreenSubtitle = "Frosted layers · blurred backdrop · theme-tinted glass"
+
 @Composable
-fun GlassmorphismScreen() {
+fun GlassmorphismScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
     val scheme = MaterialTheme.colorScheme
     val backdrop = LocalGlassBackdrop.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(top = 56.dp, bottom = 28.dp)
-            .verticalScroll(rememberScrollState()),
+    DemoCollapsingScrollScaffold(
+        title = GlassScreenTitle,
+        subtitle = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && backdrop?.hazeEnabled == true) {
+            "Chrome and sheets sample the same live frosted backdrop"
+        } else {
+            GlassScreenSubtitle
+        },
+        chromeStyle = DetailChromeStyle.Glass,
+        onNavigateBack = onNavigateBack,
+        guide = guide,
+        verticalSpacing = 28.dp,
     ) {
-        DemoAnimatedSection(index = 0) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = "Glassmorphism",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = scheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && backdrop?.hazeEnabled == true) {
-                        "Theme orbs fill the screen · chrome and sheets use the same frosted glass"
-                    } else {
-                        "Theme orbs fill the screen · tonal glass when blur is unavailable"
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = scheme.onSurfaceVariant,
-                )
-            }
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()

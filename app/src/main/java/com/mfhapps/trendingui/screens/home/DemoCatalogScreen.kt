@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.mfhapps.trendingui.screens.home
 
 import androidx.compose.animation.AnimatedContent
@@ -12,6 +14,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
@@ -43,9 +47,13 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -66,6 +74,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -79,6 +92,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.navigation.DemoCatalogEntry
 import com.mfhapps.trendingui.navigation.DemoCategory
 import com.mfhapps.trendingui.navigation.DemoPaneKey
@@ -90,6 +104,7 @@ import com.mfhapps.trendingui.ui.accessibility.DecorativeIcon
 import com.mfhapps.trendingui.ui.components.BrandMark
 import com.mfhapps.trendingui.ui.components.CollapsedHeaderBackdrop
 import com.mfhapps.trendingui.ui.components.appHazeSource
+import com.mfhapps.trendingui.ui.components.CatalogMorphShapes
 import com.mfhapps.trendingui.ui.components.ShapeClickableSurface
 import com.mfhapps.trendingui.ui.components.rememberCatalogCardColors
 import com.mfhapps.trendingui.ui.theme.CatalogColorMath
@@ -104,8 +119,8 @@ private const val CONTENT_TYPE_SECTION = "section"
 private const val CONTENT_TYPE_DEMO = "demo"
 private const val CATALOG_PREFIX_ITEM_COUNT = 3
 private val ScreenHorizontalPadding = 20.dp
-private val CardShape = RoundedCornerShape(20.dp)
-private val HeroCardShape = RoundedCornerShape(24.dp)
+private val ListCardShape = RoundedCornerShape(20.dp)
+private val HeroCardShape = RoundedCornerShape(28.dp)
 private val CompactCardShape = RoundedCornerShape(18.dp)
 
 private fun scrolledPastBrandHeader(
@@ -124,7 +139,7 @@ fun DemoCatalogScreen(
     onOpenDemo: (Any) -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
-    brandDesign: Int = 1,
+    launcherIcon: AppLauncherIcon = AppLauncherIcon.Default,
     selectedPaneKey: DemoPaneKey? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -216,7 +231,7 @@ fun DemoCatalogScreen(
                 HomeLayoutStyle.FeaturedList -> FeaturedCatalogList(
                     listState = listState,
                     contentPadding = PaddingValues(bottom = listBottomPadding),
-                    brandDesign = brandDesign,
+                    launcherIcon = launcherIcon,
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
                     grouped = grouped,
@@ -232,7 +247,7 @@ fun DemoCatalogScreen(
                 HomeLayoutStyle.BentoGrid -> BentoCatalogGrid(
                     gridState = bentoGridState,
                     bottomPadding = listBottomPadding,
-                    brandDesign = brandDesign,
+                    launcherIcon = launcherIcon,
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
                     grouped = grouped,
@@ -248,7 +263,7 @@ fun DemoCatalogScreen(
                 HomeLayoutStyle.CompactTiles -> CompactCatalogGrid(
                     listState = compactListState,
                     bottomPadding = listBottomPadding,
-                    brandDesign = brandDesign,
+                    launcherIcon = launcherIcon,
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
                     visibleDemos = visibleDemos,
@@ -273,7 +288,7 @@ fun DemoCatalogScreen(
         ) {
             CatalogCollapsedTopBar(
                 activeSection = activeCatalogSection,
-                brandDesign = brandDesign,
+                launcherIcon = launcherIcon,
             )
         }
     }
@@ -284,7 +299,7 @@ fun DemoCatalogScreen(
 private fun FeaturedCatalogList(
     listState: androidx.compose.foundation.lazy.LazyListState,
     contentPadding: PaddingValues,
-    brandDesign: Int,
+    launcherIcon: AppLauncherIcon,
     demoCountLabel: String,
     featuredDemo: DemoCatalogEntry,
     grouped: Map<DemoCategory, List<DemoCatalogEntry>>,
@@ -311,7 +326,7 @@ private fun FeaturedCatalogList(
             CatalogBrandHeader(
                 demoCountLabel = demoCountLabel,
                 onOpenSettings = onOpenSettings,
-                brandDesign = brandDesign,
+                launcherIcon = launcherIcon,
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { onBrandHeaderSized(it.height) }
@@ -369,7 +384,7 @@ private fun FeaturedCatalogList(
 private fun BentoCatalogGrid(
     gridState: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState,
     bottomPadding: androidx.compose.ui.unit.Dp,
-    brandDesign: Int,
+    launcherIcon: AppLauncherIcon,
     demoCountLabel: String,
     featuredDemo: DemoCatalogEntry,
     grouped: Map<DemoCategory, List<DemoCatalogEntry>>,
@@ -400,7 +415,7 @@ private fun BentoCatalogGrid(
             CatalogBrandHeader(
                 demoCountLabel = demoCountLabel,
                 onOpenSettings = onOpenSettings,
-                brandDesign = brandDesign,
+                launcherIcon = launcherIcon,
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { onBrandHeaderSized(it.height) }
@@ -447,7 +462,7 @@ private fun BentoCatalogGrid(
 private fun CompactCatalogGrid(
     listState: androidx.compose.foundation.lazy.LazyListState,
     bottomPadding: androidx.compose.ui.unit.Dp,
-    brandDesign: Int,
+    launcherIcon: AppLauncherIcon,
     demoCountLabel: String,
     featuredDemo: DemoCatalogEntry,
     visibleDemos: List<DemoCatalogEntry>,
@@ -460,9 +475,9 @@ private fun CompactCatalogGrid(
     sharedTransitionScope: SharedTransitionScope?,
     animatedVisibilityScope: AnimatedVisibilityScope?,
 ) {
-    val tileHeight = 152.dp
+    val tileHeight = rememberCompactTileMinHeight()
     val rowGap = 10.dp
-    val gridHeight = remember(visibleDemos.size) {
+    val gridHeight = remember(visibleDemos.size, tileHeight) {
         val rows = (visibleDemos.size + 1) / 2
         if (rows == 0) 0.dp else tileHeight * rows + rowGap * (rows - 1).coerceAtLeast(0)
     }
@@ -478,7 +493,7 @@ private fun CompactCatalogGrid(
             CatalogBrandHeader(
                 demoCountLabel = demoCountLabel,
                 onOpenSettings = onOpenSettings,
-                brandDesign = brandDesign,
+                launcherIcon = launcherIcon,
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { onBrandHeaderSized(it.height) }
@@ -530,7 +545,7 @@ private fun CompactCatalogGrid(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FeaturedHeroCard(
     demo: DemoCatalogEntry,
@@ -543,9 +558,9 @@ private fun FeaturedHeroCard(
     val heroStops = remember(scheme) {
         listOf(
             scheme.primary,
-            lerp(scheme.primary, scheme.tertiary, 0.25f),
-            lerp(scheme.primary, scheme.tertiary, 0.5f),
-            lerp(scheme.primary, scheme.tertiary, 0.75f),
+            lerp(scheme.primary, scheme.tertiary, 0.2f),
+            lerp(scheme.primary, scheme.tertiary, 0.45f),
+            lerp(scheme.secondary, scheme.tertiary, 0.65f),
             scheme.tertiary,
         )
     }
@@ -556,78 +571,143 @@ private fun FeaturedHeroCard(
         Brush.linearGradient(
             colors = heroStops,
             start = Offset(0f, 0f),
-            end = Offset(800f, 600f),
+            end = Offset(900f, 700f),
         )
     }
+    val heroGlow = remember(heroStops) {
+        Brush.radialGradient(
+            colors = listOf(
+                heroStops.first().copy(alpha = 0.55f),
+                Color.Transparent,
+            ),
+            center = Offset(0.85f, 0.12f),
+            radius = 520f,
+        )
+    }
+    val heroMorph = CatalogMorphShapes.heroMorph
+    val iconShape = CatalogMorphShapes.iconForDemo(demo.route).toShape()
+    val accentShape = MaterialShapes.Sunny.toShape()
     ShapeClickableSurface(
         onClick = onClick,
         shape = HeroCardShape,
+        morphRest = heroMorph.rest,
+        morphPressed = heroMorph.pressed,
         modifier = modifier
             .fillMaxWidth()
-            .height(132.dp)
             .semantics(mergeDescendants = true) {
                 role = Role.Button
                 contentDescription = "Featured demo: ${demo.title}. ${demo.subtitle}."
             },
         color = Color.Transparent,
         contentColor = heroForeground.title,
-        rippleColor = heroForeground.title.copy(alpha = 0.24f),
+        rippleColor = heroForeground.title.copy(alpha = 0.28f),
+        shadowElevation = 12.dp,
+        border = BorderStroke(1.dp, heroForeground.title.copy(alpha = 0.22f)),
     ) {
         Box(
             Modifier
                 .fillMaxSize()
                 .background(heroBrush)
-                .padding(18.dp),
+                .drawBehind { drawRect(brush = heroGlow) },
         ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 28.dp, y = (-18).dp)
+                    .size(132.dp)
+                    .graphicsLayer { alpha = 0.2f }
+                    .clip(accentShape)
+                    .background(heroForeground.title),
+            )
             Column(
-                Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, top = 18.dp, end = 20.dp, bottom = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = heroForeground.badgeFill,
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Surface(
+                        shape = MaterialTheme.shapes.largeIncreased,
+                        color = heroForeground.badgeFill,
+                        shadowElevation = 2.dp,
+                    ) {
+                        Text(
+                            text = "Spotlight",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = heroForeground.badgeText,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                        )
+                    }
+                    Surface(
+                        shape = MaterialTheme.shapes.medium,
+                        color = heroForeground.title.copy(alpha = 0.14f),
+                    ) {
+                        Text(
+                            text = demo.category.displayName(),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = heroForeground.section,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        )
+                    }
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
-                        text = "Featured",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = heroForeground.badgeText,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        text = demo.title,
+                        style = MaterialTheme.typography.headlineLargeEmphasized,
+                        color = heroForeground.title,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = demo.subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = heroForeground.subtitle,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     DemoSharedIcon(
                         contentKey = demo.route.demoSharedContentKey(),
                         icon = demo.icon,
+                        shape = iconShape,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                     )
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    Spacer(Modifier.weight(1f))
+                    Surface(
+                        shape = MaterialTheme.shapes.largeIncreased,
+                        color = heroForeground.badgeFill,
+                        shadowElevation = 4.dp,
                     ) {
-                        Text(
-                            text = demo.category.displayName().uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = heroForeground.section,
-                        )
-                        Text(
-                            text = demo.title,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = heroForeground.title,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = demo.subtitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = heroForeground.subtitle,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(
+                                text = "Open demo",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = heroForeground.badgeText,
+                            )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                                contentDescription = null,
+                                tint = heroForeground.badgeText,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -639,7 +719,7 @@ private fun FeaturedHeroCard(
 private fun CatalogBrandHeader(
     demoCountLabel: String,
     onOpenSettings: () -> Unit,
-    brandDesign: Int,
+    launcherIcon: AppLauncherIcon,
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -651,7 +731,7 @@ private fun CatalogBrandHeader(
         BrandMark(
             size = 48.dp,
             animated = true,
-            design = brandDesign,
+            launcherIcon = launcherIcon,
         )
         Column(
             modifier = Modifier.weight(1f),
@@ -659,14 +739,17 @@ private fun CatalogBrandHeader(
         ) {
             Text(
                 text = "UITrends",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMediumEmphasized,
                 color = scheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = "Material 3 pattern library · $demoCountLabel",
                 style = MaterialTheme.typography.bodyMedium,
                 color = scheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
         }
         FilledTonalIconButton(
@@ -687,7 +770,7 @@ private fun CatalogBrandHeader(
 @Composable
 private fun CatalogCollapsedTopBar(
     activeSection: DemoCategory?,
-    brandDesign: Int,
+    launcherIcon: AppLauncherIcon,
 ) {
     SectionChangeHapticEffect(sectionKey = activeSection)
     val scheme = MaterialTheme.colorScheme
@@ -708,7 +791,7 @@ private fun CatalogCollapsedTopBar(
             BrandMark(
                 size = 32.dp,
                 animated = false,
-                design = brandDesign,
+                launcherIcon = launcherIcon,
             )
             Column(
                 modifier = Modifier.weight(1f),
@@ -716,9 +799,11 @@ private fun CatalogCollapsedTopBar(
             ) {
                 Text(
                     text = "UITrends",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleLargeEmphasized,
                     fontWeight = FontWeight.Bold,
                     color = scheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 AnimatedContent(
                     targetState = activeSection,
@@ -734,6 +819,8 @@ private fun CatalogCollapsedTopBar(
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = scheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -747,8 +834,7 @@ private fun CatalogCollapsedTopBar(
 private fun CategoryHeader(category: DemoCategory) {
     Text(
         text = category.displayName(),
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.SemiBold,
+        style = MaterialTheme.typography.titleSmallEmphasized,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
             .fillMaxWidth()
@@ -768,9 +854,14 @@ private fun DemoListRow(
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val cardColors = rememberCatalogCardColors(selected)
+    val morphPair = CatalogMorphShapes.forDemo(demo.route)
+    val iconShape = morphPair.rest.toShape()
+    val scheme = MaterialTheme.colorScheme
     ShapeClickableSurface(
         onClick = onClick,
-        shape = CardShape,
+        shape = ListCardShape,
+        morphRest = morphPair.rest,
+        morphPressed = morphPair.pressed,
         modifier = modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
@@ -780,16 +871,25 @@ private fun DemoListRow(
         color = cardColors.container,
         contentColor = cardColors.onContainer,
         rippleColor = cardColors.ripple,
-        tonalElevation = if (selected) 2.dp else 1.dp,
+        tonalElevation = if (selected) 3.dp else 1.dp,
+        shadowElevation = if (selected) 2.dp else 0.dp,
+        border = if (selected) {
+            BorderStroke(1.5.dp, scheme.primary.copy(alpha = 0.55f))
+        } else {
+            null
+        },
     ) {
         ListItem(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 2.dp),
             headlineContent = {
                 Text(
                     demo.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleMediumEmphasized,
                     color = cardColors.onContainer,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             },
             supportingContent = {
@@ -797,12 +897,15 @@ private fun DemoListRow(
                     demo.subtitle,
                     style = MaterialTheme.typography.bodyMedium,
                     color = cardColors.onContainerVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             },
             leadingContent = {
                 DemoSharedIcon(
                     contentKey = demo.route.demoSharedContentKey(),
                     icon = demo.icon,
+                    shape = iconShape,
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
                 )
@@ -835,16 +938,22 @@ private fun BentoDemoTile(
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val cardColors = rememberCatalogCardColors(selected)
+    val morphPair = CatalogMorphShapes.forDemo(demo.route)
+    val iconShape = morphPair.rest.toShape()
+    val tileMinHeight = rememberBentoTileMinHeight(tall = tall)
     ShapeClickableSurface(
         onClick = onClick,
-        shape = CardShape,
+        shape = ListCardShape,
+        morphRest = morphPair.rest,
+        morphPressed = morphPair.pressed,
         modifier = modifier
             .fillMaxWidth()
-            .height(if (tall) 172.dp else 120.dp),
+            .height(tileMinHeight),
         color = cardColors.container,
         contentColor = cardColors.onContainer,
         rippleColor = cardColors.ripple,
-        tonalElevation = if (selected) 2.dp else 1.dp,
+        tonalElevation = if (selected) 3.dp else 1.dp,
+        shadowElevation = if (selected) 2.dp else 0.dp,
     ) {
         Column(
             Modifier
@@ -855,6 +964,7 @@ private fun BentoDemoTile(
             DemoSharedIcon(
                 contentKey = demo.route.demoSharedContentKey(),
                 icon = demo.icon,
+                shape = iconShape,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
             )
@@ -865,12 +975,14 @@ private fun BentoDemoTile(
                     fontWeight = FontWeight.SemiBold,
                     color = cardColors.onContainer,
                     maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     demo.subtitle,
                     style = MaterialTheme.typography.labelSmall,
                     color = cardColors.onContainerVariant,
                     maxLines = if (tall) 3 else 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -888,16 +1000,28 @@ private fun CompactDemoTile(
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val cardColors = rememberCatalogCardColors(selected)
+    val morphPair = CatalogMorphShapes.forDemo(demo.route)
+    val iconShape = morphPair.rest.toShape()
+    val tileMinHeight = rememberCompactTileMinHeight()
+    val scheme = MaterialTheme.colorScheme
     ShapeClickableSurface(
         onClick = onClick,
         shape = CompactCardShape,
+        morphRest = morphPair.rest,
+        morphPressed = morphPair.pressed,
         modifier = modifier
             .fillMaxWidth()
-            .height(152.dp),
+            .height(tileMinHeight),
         color = cardColors.container,
         contentColor = cardColors.onContainer,
         rippleColor = cardColors.ripple,
-        tonalElevation = if (selected) 1.dp else 0.dp,
+        tonalElevation = if (selected) 2.dp else 1.dp,
+        shadowElevation = if (selected) 1.dp else 0.dp,
+        border = if (selected) {
+            BorderStroke(1.5.dp, scheme.primary.copy(alpha = 0.55f))
+        } else {
+            null
+        },
     ) {
         Column(
             Modifier
@@ -908,6 +1032,7 @@ private fun CompactDemoTile(
             DemoSharedIcon(
                 contentKey = demo.route.demoSharedContentKey(),
                 icon = demo.icon,
+                shape = iconShape,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
             )
@@ -917,12 +1042,14 @@ private fun CompactDemoTile(
                 fontWeight = FontWeight.SemiBold,
                 color = cardColors.onContainer,
                 maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 demo.subtitle,
                 style = MaterialTheme.typography.labelSmall,
                 color = cardColors.onContainerVariant,
                 maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }

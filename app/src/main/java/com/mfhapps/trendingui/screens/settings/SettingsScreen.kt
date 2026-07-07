@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
@@ -39,7 +41,9 @@ import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
+import com.mfhapps.trendingui.navigation.NestedScreenOverlay
 import com.mfhapps.trendingui.ui.legal.SettingsLegalPanel
+import com.mfhapps.trendingui.ui.legal.WhoMadeThisScreen
 import com.mfhapps.trendingui.ui.platform.supportsBackdropBlur
 import com.mfhapps.trendingui.ui.settings.SettingsAboutPanel
 import com.mfhapps.trendingui.ui.settings.SettingsAppInfoOverscrollHaptics
@@ -58,6 +62,7 @@ import com.mfhapps.trendingui.ui.settings.rememberSettingsChipCollapseOnScroll
 import com.mfhapps.trendingui.ui.settings.rememberSettingsHeaderForeground
 import com.mfhapps.trendingui.ui.settings.rememberSettingsListNestedScroll
 import com.mfhapps.trendingui.ui.settings.scrollSettingsToTop
+import com.mfhapps.trendingui.ui.theme.AppFontStyle
 import com.mfhapps.trendingui.ui.theme.BrandAccentColor
 import com.mfhapps.trendingui.ui.theme.HomeLayoutStyle
 import com.mfhapps.trendingui.ui.theme.ModalBackdropStyle
@@ -74,6 +79,7 @@ fun SettingsScreen(
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     onBrandAccentChange: (BrandAccentColor) -> Unit,
+    onAppFontStyleChange: (AppFontStyle) -> Unit,
     onHomeLayoutChange: (HomeLayoutStyle) -> Unit,
     onBlurModalBackdropChange: (Boolean) -> Unit,
     onModalBackdropStyleChange: (ModalBackdropStyle) -> Unit,
@@ -100,6 +106,7 @@ fun SettingsScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val scope = rememberCoroutineScope()
     var appInfoExpanded by rememberSaveable { mutableStateOf(false) }
+    var showWhoMadeThis by rememberSaveable { mutableStateOf(false) }
 
     val collapsedFraction by remember {
         derivedStateOf { scrollBehavior.state.collapsedFraction.coerceIn(0f, 1f) }
@@ -142,7 +149,8 @@ fun SettingsScreen(
     }
 
     CompositionLocalProvider(LocalModalBackdropStyle provides liveBackdropStyle) {
-        SettingsScreenBackground(modifier = modifier) {
+        Box(modifier = modifier) {
+        SettingsScreenBackground(modifier = Modifier.fillMaxSize()) {
             SettingsAppInfoOverscrollHaptics(stretchFraction = stretchFraction)
             val bottomInset = WindowInsets.navigationBars.asPaddingValues()
             CollapsingBlurTopBarLayout(
@@ -172,6 +180,7 @@ fun SettingsScreen(
                         },
                         guide = guide,
                         colors = topBarColors,
+                        launcherIcon = selectedLauncherIcon,
                         barModifier = barModifier,
                     )
                 },
@@ -194,7 +203,7 @@ fun SettingsScreen(
                     item(key = "appearance-title") {
                         SettingsSectionTitle(
                             title = "Appearance",
-                            subtitle = "Theme and accent colors.",
+                            subtitle = "Theme, typography, and accent colors.",
                         )
                     }
 
@@ -256,6 +265,20 @@ fun SettingsScreen(
                             SettingsSectionDivider()
 
                             SettingsSubsectionLabel(
+                                title = "Typography",
+                                subtitle = preferences.appFontStyle.label,
+                                icon = Icons.Outlined.TextFields,
+                            )
+                            SettingsCardContent {
+                                AppFontStylePicker(
+                                    selected = preferences.appFontStyle,
+                                    onSelected = onAppFontStyleChange,
+                                )
+                            }
+
+                            SettingsSectionDivider()
+
+                            SettingsSubsectionLabel(
                                 title = "Accent color",
                                 subtitle = if (brandAccentEnabled) {
                                     "Buttons, chips, and accents"
@@ -291,7 +314,9 @@ fun SettingsScreen(
                     }
 
                     item(key = "legal-card") {
-                        SettingsLegalPanel()
+                        SettingsLegalPanel(
+                            onOpenWhoMadeThis = { showWhoMadeThis = true },
+                        )
                     }
 
                     item(key = "about-title") {
@@ -305,6 +330,17 @@ fun SettingsScreen(
                         )
                     }
                 }
+            }
+        }
+
+            NestedScreenOverlay(
+                visible = showWhoMadeThis,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                WhoMadeThisScreen(
+                    onNavigateBack = { showWhoMadeThis = false },
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
     }
