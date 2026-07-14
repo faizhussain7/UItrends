@@ -7,4 +7,11 @@
     <issue id="GradleDependency" severity="ignore" />
     <issue id="NewerVersionAvailable" severity="ignore" />
     <issue id="ObsoleteSdkInt" severity="ignore" />
+    <issue id="Typos">
+        <ignore path="**/values/font_certs.xml" />
+    </issue>
+    <issue id="VectorRaster">
+        <ignore path="**/drawable/ic_splash_catalog_static.xml" />
+        <ignore path="**/drawable/ic_splash_catalog_vector.xml" />
+    </issue>
 </lint>

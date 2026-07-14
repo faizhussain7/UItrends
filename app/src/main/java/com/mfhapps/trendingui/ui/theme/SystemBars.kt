@@ -1,7 +1,6 @@
 package com.mfhapps.trendingui.ui.theme
 
 import android.app.Activity
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -16,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowCompat
 
 private class SystemBarAppearanceStack {
@@ -131,7 +131,7 @@ fun SyncActivityWindowBackground() {
 
     SideEffect {
         val activity = view.context as? Activity ?: return@SideEffect
-        activity.window.setBackgroundDrawable(ColorDrawable(background.toArgb()))
+        activity.window.setBackgroundDrawable(background.toArgb().toDrawable())
     }
 }
 

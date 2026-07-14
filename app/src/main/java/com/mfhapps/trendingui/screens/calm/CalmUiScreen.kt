@@ -26,9 +26,9 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -55,6 +55,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -378,7 +379,7 @@ fun CalmUiScreen(
     val inDetailPane = LocalDetailPaneActive.current
     val compact = isCompactWindowWidth()
     val showBackInTopBar = inDetailPane && compact
-    val showTopBarActions = compact
+    val showTopBarActions = true
     val section = CalmSections[sectionIndex]
     val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
@@ -418,7 +419,7 @@ fun CalmUiScreen(
                     onNext = { if (sectionIndex < CalmSections.lastIndex) sectionIndex++ },
                 )
             } else {
-                Row(Modifier.fillMaxSize().statusBarsPadding()) {
+                Row(Modifier.fillMaxSize()) {
                     if (!compact) {
                         CalmTableOfContentsRail(
                             sections = CalmSections,
@@ -426,10 +427,13 @@ fun CalmUiScreen(
                             onSelect = { sectionIndex = it },
                             modifier = Modifier
                                 .width(220.dp)
-                                .fillMaxHeight(),
+                                .fillMaxHeight()
+                                .windowInsetsPadding(appBarTopWindowInsets()),
                         )
                         VerticalDivider()
                     }
+
+                    val contentAppBarInsets = calmContentAppBarInsets(hasLeadingRail = !compact)
 
                     Column(Modifier.weight(1f)) {
                         Column {
@@ -460,6 +464,7 @@ fun CalmUiScreen(
                                         focusMode = focusMode,
                                         onFocusMode = { focusMode = it },
                                         onClose = { readerPanelOpen = false },
+                                        windowInsets = contentAppBarInsets,
                                     )
                                 } else {
                                     CalmReaderTopBar(
@@ -471,6 +476,7 @@ fun CalmUiScreen(
                                         eInkVariantLabel = eInkVariantLabel,
                                         guide = guide,
                                         showTopBarActions = showTopBarActions,
+                                        windowInsets = contentAppBarInsets,
                                     )
                                 }
                             }
@@ -603,7 +609,7 @@ private fun CalmFocusReadingLayout(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
+                .windowInsetsPadding(appBarTopWindowInsets())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -704,6 +710,10 @@ private fun VerticalDivider() {
 }
 
 @Composable
+private fun calmContentAppBarInsets(hasLeadingRail: Boolean): WindowInsets =
+    appBarTopWindowInsets()
+
+@Composable
 private fun CalmReaderTopBar(
     showBack: Boolean,
     onNavigateBack: () -> Unit,
@@ -713,6 +723,7 @@ private fun CalmReaderTopBar(
     eInkVariantLabel: String,
     guide: DemoTrendGuide?,
     showTopBarActions: Boolean,
+    windowInsets: WindowInsets = appBarTopWindowInsets(),
 ) {
     val scheme = MaterialTheme.colorScheme
     TopAppBar(
@@ -751,6 +762,7 @@ private fun CalmReaderTopBar(
                 onToggleReaderPanel = onToggleReaderPanel,
             )
         },
+        windowInsets = windowInsets,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = scheme.background,
             scrolledContainerColor = scheme.background,
@@ -777,6 +789,7 @@ private fun ReaderSettingsPanel(
     focusMode: Boolean,
     onFocusMode: (Boolean) -> Unit,
     onClose: () -> Unit,
+    windowInsets: WindowInsets = appBarTopWindowInsets(),
 ) {
     val fontPct = (fontScale * 100f).toInt()
     val lhPct = (lineHeightScale * 100f).toInt()
@@ -818,6 +831,7 @@ private fun ReaderSettingsPanel(
                     )
                 }
             },
+            windowInsets = windowInsets,
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = scheme.background,
                 scrolledContainerColor = scheme.background,

@@ -30,9 +30,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -92,6 +90,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
 import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.navigation.DemoCatalogEntry
 import com.mfhapps.trendingui.navigation.DemoCategory
@@ -107,6 +107,12 @@ import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.CatalogMorphShapes
 import com.mfhapps.trendingui.ui.components.ShapeClickableSurface
 import com.mfhapps.trendingui.ui.components.rememberCatalogCardColors
+import com.mfhapps.trendingui.ui.platform.catalogAdaptiveMinTileWidth
+import com.mfhapps.trendingui.ui.platform.catalogCollapsedBarWindowInsets
+import com.mfhapps.trendingui.ui.platform.catalogListContentWindowInsets
+import com.mfhapps.trendingui.ui.platform.catalogScaffoldContentPadding
+import com.mfhapps.trendingui.ui.platform.isExpandedWindowWidth
+import com.mfhapps.trendingui.ui.platform.isMediumOrWiderWindow
 import com.mfhapps.trendingui.ui.theme.CatalogColorMath
 import com.mfhapps.trendingui.ui.accessibility.SectionChangeHapticEffect
 import com.mfhapps.trendingui.ui.theme.CatalogHomeSystemBars
@@ -118,7 +124,8 @@ private const val CONTENT_TYPE_HERO = "hero"
 private const val CONTENT_TYPE_SECTION = "section"
 private const val CONTENT_TYPE_DEMO = "demo"
 private const val CATALOG_PREFIX_ITEM_COUNT = 3
-private val ScreenHorizontalPadding = 20.dp
+private val CatalogPortraitGutter = 12.dp
+private val CatalogLandscapeGutter = 8.dp
 private val ListCardShape = RoundedCornerShape(20.dp)
 private val HeroCardShape = RoundedCornerShape(28.dp)
 private val CompactCardShape = RoundedCornerShape(18.dp)
@@ -225,12 +232,18 @@ fun DemoCatalogScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
+            contentWindowInsets = catalogListContentWindowInsets(),
         ) { innerPadding ->
-            val listBottomPadding = innerPadding.calculateBottomPadding()
+            val landscape = LocalConfiguration.current.orientation ==
+                Configuration.ORIENTATION_LANDSCAPE
+            val listContentPadding = catalogScaffoldContentPadding(
+                innerPadding = innerPadding,
+                horizontalGutter = if (landscape) CatalogLandscapeGutter else CatalogPortraitGutter,
+            )
             when (layoutStyle) {
                 HomeLayoutStyle.FeaturedList -> FeaturedCatalogList(
                     listState = listState,
-                    contentPadding = PaddingValues(bottom = listBottomPadding),
+                    contentPadding = listContentPadding,
                     launcherIcon = launcherIcon,
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
@@ -246,7 +259,7 @@ fun DemoCatalogScreen(
                 )
                 HomeLayoutStyle.BentoGrid -> BentoCatalogGrid(
                     gridState = bentoGridState,
-                    bottomPadding = listBottomPadding,
+                    contentPadding = listContentPadding,
                     launcherIcon = launcherIcon,
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
@@ -262,7 +275,7 @@ fun DemoCatalogScreen(
                 )
                 HomeLayoutStyle.CompactTiles -> CompactCatalogGrid(
                     listState = compactListState,
-                    bottomPadding = listBottomPadding,
+                    contentPadding = listContentPadding,
                     launcherIcon = launcherIcon,
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
@@ -317,9 +330,7 @@ private fun FeaturedCatalogList(
         modifier = Modifier
             .fillMaxSize()
             .appHazeSource(),
-        contentPadding = PaddingValues(
-            bottom = contentPadding.calculateBottomPadding() + 16.dp,
-        ),
+        contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "brand_header", contentType = CONTENT_TYPE_HEADER) {
@@ -330,8 +341,6 @@ private fun FeaturedCatalogList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { onBrandHeaderSized(it.height) }
-                    .statusBarsPadding()
-                    .padding(horizontal = ScreenHorizontalPadding)
                     .padding(bottom = 4.dp),
             )
         }
@@ -341,18 +350,14 @@ private fun FeaturedCatalogList(
                 onClick = { onOpenDemo(featuredDemo.route) },
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
-                modifier = Modifier
-                    .padding(horizontal = ScreenHorizontalPadding)
-                    .animateItem(),
+                modifier = Modifier.animateItem(),
             )
         }
         item(key = "catalog_filters", contentType = CONTENT_TYPE_HEADER) {
             CatalogFilters(
                 activeCategory = activeCategory,
                 onCategoryChange = onCategoryChange,
-                modifier = Modifier
-                    .padding(horizontal = ScreenHorizontalPadding)
-                    .animateItem(),
+                modifier = Modifier.animateItem(),
             )
         }
         grouped.forEach { (category, demos) ->
@@ -370,9 +375,7 @@ private fun FeaturedCatalogList(
                     onClick = { onOpenDemo(demo.route) },
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
-                    modifier = Modifier
-                        .padding(horizontal = ScreenHorizontalPadding)
-                        .animateItem(),
+                    modifier = Modifier.animateItem(),
                 )
             }
         }
@@ -383,7 +386,7 @@ private fun FeaturedCatalogList(
 @Composable
 private fun BentoCatalogGrid(
     gridState: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState,
-    bottomPadding: androidx.compose.ui.unit.Dp,
+    contentPadding: PaddingValues,
     launcherIcon: AppLauncherIcon,
     demoCountLabel: String,
     featuredDemo: DemoCatalogEntry,
@@ -397,17 +400,14 @@ private fun BentoCatalogGrid(
     sharedTransitionScope: SharedTransitionScope?,
     animatedVisibilityScope: AnimatedVisibilityScope?,
 ) {
+    val minTileWidth = catalogAdaptiveMinTileWidth()
     LazyVerticalStaggeredGrid(
         state = gridState,
-        columns = StaggeredGridCells.Adaptive(168.dp),
+        columns = StaggeredGridCells.Adaptive(minTileWidth),
         modifier = Modifier
             .fillMaxSize()
             .appHazeSource(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            bottom = bottomPadding + 16.dp,
-        ),
+        contentPadding = contentPadding,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalItemSpacing = 12.dp,
     ) {
@@ -419,7 +419,6 @@ private fun BentoCatalogGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { onBrandHeaderSized(it.height) }
-                    .statusBarsPadding()
                     .padding(bottom = 4.dp),
             )
         }
@@ -461,7 +460,7 @@ private fun BentoCatalogGrid(
 @Composable
 private fun CompactCatalogGrid(
     listState: androidx.compose.foundation.lazy.LazyListState,
-    bottomPadding: androidx.compose.ui.unit.Dp,
+    contentPadding: PaddingValues,
     launcherIcon: AppLauncherIcon,
     demoCountLabel: String,
     featuredDemo: DemoCatalogEntry,
@@ -477,8 +476,17 @@ private fun CompactCatalogGrid(
 ) {
     val tileHeight = rememberCompactTileMinHeight()
     val rowGap = 10.dp
-    val gridHeight = remember(visibleDemos.size, tileHeight) {
-        val rows = (visibleDemos.size + 1) / 2
+    val columnCount = when {
+        isExpandedWindowWidth() -> 3
+        isMediumOrWiderWindow() -> 3
+        else -> 2
+    }
+    val gridHeight = remember(visibleDemos.size, tileHeight, columnCount) {
+        val rows = if (visibleDemos.isEmpty()) {
+            0
+        } else {
+            (visibleDemos.size + columnCount - 1) / columnCount
+        }
         if (rows == 0) 0.dp else tileHeight * rows + rowGap * (rows - 1).coerceAtLeast(0)
     }
     LazyColumn(
@@ -486,7 +494,7 @@ private fun CompactCatalogGrid(
         modifier = Modifier
             .fillMaxSize()
             .appHazeSource(),
-        contentPadding = PaddingValues(bottom = bottomPadding + 16.dp),
+        contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
@@ -497,8 +505,7 @@ private fun CompactCatalogGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { onBrandHeaderSized(it.height) }
-                    .statusBarsPadding()
-                    .padding(horizontal = ScreenHorizontalPadding),
+                    .padding(bottom = 4.dp),
             )
         }
         item {
@@ -507,23 +514,20 @@ private fun CompactCatalogGrid(
                 onClick = { onOpenDemo(featuredDemo.route) },
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
-                modifier = Modifier.padding(horizontal = ScreenHorizontalPadding),
             )
         }
         item {
             CatalogFilters(
                 activeCategory = activeCategory,
                 onCategoryChange = onCategoryChange,
-                modifier = Modifier.padding(horizontal = ScreenHorizontalPadding),
             )
         }
         item {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(columnCount),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(gridHeight)
-                    .padding(horizontal = ScreenHorizontalPadding),
+                    .height(gridHeight),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 userScrollEnabled = false,
@@ -774,20 +778,23 @@ private fun CatalogCollapsedTopBar(
 ) {
     SectionChangeHapticEffect(sectionKey = activeSection)
     val scheme = MaterialTheme.colorScheme
+    val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     CollapsedHeaderBackdrop(
         modifier = Modifier.fillMaxWidth(),
         collapsedFraction = 1f,
         surfaceColor = scheme.surface,
     ) {
-        Column(Modifier.fillMaxWidth()) {
-            Spacer(Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = ScreenHorizontalPadding, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(catalogCollapsedBarWindowInsets())
+                .padding(
+                    horizontal = if (landscape) CatalogLandscapeGutter else CatalogPortraitGutter,
+                    vertical = 10.dp,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             BrandMark(
                 size = 32.dp,
                 animated = false,
@@ -825,7 +832,6 @@ private fun CatalogCollapsedTopBar(
                     }
                 }
             }
-            }
         }
     }
 }
@@ -838,7 +844,7 @@ private fun CategoryHeader(category: DemoCategory) {
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = ScreenHorizontalPadding, vertical = 4.dp)
+            .padding(vertical = 4.dp)
             .semantics { role = Role.Tab },
     )
 }
@@ -1072,17 +1078,10 @@ private fun CatalogFilters(
             "3D" to DemoCategory.Sensors3d,
         )
     }
-    val chipContainer = scheme.surfaceContainerHigh
-    val chipColors = remember(chipContainer, scheme) {
-        CatalogColorMath.resolveFilterChipColors(
-            barBackground = chipContainer,
-            colorScheme = scheme,
-        )
-    }
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        color = chipContainer,
+        color = scheme.surfaceContainerHigh,
     ) {
         Row(
             modifier = Modifier
@@ -1103,10 +1102,10 @@ private fun CatalogFilters(
                         )
                     },
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = chipColors.idleContainer,
-                        selectedContainerColor = chipColors.selectedContainer,
-                        labelColor = chipColors.idleLabel,
-                        selectedLabelColor = chipColors.selectedLabel,
+                        containerColor = Color.Transparent,
+                        labelColor = scheme.onSurfaceVariant,
+                        selectedContainerColor = scheme.primaryContainer,
+                        selectedLabelColor = scheme.onPrimaryContainer,
                     ),
                     border = null,
                 )

@@ -24,14 +24,6 @@ data class GradientChipColors(
     val label: Color,
 )
 
-@Immutable
-data class FilterChipColors(
-    val idleContainer: Color,
-    val selectedContainer: Color,
-    val idleLabel: Color,
-    val selectedLabel: Color,
-)
-
 internal object CatalogColorMath {
 
     private val OnGradientDark = Color(0xFF050508)
@@ -130,60 +122,6 @@ internal object CatalogColorMath {
             style = VibrantForegroundStyle.OnGradient,
         )
         return GradientChipColors(container = container, label = label)
-    }
-
-    fun resolveFilterChipColors(
-        barBackground: Color,
-        colorScheme: androidx.compose.material3.ColorScheme,
-    ): FilterChipColors {
-        val bar = barBackground.copy(alpha = 1f)
-        val barSamples = listOf(bar)
-        val idleLabel = VibrancyMath.resolve(
-            rawBackdrops = barSamples,
-            colorScheme = colorScheme,
-            role = GradientForegroundRole.Title,
-            style = VibrantForegroundStyle.OnGradient,
-        )
-        val accentOnBar = VibrancyMath.resolve(
-            rawBackdrops = barSamples,
-            colorScheme = colorScheme,
-            role = GradientForegroundRole.Section,
-            style = VibrantForegroundStyle.OnGradient,
-        )
-        val primarySeed = lerp(colorScheme.primary, accentOnBar, 0.2f).copy(alpha = 1f)
-        val primaryBlend = if (bar.luminance() >= 0.5f) 0.88f else 0.92f
-        var selectedContainer = lerp(bar, primarySeed, primaryBlend).copy(alpha = 1f)
-        if (wcagContrastRatio(selectedContainer, bar) < 2.4) {
-            selectedContainer = lerp(bar, colorScheme.primary, 0.94f).copy(alpha = 1f)
-        }
-        val selectedLabel = resolveChipLabelOnContainer(
-            container = selectedContainer,
-            colorScheme = colorScheme,
-        )
-        return FilterChipColors(
-            idleContainer = Color.Transparent,
-            selectedContainer = selectedContainer,
-            idleLabel = idleLabel,
-            selectedLabel = selectedLabel,
-        )
-    }
-
-    private fun resolveChipLabelOnContainer(
-        container: Color,
-        colorScheme: androidx.compose.material3.ColorScheme,
-    ): Color {
-        val onPrimaryContrast = wcagContrastRatio(colorScheme.onPrimary, container)
-        val onPrimaryContainerContrast = wcagContrastRatio(colorScheme.onPrimaryContainer, container)
-        return when {
-            onPrimaryContrast >= WCAG_BODY -> colorScheme.onPrimary
-            onPrimaryContainerContrast >= WCAG_BODY -> colorScheme.onPrimaryContainer
-            else -> VibrancyMath.resolve(
-                rawBackdrops = listOf(container),
-                colorScheme = colorScheme,
-                role = GradientForegroundRole.Title,
-                style = VibrantForegroundStyle.OnGradient,
-            )
-        }
     }
 
     fun resolveGradientChromeColors(

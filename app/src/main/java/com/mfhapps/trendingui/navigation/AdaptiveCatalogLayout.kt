@@ -6,11 +6,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import com.mfhapps.trendingui.ui.platform.CatalogPaneRole
+import com.mfhapps.trendingui.ui.platform.LocalCatalogPaneRole
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
+import com.mfhapps.trendingui.ui.platform.detailPaneHorizontalSafePadding
+import com.mfhapps.trendingui.ui.platform.isMediumOrWiderWindow
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.HingePolicy
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
@@ -26,13 +37,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.screens.home.DemoCatalogScreen
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.accessibility.rememberReduceMotion
 import com.mfhapps.trendingui.ui.theme.AppFontStyle
 import com.mfhapps.trendingui.ui.theme.BrandAccentColor
 import com.mfhapps.trendingui.ui.theme.HomeLayoutStyle
-import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.ui.theme.ModalBackdropStyle
 import com.mfhapps.trendingui.ui.theme.ThemeMode
 import com.mfhapps.trendingui.ui.theme.ThemePreferences
@@ -58,7 +69,19 @@ fun AdaptiveCatalogLayout(
     modifier: Modifier = Modifier,
 ) {
     val reduceMotion = rememberReduceMotion()
-    val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val dualPane = isMediumOrWiderWindow()
+    val listPaneRole = if (dualPane) CatalogPaneRole.List else CatalogPaneRole.Single
+    val detailPaneRole = if (dualPane) CatalogPaneRole.Detail else CatalogPaneRole.Single
+    val scaffoldDirective = remember(windowAdaptiveInfo) {
+        calculatePaneScaffoldDirective(
+            windowAdaptiveInfo = windowAdaptiveInfo,
+            verticalHingePolicy = HingePolicy.AlwaysAvoid,
+        ).copy(horizontalPartitionSpacerSize = 0.dp)
+    }
+    val navigator = rememberListDetailPaneScaffoldNavigator<String>(
+        scaffoldDirective = scaffoldDirective,
+    )
     val scope = rememberCoroutineScope()
     var settingsSession by remember { mutableIntStateOf(0) }
     val detailKey = navigator.currentDestination?.contentKey
@@ -69,22 +92,24 @@ fun AdaptiveCatalogLayout(
             val sharedScope = this
             NavigableListDetailPaneScaffold(
                 navigator = navigator,
+                modifier = Modifier.fillMaxSize(),
                 listPane = {
                     AnimatedPane {
                         CompositionLocalProvider(
                             LocalSharedTransitionScope provides sharedScope,
                             LocalNavAnimatedVisibilityScope provides this@AnimatedPane,
+                            LocalCatalogPaneRole provides listPaneRole,
                         ) {
                             DemoCatalogScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 launcherIcon = launcherIcon,
                                 selectedPaneKey = selectedDemoKey,
                                 onOpenDemo = { route ->
-                                    val key = route.toDemoPaneKey() ?: return@DemoCatalogScreen
+                                    val paneKey = route.toDemoPaneKey() ?: return@DemoCatalogScreen
                                     scope.launch {
                                         navigator.navigateTo(
                                             ListDetailPaneScaffoldRole.Detail,
-                                            key.navKey,
+                                            paneKey.navKey,
                                         )
                                     }
                                 },
@@ -106,6 +131,7 @@ fun AdaptiveCatalogLayout(
                         CompositionLocalProvider(
                             LocalSharedTransitionScope provides sharedScope,
                             LocalNavAnimatedVisibilityScope provides this@AnimatedPane,
+                            LocalCatalogPaneRole provides detailPaneRole,
                         ) {
                             when {
                                 detailKey == SETTINGS_DETAIL_KEY -> {
@@ -158,25 +184,33 @@ fun AdaptiveCatalogLayout(
 
 @Composable
 private fun CatalogDetailPlaceholder(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    val scheme = MaterialTheme.colorScheme
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = scheme.surfaceContainerLow,
     ) {
-        Text(
-            text = "Select a pattern",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = "Choose a demo from the catalog to preview it here.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp),
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .detailPaneHorizontalSafePadding()
+                .windowInsetsPadding(appBarTopWindowInsets())
+                .padding(horizontal = 24.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Select a pattern",
+                style = MaterialTheme.typography.headlineSmall,
+                color = scheme.onSurface,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Choose a demo from the catalog to preview it beside the list.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = scheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
     }
 }

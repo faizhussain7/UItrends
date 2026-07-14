@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -127,7 +128,7 @@ fun OrbsMeshScreen(
                 collapsedFraction = collapsedFraction,
                 onNavigateBack = onNavigateBack,
                 guide = guide,
-                barModifier = barModifier,
+                modifier = barModifier,
             )
         },
     ) {
@@ -334,7 +335,7 @@ private fun OrbsCollapsingTopBar(
     collapsedFraction: Float,
     onNavigateBack: () -> Unit,
     guide: DemoTrendGuide?,
-    barModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val nestedBackDispatcher = LocalNestedBackDispatcher.current
@@ -346,8 +347,8 @@ private fun OrbsCollapsingTopBar(
     val subtitleAlpha = (1f - collapsedFraction * 1.35f).coerceIn(0f, 1f)
 
     LargeTopAppBar(
-        modifier = barModifier,
-        windowInsets = TopAppBarDefaults.windowInsets,
+        modifier = modifier,
+        windowInsets = appBarTopWindowInsets(),
         scrollBehavior = scrollBehavior,
         colors = rememberCollapsedTopAppBarColors(
             collapsedFraction = collapsedFraction,

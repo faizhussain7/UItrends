@@ -9,8 +9,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 import androidx.compose.ui.unit.dp
+import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 
 val LocalDetailPaneActive = staticCompositionLocalOf { false }
 
@@ -29,7 +29,6 @@ fun Modifier.demoDetailScrollInsets(): Modifier {
 }
 
 fun Modifier.demoDetailScrollBottomGap(): Modifier = padding(bottom = 8.dp)
-
 
 class NestedBackDispatcher {
     var handler: (() -> Boolean)? = null

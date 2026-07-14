@@ -38,6 +38,7 @@ fun SettingsDetailHost(
         useGradientTopBar = false,
         contentOwnsTitle = true,
         hideCompactTopBar = true,
+        contentProvidesActions = true,
         onNavigateBack = onNavigateBack,
     ) {
         SettingsScreen(

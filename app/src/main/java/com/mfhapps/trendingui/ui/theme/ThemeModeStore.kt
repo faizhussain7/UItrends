@@ -1,6 +1,7 @@
 package com.mfhapps.trendingui.ui.theme
 
 import android.content.Context
+import androidx.core.content.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,9 +22,9 @@ class ThemeModeStore private constructor(
     fun current(): ThemeMode = _themeMode.value
 
     fun set(mode: ThemeMode) {
-        prefs.edit()
-            .putString(KEY_THEME_MODE, mode.name)
-            .commit()
+        prefs.edit {
+            putString(KEY_THEME_MODE, mode.name)
+        }
         _themeMode.value = mode
     }
 

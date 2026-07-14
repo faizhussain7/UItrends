@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +38,8 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.TopAppBarDefaults
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import com.mfhapps.trendingui.ui.components.FilledTonalButton
@@ -69,7 +71,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -124,8 +127,9 @@ private enum class StreamPhase { Thinking, Searching, Generating, Done }
 @Composable
 fun AiCopilotScreen() {
     val scheme = MaterialTheme.colorScheme
-    val configuration = LocalConfiguration.current
-    val sheetPeekHeight = (configuration.screenHeightDp * 0.52f).dp.coerceIn(280.dp, 420.dp)
+    val sheetPeekHeight = with(LocalDensity.current) {
+        (LocalWindowInfo.current.containerSize.height.toDp() * 0.52f).coerceIn(280.dp, 420.dp)
+    }
 
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.PartiallyExpanded,
@@ -235,7 +239,7 @@ fun AiCopilotScreen() {
                     .fillMaxSize()
                     .appHazeSource()
                     .padding(innerPadding)
-                    .statusBarsPadding()
+                    .windowInsetsPadding(appBarTopWindowInsets())
                     .padding(top = 56.dp)
                     .padding(horizontal = 20.dp)
                     .verticalScroll(rememberScrollState()),

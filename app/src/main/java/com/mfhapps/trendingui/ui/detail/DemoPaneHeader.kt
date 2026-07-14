@@ -1,13 +1,16 @@
 package com.mfhapps.trendingui.ui.detail
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 import androidx.compose.ui.unit.dp
-
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
+import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 
 @Composable
 fun DemoPaneHeader(
@@ -17,21 +20,30 @@ fun DemoPaneHeader(
 ) {
     val inDetailPane = LocalDetailPaneActive.current
     val compact = isCompactWindowWidth()
-    val showInContent = !inDetailPane || !compact
+if (inDetailPane && compact) return
 
-    if (!showInContent) return
-
-    Text(
-        text = title,
-        style = MaterialTheme.typography.headlineLarge,
-        modifier = modifier,
-    )
-    if (subtitle != null) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (inDetailPane) {
+                    Modifier.windowInsetsPadding(appBarTopWindowInsets())
+                } else {
+                    Modifier
+                },
+            ),
+    ) {
         Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+            text = title,
+            style = MaterialTheme.typography.headlineLarge,
         )
+        if (subtitle != null) {
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+            )
+        }
     }
 }

@@ -35,16 +35,16 @@ fun DetailPaneTopBarActions(
     sourceCodeUrl: String? = LocalDemoSourceCodeUrl.current,
     iconTint: Color = MaterialTheme.colorScheme.primary,
     chromeStyle: DetailChromeStyle = LocalDetailChromeStyle.current,
-    leading: @Composable (() -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null,
 ) {
-    if (guide == null && sourceCodeUrl == null && leading == null) return
+    if (guide == null && sourceCodeUrl == null && content == null) return
 
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        leading?.invoke()
+        content?.invoke()
         if (sourceCodeUrl != null) {
             DetailPaneSourceCodeAction(
                 url = sourceCodeUrl,

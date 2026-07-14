@@ -38,11 +38,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -71,6 +71,8 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import com.mfhapps.trendingui.ui.components.AppModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -794,7 +796,7 @@ private fun BoxScope.PretextCameraChromeOverlay(
         modifier = Modifier
             .align(Alignment.TopCenter)
             .fillMaxWidth()
-            .statusBarsPadding()
+            .windowInsetsPadding(appBarTopWindowInsets())
             .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         CameraTopHud(

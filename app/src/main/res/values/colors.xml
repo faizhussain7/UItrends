@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand_ink">#FF1A1816</color>
-    <color name="brand_deep">#FF121110</color>
     <color name="brand_primary">#FFD42D6A</color>
     <color name="brand_primary_dark">#FFA61E52</color>
     <color name="brand_accent">#FF4F6D95</color>
-    <color name="brand_surface">#FFFFFCF9</color>
-    <color name="brand_surface_dim">#FFFFF0F4</color>
     <color name="splash_background">#FFFFFCF9</color>
     <color name="splash_background_dark">#FF121110</color>
-    <color name="splash_icon_background">#00000000</color>
     <color name="launcher_bg_start">@color/splash_background</color>
     <color name="launcher_bg_mid">@color/splash_background</color>
     <color name="launcher_bg_end">@color/splash_background</color>
-    <color name="launcher_wave_light">#38D42D6A</color>
-    <color name="launcher_wave_dark">#454F6D95</color>
-    <color name="launcher_glow">#30D42D6A</color>
 </resources>

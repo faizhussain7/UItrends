@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -47,9 +48,9 @@ import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import com.mfhapps.trendingui.ui.neumorphism.NeuChromeIconButton
 
 enum class DemoCollapsingHeaderMode {
-    /** Large title in the app bar that collapses on scroll (Glass, Neumorphism). */
+
     LargeCollapsing,
-    /** Compact bar; title + blur appear only after the in-content hero scrolls away (Neo-Brutal). */
+
     HeroTitle,
 }
 
@@ -127,15 +128,15 @@ fun DemoCollapsingScrollScaffold(
                     collapsedFraction = collapsedFraction,
                     onNavigateBack = onNavigateBack,
                     guide = guide,
-                    barModifier = barModifier,
+                    modifier = barModifier,
                 )
                 DemoCollapsingHeaderMode.HeroTitle -> DemoHeroTitleTopBar(
                     title = title,
                     chromeStyle = chromeStyle,
                     onNavigateBack = onNavigateBack,
                     guide = guide,
-                    barModifier = barModifier,
                     collapsedFraction = collapsedFraction,
+                    modifier = barModifier,
                 )
             }
         },
@@ -171,7 +172,7 @@ private fun DemoCollapsingLargeTopBar(
     collapsedFraction: Float,
     onNavigateBack: () -> Unit,
     guide: DemoTrendGuide?,
-    barModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val titleStyle = lerpTextStyle(
@@ -188,9 +189,9 @@ private fun DemoCollapsingLargeTopBar(
     }
 
     LargeTopAppBar(
-        modifier = barModifier,
+        modifier = modifier,
         collapsedHeight = CollapsedTopBarHeight,
-        windowInsets = TopAppBarDefaults.windowInsets,
+        windowInsets = appBarTopWindowInsets(),
         scrollBehavior = scrollBehavior,
         colors = rememberCollapsedTopAppBarColors(
             collapsedFraction = collapsedFraction,
@@ -248,8 +249,8 @@ private fun DemoHeroTitleTopBar(
     chromeStyle: DetailChromeStyle,
     onNavigateBack: () -> Unit,
     guide: DemoTrendGuide?,
-    barModifier: Modifier = Modifier,
     collapsedFraction: Float,
+    modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val scrolledContainer = when (chromeStyle) {
@@ -260,8 +261,8 @@ private fun DemoHeroTitleTopBar(
     }
 
     TopAppBar(
-        modifier = barModifier.heightIn(min = CompactTopBarHeight),
-        windowInsets = TopAppBarDefaults.windowInsets,
+        modifier = modifier.heightIn(min = CompactTopBarHeight),
+        windowInsets = appBarTopWindowInsets(),
         colors = rememberCollapsedTopAppBarColors(
             collapsedFraction = collapsedFraction,
             containerColor = Color.Transparent,

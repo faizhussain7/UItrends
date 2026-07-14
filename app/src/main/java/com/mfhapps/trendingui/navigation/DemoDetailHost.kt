@@ -68,6 +68,13 @@ fun DemoDetailHost(
                 paneKey == DemoPaneKey.Spatial ||
                 paneKey == DemoPaneKey.Copilot ||
                 paneKey == DemoPaneKey.Pretext,
+            contentProvidesActions = paneKey == DemoPaneKey.Pretext ||
+                paneKey == DemoPaneKey.Calm ||
+                paneKey == DemoPaneKey.Orbs ||
+                paneKey == DemoPaneKey.Spatial ||
+                paneKey == DemoPaneKey.Glass ||
+                paneKey == DemoPaneKey.Brutal ||
+                paneKey == DemoPaneKey.Neumorphism,
             glassHazeEnabled = glassHazeEnabled,
             chromeStyle = when (paneKey) {
                 DemoPaneKey.Brutal -> DetailChromeStyle.NeoBrutal

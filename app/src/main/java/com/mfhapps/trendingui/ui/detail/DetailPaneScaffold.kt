@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import com.mfhapps.trendingui.ui.components.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -37,10 +39,11 @@ import com.mfhapps.trendingui.ui.glass.GlassChromeIconButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
+import com.mfhapps.trendingui.ui.platform.detailPaneHorizontalSafePadding
 import com.mfhapps.trendingui.ui.theme.CatalogGradientChrome
 import com.mfhapps.trendingui.ui.theme.AdaptiveGradientIcon
 import com.mfhapps.trendingui.ui.theme.AdaptiveGradientText
@@ -63,12 +66,12 @@ fun DetailPaneScaffold(
     useGradientTopBar: Boolean = false,
     contentOwnsTitle: Boolean = false,
     hideCompactTopBar: Boolean = false,
+    contentProvidesActions: Boolean = false,
     immersiveBackground: Boolean = false,
     glassHazeEnabled: Boolean = true,
     chromeStyle: DetailChromeStyle = DetailChromeStyle.Default,
     content: @Composable () -> Unit,
 ) {
-    val compact = isCompactWindowWidth()
     val sourceCodeUrl = LocalDemoSourceCodeUrl.current
     val appearance = LocalCatalogAppearance.current
     val catalogColors = LocalHomeCatalogColors.current
@@ -82,11 +85,13 @@ fun DetailPaneScaffold(
     val immersiveChrome = immersiveBackground && !useGradientTopBar
     val transparentTopBar = useGradientTopBar || immersiveChrome
     val contentManagesBackdropBlur = hideCompactTopBar && contentOwnsTitle
+    val chromeIconColor = MaterialTheme.colorScheme.primary
     val topBarForeground = when {
         useGradientTopBar -> catalogColors.glassBarTitle
         immersiveChrome -> MaterialTheme.colorScheme.onSurface
         else -> MaterialTheme.colorScheme.onSurface
     }
+    val appBarInsets = appBarTopWindowInsets()
 
     val immersiveCollapseState = remember { ImmersiveTopBarCollapseState() }
     val immersiveCollapseFraction = if (immersiveChrome) {
@@ -117,8 +122,8 @@ fun DetailPaneScaffold(
                     containerColor = Color.Transparent,
                     scrolledContainerColor = Color.Transparent,
                     titleContentColor = topBarForeground,
-                    navigationIconContentColor = topBarForeground,
-                    actionIconContentColor = topBarForeground,
+                    navigationIconContentColor = chromeIconColor,
+                    actionIconContentColor = chromeIconColor,
                 )
             } else {
                 TopAppBarDefaults.topAppBarColors(
@@ -133,14 +138,15 @@ fun DetailPaneScaffold(
                         else -> MaterialTheme.colorScheme.surface
                     },
                     titleContentColor = topBarForeground,
-                    navigationIconContentColor = topBarForeground,
-                    actionIconContentColor = topBarForeground,
+                    navigationIconContentColor = chromeIconColor,
+                    actionIconContentColor = chromeIconColor,
                 )
             }
 
             val topBarContent: @Composable (Modifier) -> Unit = { barModifier ->
                 TopAppBar(
                     modifier = barModifier,
+                    windowInsets = appBarInsets,
                     title = {
                     if (!contentOwnsTitle) {
                         Column {
@@ -207,7 +213,12 @@ fun DetailPaneScaffold(
                         DetailChromeStyle.Orbs,
                         DetailChromeStyle.Spatial,
                         DetailChromeStyle.Copilot,
-                        DetailChromeStyle.Default -> IconButton(onClick = onBack) {
+                        DetailChromeStyle.Default -> IconButton(
+                            onClick = onBack,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = chromeIconColor,
+                            ),
+                        ) {
                             if (useGradientTopBar) {
                                 AdaptiveGradientIcon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -219,7 +230,7 @@ fun DetailPaneScaffold(
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back to catalog",
-                                    tint = topBarForeground,
+                                    tint = chromeIconColor,
                                 )
                             }
                         }
@@ -230,12 +241,8 @@ fun DetailPaneScaffold(
                         DetailPaneTopBarActions(
                             guide = guide,
                             chromeStyle = chromeStyle,
-                            iconTint = when {
-                                copilotChrome -> MaterialTheme.colorScheme.onSurface
-                                immersiveChrome -> catalogColors.headerIcon
-                                else -> MaterialTheme.colorScheme.primary
-                            },
-                            leading = if (copilotChrome) {
+                            iconTint = chromeIconColor,
+                            content = if (copilotChrome) {
                                 { CopilotLiveStatusChip() }
                             } else {
                                 null
@@ -264,74 +271,90 @@ fun DetailPaneScaffold(
             }
         }
 
+val contentOwnsChrome = hideCompactTopBar
+        val showScaffoldTopBar = !contentOwnsChrome
+        val needsFloatingActions = !contentProvidesActions &&
+            !showScaffoldTopBar &&
+            (guide != null || sourceCodeUrl != null)
+
+        val floatingActions: @Composable () -> Unit = {
+            DetailPaneTopBarActions(
+                guide = guide,
+                chromeStyle = chromeStyle,
+                content = if (copilotChrome) {
+                    { CopilotLiveStatusChip() }
+                } else {
+                    null
+                },
+                modifier = Modifier
+                    .windowInsetsPadding(appBarInsets)
+                    .padding(12.dp),
+            )
+        }
+
         val scaffoldContent: @Composable () -> Unit = {
-            if (compact && immersiveChrome) {
-                Box(Modifier.fillMaxSize()) {
-                    content()
-                    if (!hideCompactTopBar) {
+            when {
+contentOwnsChrome -> {
+                    Box(Modifier.fillMaxSize()) {
+                        DetailPaneContentPadding(
+                            innerPadding = PaddingValues(0.dp),
+                            registerHazeSource = !contentManagesBackdropBlur,
+                        ) {
+                            content()
+                        }
+                        if (needsFloatingActions) {
+                            Box(Modifier.align(Alignment.TopEnd)) {
+                                floatingActions()
+                            }
+                        }
+                    }
+                }
+immersiveChrome -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(
+                                if (contentManagesBackdropBlur) {
+                                    Modifier
+                                } else {
+                                    Modifier.appHazeSource()
+                                },
+                            ),
+                    ) {
+                        content()
                         topBar()
                     }
                 }
-            } else if (compact && !hideCompactTopBar) {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    containerColor = Color.Transparent,
-                    topBar = topBar,
-                ) { innerPadding ->
-                    DetailPaneContentPadding(
-                        innerPadding = innerPadding,
-                        registerHazeSource = !contentManagesBackdropBlur,
-                    ) {
-                        content()
-                    }
-                }
-            } else if (compact) {
-                DetailPaneContentPadding(
-                    innerPadding = PaddingValues(0.dp),
-                    registerHazeSource = !contentManagesBackdropBlur,
-                ) {
-                    content()
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(
-                            if (contentManagesBackdropBlur) {
-                                Modifier
-                            } else {
-                                Modifier.appHazeSource()
-                            },
-                        ),
-                ) {
-                    content()
-                    if (guide != null || sourceCodeUrl != null) {
-                        DetailPaneTopBarActions(
-                            guide = guide,
-                            chromeStyle = chromeStyle,
-                            leading = if (copilotChrome) {
-                                { CopilotLiveStatusChip() }
-                            } else {
-                                null
-                            },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(12.dp),
-                        )
+else -> {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        containerColor = Color.Transparent,
+                        topBar = topBar,
+                    ) { innerPadding ->
+                        DetailPaneContentPadding(
+                            innerPadding = innerPadding,
+                            registerHazeSource = !contentManagesBackdropBlur,
+                        ) {
+                            content()
+                        }
                     }
                 }
             }
         }
 
+        val paneRootModifier = Modifier
+            .fillMaxSize()
+            .detailPaneHorizontalSafePadding()
+
         if (useGradientTopBar) {
             CatalogGradientChrome(
                 appearance = appearance,
-                modifier = modifier,
+                modifier = modifier.then(paneRootModifier),
                 content = { scaffoldContent() },
             )
         } else {
             Box(
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier.then(paneRootModifier),
                 content = {
                     if (!immersiveChrome) {
                         Box(

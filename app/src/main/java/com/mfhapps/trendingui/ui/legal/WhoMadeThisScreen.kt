@@ -52,6 +52,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.toShape
@@ -230,7 +231,7 @@ fun WhoMadeThisScreen(
                             onNavigateBack = onNavigateBack,
                             onRefresh = viewModel::refresh,
                             refreshEnabled = !state.loading,
-                            barModifier = barModifier,
+                            modifier = barModifier,
                         )
                         CreatorProfileLoadingBar(loading = state.loading)
                     }
@@ -313,7 +314,7 @@ private fun WhoMadeThisCollapsingTopBar(
     onNavigateBack: () -> Unit,
     onRefresh: () -> Unit,
     refreshEnabled: Boolean,
-    barModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val titleStyle = lerpTextStyle(
@@ -324,8 +325,8 @@ private fun WhoMadeThisCollapsingTopBar(
     val subtitleAlpha = (1f - collapsedFraction * 1.4f).coerceIn(0f, 1f)
 
     LargeTopAppBar(
-        modifier = barModifier,
-        windowInsets = TopAppBarDefaults.windowInsets,
+        modifier = modifier,
+        windowInsets = appBarTopWindowInsets(),
         scrollBehavior = scrollBehavior,
         colors = colors,
         title = {
@@ -608,10 +609,10 @@ private fun CreatorProfileLoadingBar(
 @Composable
 private fun CreatorMetaChip(
     text: String,
+    modifier: Modifier = Modifier,
     style: TextStyle = MaterialTheme.typography.labelLarge,
     horizontalPadding: Dp = 12.dp,
     verticalPadding: Dp = 6.dp,
-    modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val chipShape = MaterialShapes.Pill.toShape()

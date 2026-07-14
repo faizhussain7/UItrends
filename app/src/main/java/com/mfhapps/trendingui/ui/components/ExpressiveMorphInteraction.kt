@@ -17,7 +17,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
@@ -198,13 +197,11 @@ fun Modifier.expressiveClickable(
     role: Role = Role.Button,
     interactionSource: MutableInteractionSource,
     morphPress: ExpressiveMorphPress,
-): Modifier = composed {
-    scale(morphPress.scale)
-        .clickable(
-            interactionSource = interactionSource,
-            indication = null,
-            enabled = enabled,
-            role = role,
-            onClick = onClick,
-        )
-}
+): Modifier = scale(morphPress.scale)
+    .clickable(
+        interactionSource = interactionSource,
+        indication = null,
+        enabled = enabled,
+        role = role,
+        onClick = onClick,
+    )

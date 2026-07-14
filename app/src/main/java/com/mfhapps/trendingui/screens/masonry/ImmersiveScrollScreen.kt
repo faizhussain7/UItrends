@@ -86,7 +86,8 @@ import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import com.mfhapps.trendingui.ui.components.CatalogMorphShapes
 import com.mfhapps.trendingui.ui.components.Button
 import com.mfhapps.trendingui.ui.components.ExpressivePolygonIcon
@@ -487,9 +488,14 @@ private fun ImmersiveMasonryHero(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 24.dp)
+                    .padding(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 20.dp,
+                        bottom = HeroDeckOverlap + 20.dp,
+                    )
                     .graphicsLayer { alpha = titleAlpha },
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Surface(
                     shape = MaterialTheme.shapes.largeIncreased,
@@ -517,6 +523,7 @@ private fun ImmersiveMasonryHero(
                     color = Color.White.copy(alpha = 0.88f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(end = 8.dp, bottom = 4.dp),
                 )
             }
         }
@@ -811,14 +818,15 @@ private fun MasonryItemDetail(
     val scheme = MaterialTheme.colorScheme
     val haptics = LocalHapticFeedback.current
     val reduceMotion = LocalReduceMotion.current
-    val configuration = LocalConfiguration.current
     val backgroundLayers = rememberMasonryDetailBackground(
         imageSeed = "masonry-tile-${item.id}",
         colorScheme = scheme,
         reduceMotion = reduceMotion,
     )
     val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + TopBarHeight + 4.dp
-    val heroHeight = (configuration.screenHeightDp * 0.56f).dp.coerceIn(380.dp, 520.dp)
+    val heroHeight = with(LocalDensity.current) {
+        (LocalWindowInfo.current.containerSize.height.toDp() * 0.56f).coerceIn(380.dp, 520.dp)
+    }
     val meta = remember(item.id) { item.detailMeta() }
     val morphPair = remember(item.id) { masonryMorphPair(item.id) }
     var isZoomed by remember { mutableStateOf(false) }

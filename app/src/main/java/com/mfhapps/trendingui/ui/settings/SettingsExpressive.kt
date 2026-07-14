@@ -48,6 +48,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
@@ -70,8 +71,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Velocity
@@ -275,7 +276,7 @@ fun SettingsChipCollapseOnScrollEffect(
     }
 }
 
-private fun consumeSettingsTopPull(
+internal fun consumeSettingsTopPull(
     listState: LazyListState,
     pullOffsetPx: MutableFloatState,
     maxPullPx: Float,
@@ -438,7 +439,9 @@ fun SettingsCollapsingTopBar(
     launcherIcon: AppLauncherIcon = AppLauncherIcon.Default,
 ) {
     val chipSizing = rememberSettingsAppInfoChipSizing()
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenWidth = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
     val guideSlot = if (guide != null) {
         SettingsExpressiveDefaults.guideActionWidth + 4.dp
     } else {
@@ -465,7 +468,7 @@ fun SettingsCollapsingTopBar(
 
     LargeTopAppBar(
         modifier = barModifier.then(modifier),
-        windowInsets = TopAppBarDefaults.windowInsets,
+        windowInsets = appBarTopWindowInsets(),
         title = {
             Text(
                 text = title,

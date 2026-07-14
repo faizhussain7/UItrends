@@ -18,7 +18,6 @@
     <style name="Theme.Trendinguipatterns.Starting.Light" parent="Theme.SplashScreen">
         <item name="android:windowBackground">@color/splash_background</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_catalog_static</item>
         <item name="splashScreenIconSize">@dimen/splash_icon_display_size</item>
@@ -29,7 +28,6 @@
     <style name="Theme.Trendinguipatterns.Starting.Dark" parent="Theme.SplashScreen">
         <item name="android:windowBackground">@color/splash_background_dark</item>
         <item name="windowSplashScreenBackground">@color/splash_background_dark</item>
-        <item name="android:windowSplashScreenBackground">@color/splash_background_dark</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_catalog_static</item>
         <item name="splashScreenIconSize">@dimen/splash_icon_display_size</item>

@@ -8,20 +8,25 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import com.mfhapps.trendingui.ui.components.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -29,8 +34,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.layout.HingePolicy
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.material3.rememberTopAppBarState
@@ -47,31 +55,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.lerp as lerpTextStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.util.lerp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
-import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
-import com.mfhapps.trendingui.ui.components.LocalCollapsingTopBarHeight
+import com.mfhapps.trendingui.ui.components.IconButton
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
+import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 import kotlinx.coroutines.launch
 
@@ -102,18 +108,25 @@ fun SpatialDepthScreen(
     }
 
     val layers = remember { defaultSpatialLayers() }
-    var selectedId by remember { mutableIntStateOf(0) }
-    val navigator = rememberListDetailPaneScaffoldNavigator<Int>()
+    var selectedId by remember { mutableIntStateOf(layers.first().id) }
+    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val scaffoldDirective = remember(windowAdaptiveInfo) {
+        calculatePaneScaffoldDirective(
+            windowAdaptiveInfo = windowAdaptiveInfo,
+            verticalHingePolicy = HingePolicy.AlwaysAvoid,
+        ).copy(horizontalPartitionSpacerSize = 0.dp)
+    }
+    val navigator = rememberListDetailPaneScaffoldNavigator<Int>(
+        scaffoldDirective = scaffoldDirective,
+    )
     val scope = rememberCoroutineScope()
     val canPopDetail = navigator.canNavigateBack()
+    val selectedLayer = layers.firstOrNull { it.id == selectedId } ?: layers.first()
 
     val subtitle = when {
-        canPopDetail && isCompact ->
-            "Detail open · swipe back to return"
-        isCompact ->
-            "Tilt for perspective · tap a layer to open detail"
-        else ->
-            "List + detail · gyro parallax on the active pane"
+        canPopDetail && isCompact -> "Detail open · swipe back to return"
+        isCompact -> "Tilt for perspective · tap a layer to open detail"
+        else -> "List + detail · gyro parallax on the active pane"
     }
 
     val popDetail: () -> Unit = remember(scope, navigator, haptics) {
@@ -151,9 +164,7 @@ fun SpatialDepthScreen(
     CollapsingBlurTopBarLayout(
         scrollBehavior = scrollBehavior,
         collapsedFraction = collapsedFraction,
-        modifier = Modifier
-            .fillMaxSize()
-            .navigationBarsPadding(),
+        modifier = Modifier.fillMaxSize(),
         topBar = { barModifier ->
             SpatialCollapsingTopBar(
                 scrollBehavior = scrollBehavior,
@@ -161,16 +172,14 @@ fun SpatialDepthScreen(
                 subtitle = subtitle,
                 onNavigateBack = onNavigateBack,
                 guide = guide,
-                chrome = chrome,
-                barModifier = barModifier,
+                modifier = barModifier,
             )
         },
     ) {
         ListDetailPaneScaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp)
-                .padding(bottom = 8.dp),
+                .navigationBarsPadding(),
             directive = navigator.scaffoldDirective,
             value = navigator.scaffoldValue,
             listPane = {
@@ -183,18 +192,13 @@ fun SpatialDepthScreen(
                 )
             },
             detailPane = {
-                if (!canPopDetail && !isCompact) {
-                    SpatialDetailPlaceholder(chrome = chrome)
-                } else {
-                    val layer = layers.firstOrNull { it.id == selectedId } ?: layers.first()
-                    SpatialDetailPane(
-                        layer = layer,
-                        tilt = tilt,
-                        chrome = chrome,
-                        nestedScrollConnection = scrollBehavior.nestedScrollConnection,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+                SpatialDetailPane(
+                    layer = selectedLayer,
+                    tilt = tilt,
+                    chrome = chrome,
+                    nestedScrollConnection = scrollBehavior.nestedScrollConnection,
+                    modifier = Modifier.fillMaxSize(),
+                )
             },
         )
     }
@@ -249,7 +253,8 @@ private fun SpatialLayerList(
                         .fillMaxWidth()
                         .animateItem()
                         .semantics {
-                            contentDescription = "${layer.title}, depth tier ${layer.depthTier + 1}, tap to view detail"
+                            contentDescription =
+                                "${layer.title}, depth tier ${layer.depthTier + 1}, tap to view detail"
                         },
                 )
             }
@@ -265,11 +270,11 @@ private fun SpatialCollapsingTopBar(
     subtitle: String,
     onNavigateBack: () -> Unit,
     guide: DemoTrendGuide?,
-    chrome: SpatialChrome,
-    barModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val nestedBackDispatcher = LocalNestedBackDispatcher.current
+    val iconColor = scheme.primary
     val titleStyle = lerpTextStyle(
         start = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
         stop = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
@@ -278,16 +283,16 @@ private fun SpatialCollapsingTopBar(
     val subtitleAlpha = (1f - collapsedFraction * 1.35f).coerceIn(0f, 1f)
 
     LargeTopAppBar(
-        modifier = barModifier,
-        windowInsets = TopAppBarDefaults.windowInsets,
+        modifier = modifier,
+        windowInsets = appBarTopWindowInsets(),
         scrollBehavior = scrollBehavior,
         colors = rememberCollapsedTopAppBarColors(
             collapsedFraction = collapsedFraction,
             containerColor = Color.Transparent,
             scrolledContainerColor = scheme.surface,
-            navigationIconContentColor = scheme.onSurface,
+            navigationIconContentColor = iconColor,
             titleContentColor = scheme.onSurface,
-            actionIconContentColor = scheme.onSurface,
+            actionIconContentColor = iconColor,
         ),
         title = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -317,61 +322,22 @@ private fun SpatialCollapsingTopBar(
                         onNavigateBack()
                     }
                 },
+                colors = IconButtonDefaults.iconButtonColors(contentColor = iconColor),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back to catalog",
-                    tint = scheme.onSurface,
+                    tint = iconColor,
                 )
             }
         },
         actions = {
             DetailPaneTopBarActions(
                 guide = guide,
-                iconTint = scheme.onSurface,
+                iconTint = iconColor,
             )
         },
     )
-}
-
-@Composable
-private fun SpatialDetailPlaceholder(
-    chrome: SpatialChrome,
-    modifier: Modifier = Modifier,
-) {
-    val scheme = MaterialTheme.colorScheme
-    val topInset = LocalCollapsingTopBarHeight.current
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        shape = SpatialCardShape,
-        color = chrome.readableSurface,
-        border = BorderStroke(SpatialCardBorderWidth, scheme.outlineVariant.copy(alpha = 0.35f)),
-        tonalElevation = 0.dp,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = topInset)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            SpatialDepthBadge(label = "Z—", chrome = chrome)
-            Text(
-                text = "Select a layer",
-                style = MaterialTheme.typography.titleLarge,
-                color = scheme.onSurface,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 16.dp),
-            )
-            Text(
-                text = "Pick a card on the left to preview depth, parallax, and pane adaptivity on this screen.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = scheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        }
-    }
 }
 
 @Composable
@@ -385,11 +351,10 @@ private fun SpatialDetailPane(
     val scheme = MaterialTheme.colorScheme
     val depthFactor = spatialDepthFactor(layer.id)
     val scrollState = rememberScrollState()
-    val topInset = LocalCollapsingTopBarHeight.current
 
-    Surface(
+    Column(
         modifier = modifier
-            .padding(top = topInset)
+            .fillMaxSize()
             .spatialPerspective(
                 if (tilt.enabled) {
                     tilt.copy(
@@ -399,45 +364,29 @@ private fun SpatialDetailPane(
                 } else {
                     tilt
                 },
+            )
+            .verticalScroll(scrollState)
+            .nestedScroll(nestedScrollConnection)
+            .padding(
+                collapsingTopBarContentPadding(
+                    extra = PaddingValues(bottom = 16.dp),
+                ),
             ),
-        shape = SpatialCardShape,
-        color = chrome.readableSurfaceStrong,
-        border = BorderStroke(
-            width = SpatialCardBorderWidth,
-            color = scheme.primary.copy(alpha = 0.28f),
-        ),
-        shadowElevation = if (chrome.isDark) 10.dp else 6.dp,
-        tonalElevation = 0.dp,
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .nestedScroll(nestedScrollConnection)
-                .padding(20.dp),
+        SpatialLayerSurface(
+            selected = true,
+            chrome = chrome,
+            elevation = if (chrome.isDark) 10.dp else 6.dp,
+            borderColor = scheme.primary.copy(alpha = 0.28f),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = layer.title,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = scheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f),
-                )
-                SpatialDepthBadge(
-                    label = "Z${layer.depthTier + 1}",
-                    chrome = chrome,
-                )
-            }
-
-            Text(
-                text = "Depth tier ${layer.depthTier + 1} · parallax ${"%.2f".format(depthFactor)}×",
-                style = MaterialTheme.typography.labelLarge,
-                color = scheme.primary,
-                modifier = Modifier.padding(top = 8.dp),
+            SpatialLayerTitleRow(
+                title = layer.title,
+                subtitle = "Depth tier ${layer.depthTier + 1} · parallax ${"%.2f".format(depthFactor)}×",
+                subtitleColor = scheme.primary,
+                badgeLabel = "Z${layer.depthTier + 1}",
+                chrome = chrome,
+                titleStyle = MaterialTheme.typography.headlineSmall,
+                titleWeight = FontWeight.SemiBold,
             )
 
             SpatialDepthMeter(
@@ -472,12 +421,91 @@ private fun SpatialDetailPane(
             )
             Text(
                 text = "On phones the detail pane replaces the list and stays below the collapsing header. " +
-                    "On wide screens both panes stay visible with matched depth styling.",
+                    "On wide screens both panes stay visible with the same layer card layout.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = scheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
+                modifier = Modifier.padding(top = 8.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun SpatialLayerSurface(
+    selected: Boolean,
+    chrome: SpatialChrome,
+    modifier: Modifier = Modifier,
+    elevation: androidx.compose.ui.unit.Dp = 0.dp,
+    borderColor: Color = Color.Transparent,
+    onClick: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val surfaceColor = if (selected) chrome.cardSurfaceSelected else chrome.cardSurface
+    val surfaceModifier = modifier.fillMaxWidth()
+    val padding = Modifier.padding(
+        horizontal = SpatialCardInnerPaddingH,
+        vertical = SpatialCardInnerPaddingV,
+    )
+    if (onClick != null) {
+        Surface(
+            onClick = onClick,
+            modifier = surfaceModifier,
+            shape = SpatialCardShape,
+            color = surfaceColor,
+            border = BorderStroke(SpatialCardBorderWidth, borderColor),
+            shadowElevation = elevation,
+            tonalElevation = 0.dp,
+        ) {
+            Column(modifier = padding, content = content)
+        }
+    } else {
+        Surface(
+            modifier = surfaceModifier,
+            shape = SpatialCardShape,
+            color = chrome.readableSurfaceStrong,
+            border = BorderStroke(SpatialCardBorderWidth, borderColor),
+            shadowElevation = elevation,
+            tonalElevation = 0.dp,
+        ) {
+            Column(modifier = padding, content = content)
+        }
+    }
+}
+
+@Composable
+private fun SpatialLayerTitleRow(
+    title: String,
+    subtitle: String,
+    subtitleColor: Color,
+    badgeLabel: String,
+    chrome: SpatialChrome,
+    titleStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.titleMedium,
+    titleWeight: FontWeight = FontWeight.Medium,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = titleStyle,
+                color = scheme.onSurface,
+                fontWeight = titleWeight,
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = subtitleColor,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+        SpatialDepthBadge(
+            label = badgeLabel,
+            chrome = chrome,
+        )
     }
 }
 
@@ -501,7 +529,12 @@ private fun SpatialDepthMeter(
                 modifier = Modifier
                     .weight(1f)
                     .height(barHeight),
-                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 4.dp, bottomEnd = 4.dp),
+                shape = RoundedCornerShape(
+                    topStart = 8.dp,
+                    topEnd = 8.dp,
+                    bottomStart = 4.dp,
+                    bottomEnd = 4.dp,
+                ),
                 color = if (active) {
                     scheme.primary.copy(alpha = if (chrome.isDark) 0.85f else 0.72f)
                 } else {
@@ -555,7 +588,7 @@ private fun SpatialDepthCard(
         label = "spatial_layer_selection",
     )
     val depthOffset = spatialLayerLift(layer.id, selected = false)
-    val surfaceColor = androidx.compose.ui.graphics.lerp(
+    val surfaceColor = lerp(
         start = chrome.cardSurface,
         stop = chrome.cardSurfaceSelected,
         fraction = selectionProgress,
@@ -565,15 +598,18 @@ private fun SpatialDepthCard(
         stop = if (chrome.isDark) 16f else 10f,
         fraction = selectionProgress,
     ).dp
-    val borderColor = scheme.primary.copy(
-        alpha = 0.55f * selectionProgress,
+    val borderColor = scheme.primary.copy(alpha = 0.55f * selectionProgress)
+    val subtitleColor = lerp(
+        start = scheme.onSurfaceVariant,
+        stop = scheme.primary,
+        fraction = selectionProgress,
     )
 
     Surface(
         onClick = onClick,
         modifier = modifier.graphicsLayer {
             translationY = with(density) {
-                (depthOffset.toPx() * (1f - selectionProgress))
+                depthOffset.toPx() * (1f - selectionProgress)
             }
         },
         shape = SpatialCardShape,
@@ -582,37 +618,19 @@ private fun SpatialDepthCard(
         shadowElevation = shadowElevation,
         tonalElevation = 0.dp,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = SpatialCardInnerPaddingH,
-                    vertical = SpatialCardInnerPaddingV,
-                ),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.padding(
+                horizontal = SpatialCardInnerPaddingH,
+                vertical = SpatialCardInnerPaddingV,
+            ),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = layer.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = scheme.onSurface,
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                )
-                Text(
-                    text = if (selected) "Selected · elevated" else "Depth card",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = androidx.compose.ui.graphics.lerp(
-                        start = scheme.onSurfaceVariant,
-                        stop = scheme.primary,
-                        fraction = selectionProgress,
-                    ),
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-            }
-            SpatialDepthBadge(
-                label = "Z${layer.depthTier + 1}",
+            SpatialLayerTitleRow(
+                title = layer.title,
+                subtitle = if (selected) "Selected · elevated" else "Depth card",
+                subtitleColor = subtitleColor,
+                badgeLabel = "Z${layer.depthTier + 1}",
                 chrome = chrome,
+                titleWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
             )
         }
     }

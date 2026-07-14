@@ -11,9 +11,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-private val Context.launcherIconDataStore: DataStore<Preferences> by preferencesDataStore(
+val Context.launcherIconDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "uitrends_launcher_icon",
 )
+
+private val KEY_SELECTED_ICON = stringPreferencesKey("selected_launcher_icon")
+private val LEGACY_THEME_KEY_LAUNCHER_ICON = stringPreferencesKey("launcher_icon")
 
 class LauncherIconRepository(
     private val context: Context,
@@ -44,10 +47,5 @@ class LauncherIconRepository(
         val legacyStore = context.themeDataStore.data.first()
         val raw = legacyStore[LEGACY_THEME_KEY_LAUNCHER_ICON] ?: return null
         return AppLauncherIcon.entries.firstOrNull { it.name == raw }
-    }
-
-    private companion object {
-        val KEY_SELECTED_ICON = stringPreferencesKey("selected_launcher_icon")
-        val LEGACY_THEME_KEY_LAUNCHER_ICON = stringPreferencesKey("launcher_icon")
     }
 }
