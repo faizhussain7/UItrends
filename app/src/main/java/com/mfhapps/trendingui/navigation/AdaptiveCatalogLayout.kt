@@ -27,6 +27,7 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mfhapps.trendingui.deeplink.AppDeepLinks
 import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.screens.home.DemoCatalogScreen
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
@@ -67,6 +69,8 @@ fun AdaptiveCatalogLayout(
     onSyncLauncherIconWithThemeChange: (Boolean) -> Unit,
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     modifier: Modifier = Modifier,
+    openDestination: String? = null,
+    onOpenDestinationConsumed: () -> Unit = {},
 ) {
     val reduceMotion = rememberReduceMotion()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
@@ -87,6 +91,20 @@ fun AdaptiveCatalogLayout(
     val detailKey = navigator.currentDestination?.contentKey
     val selectedDemoKey = detailKey?.toDemoPaneKeyOrNull()
 
+    LaunchedEffect(openDestination) {
+        val destination = openDestination ?: return@LaunchedEffect
+        if (!AppDeepLinks.isKnownDestination(destination)) {
+            onOpenDestinationConsumed()
+            return@LaunchedEffect
+        }
+        if (destination == SETTINGS_DETAIL_KEY) {
+            settingsSession++
+            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SETTINGS_DETAIL_KEY)
+        } else {
+            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, destination)
+        }
+        onOpenDestinationConsumed()
+    }
     CompositionLocalProvider(LocalReduceMotion provides reduceMotion) {
         SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
             val sharedScope = this

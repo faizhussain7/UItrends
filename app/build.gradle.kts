@@ -219,6 +219,8 @@ dependencies {
     implementation(libs.coil.svg)
     implementation(libs.haze)
     implementation(libs.haze.materials)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.camera.core)

@@ -26,6 +26,8 @@ fun UITrendsApp(
     onSyncLauncherIconWithThemeChange: (Boolean) -> Unit,
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     modifier: Modifier = Modifier,
+    openDestination: String? = null,
+    onOpenDestinationConsumed: () -> Unit = {},
 ) {
     ProvideAppModalBackdrop(
         blurEnabled = themePreferences.blurModalBackdrop,
@@ -35,6 +37,8 @@ fun UITrendsApp(
             modifier = modifier,
             themePreferences = themePreferences,
             launcherIcon = launcherIcon,
+            openDestination = openDestination,
+            onOpenDestinationConsumed = onOpenDestinationConsumed,
             onThemeModeChange = onThemeModeChange,
             onDynamicColorChange = onDynamicColorChange,
             onBrandAccentChange = onBrandAccentChange,

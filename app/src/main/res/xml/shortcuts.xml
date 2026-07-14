@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="pretext"
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_pretext"
+        android:shortcutShortLabel="@string/shortcut_pretext_short"
+        android:shortcutLongLabel="@string/shortcut_pretext_long"
+        android:shortcutDisabledMessage="@string/shortcut_disabled">
+        <intent
+            android:action="com.mfhapps.trendingui.action.OPEN_DESTINATION"
+            android:targetPackage="com.mfhapps.trendingui"
+            android:targetClass="com.mfhapps.trendingui.MainActivity">
+            <extra
+                android:name="extra_destination"
+                android:value="Pretext" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="glass"
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_glass"
+        android:shortcutShortLabel="@string/shortcut_glass_short"
+        android:shortcutLongLabel="@string/shortcut_glass_long"
+        android:shortcutDisabledMessage="@string/shortcut_disabled">
+        <intent
+            android:action="com.mfhapps.trendingui.action.OPEN_DESTINATION"
+            android:targetPackage="com.mfhapps.trendingui"
+            android:targetClass="com.mfhapps.trendingui.MainActivity">
+            <extra
+                android:name="extra_destination"
+                android:value="Glass" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="masonry"
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_masonry"
+        android:shortcutShortLabel="@string/shortcut_masonry_short"
+        android:shortcutLongLabel="@string/shortcut_masonry_long"
+        android:shortcutDisabledMessage="@string/shortcut_disabled">
+        <intent
+            android:action="com.mfhapps.trendingui.action.OPEN_DESTINATION"
+            android:targetPackage="com.mfhapps.trendingui"
+            android:targetClass="com.mfhapps.trendingui.MainActivity">
+            <extra
+                android:name="extra_destination"
+                android:value="Masonry" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="settings"
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_settings"
+        android:shortcutShortLabel="@string/shortcut_settings_short"
+        android:shortcutLongLabel="@string/shortcut_settings_long"
+        android:shortcutDisabledMessage="@string/shortcut_disabled">
+        <intent
+            android:action="com.mfhapps.trendingui.action.OPEN_DESTINATION"
+            android:targetPackage="com.mfhapps.trendingui"
+            android:targetClass="com.mfhapps.trendingui.MainActivity">
+            <extra
+                android:name="extra_destination"
+                android:value="app_settings" />
+        </intent>
+    </shortcut>
+</shortcuts>

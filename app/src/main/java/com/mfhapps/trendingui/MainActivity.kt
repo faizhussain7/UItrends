@@ -1,5 +1,6 @@
 package com.mfhapps.trendingui
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,8 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mfhapps.trendingui.deeplink.AppDeepLinks
 import com.mfhapps.trendingui.launcher.LauncherIconViewModel
 import com.mfhapps.trendingui.launcher.installTrendingSplashScreen
 import com.mfhapps.trendingui.startup.AppStartupViewModel
@@ -32,6 +36,7 @@ class MainActivity : ComponentActivity() {
     private val startupViewModel: AppStartupViewModel by viewModels()
     private val themeViewModel: ThemeViewModel by viewModels()
     private val launcherIconViewModel: LauncherIconViewModel by viewModels()
+    private var openDestination by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val themeMode = ThemeModeStore.get(this).current()
@@ -46,6 +51,7 @@ class MainActivity : ComponentActivity() {
             },
         )
         super.onCreate(savedInstanceState)
+        openDestination = AppDeepLinks.destinationFrom(intent)
         enableActivityEdgeToEdge(launchDark)
         applyInitialSystemBarAppearance(themeMode, resources.configuration.isSystemInNightMode)
         applySessionTheme(themeMode, resources.configuration.isSystemInNightMode)
@@ -69,6 +75,8 @@ class MainActivity : ComponentActivity() {
                 UITrendsApp(
                     themePreferences = prefs,
                     launcherIcon = selectedLauncherIcon,
+                    openDestination = openDestination,
+                    onOpenDestinationConsumed = { openDestination = null },
                     onThemeModeChange = themeViewModel::setThemeMode,
                     onDynamicColorChange = themeViewModel::setUseDynamicColor,
                     onBrandAccentChange = themeViewModel::setBrandAccentColor,
@@ -81,6 +89,12 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        openDestination = AppDeepLinks.destinationFrom(intent)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

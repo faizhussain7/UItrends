@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">UITrends</string>
     <string name="launcher_icon_bijapur">Square Eight Star</string>
@@ -13,4 +14,24 @@
     <string name="action_torch">Toggle torch</string>
     <string name="action_flip_camera">Flip camera</string>
     <string name="action_settings">Camera settings</string>
+    <string name="shortcut_pretext_short">Pretext</string>
+    <string name="shortcut_pretext_long">Open Pretext Engine</string>
+    <string name="shortcut_glass_short">Glass</string>
+    <string name="shortcut_glass_long">Open Glassmorphism</string>
+    <string name="shortcut_masonry_short">Masonry</string>
+    <string name="shortcut_masonry_long">Open Immersive Masonry</string>
+    <string name="shortcut_settings_short">Settings</string>
+    <string name="shortcut_settings_long">Open app settings</string>
+    <string name="shortcut_disabled">Shortcut unavailable</string>
+    <string name="widget_showcase_description">Jump into Pretext Engine — paragraph layout with CameraX live reflow</string>
+    <string name="widget_showcase_label">Pretext Engine</string>
+    <string name="widget_showcase_header">Interactive UI patterns</string>
+    <string name="widget_pretext_title">Pretext Engine</string>
+    <string name="widget_pretext_body">Paragraph layout with CameraX live reflow</string>
+    <string name="widget_pretext_cta">Open Pretext</string>
+    <string name="widget_more_label">More showcases</string>
+    <string name="widget_tile_pretext_subtitle">Typography</string>
+    <string name="widget_tile_glass_subtitle">Blur &amp; depth</string>
+    <string name="widget_tile_masonry_subtitle">Immersive</string>
+    <string name="widget_tile_settings_subtitle">Look &amp; feel</string>
 </resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_panel_day">#FF1F1C1A</color>
+    <color name="widget_tile_rose_day">#FF65002A</color>
+    <color name="widget_tile_slate_day">#FF1E3A5F</color>
+    <color name="widget_tile_honey_day">#FF5E4800</color>
+    <color name="widget_tile_neutral_day">#FF353130</color>
+    <color name="widget_on_tile_rose_day">#FFFFD9E6</color>
+    <color name="widget_on_tile_slate_day">#FFD9E2EC</color>
+    <color name="widget_on_tile_honey_day">#FFFFE8A3</color>
+    <color name="widget_on_tile_neutral_day">#FFF5F0EB</color>
+</resources>

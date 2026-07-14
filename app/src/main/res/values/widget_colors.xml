@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="shortcut_pretext_bg">#FFD42D6A</color>
+    <color name="shortcut_glass_bg">#FF4F6D95</color>
+    <color name="shortcut_masonry_bg">#FFA61E52</color>
+    <color name="shortcut_settings_bg">#FF2F2B28</color>
+    <color name="widget_panel_day">#FFFFFBF7</color>
+    <color name="widget_tile_rose_day">#FFFFD9E6</color>
+    <color name="widget_tile_slate_day">#FFD9E2EC</color>
+    <color name="widget_tile_honey_day">#FFFFE8A3</color>
+    <color name="widget_tile_neutral_day">#FFE6E0DA</color>
+    <color name="widget_on_tile_rose_day">#FF3F0018</color>
+    <color name="widget_on_tile_slate_day">#FF0A1929</color>
+    <color name="widget_on_tile_honey_day">#FF261A00</color>
+    <color name="widget_on_tile_neutral_day">#FF1F1C1A</color>
+</resources>
