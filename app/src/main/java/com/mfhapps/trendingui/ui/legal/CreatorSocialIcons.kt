@@ -4,15 +4,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +21,7 @@ import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.mfhapps.trendingui.legal.CreatorSocialAssets
+import com.mfhapps.trendingui.ui.components.rememberExpressiveBadgeShape
 
 enum class CreatorSocialBrand {
     Gmail,
@@ -40,12 +39,11 @@ private fun CreatorSocialBrand.assetPath(onDarkSurface: Boolean): String = when 
     CreatorSocialBrand.WhatsApp -> CreatorSocialAssets.WHATSAPP
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CreatorBrandIcon(
     brand: CreatorSocialBrand,
     modifier: Modifier = Modifier,
-    shape: androidx.compose.ui.graphics.Shape = MaterialShapes.Gem.toShape(),
+    shape: Shape? = null,
     background: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
     iconSize: Dp = 22.dp,
 ) {
@@ -54,10 +52,12 @@ fun CreatorBrandIcon(
     val iconPixels = with(density) { iconSize.roundToPx() }
     val onDarkSurface = background.luminance() < 0.45f
     val assetPath = brand.assetPath(onDarkSurface)
+    val loopShape = rememberExpressiveBadgeShape(seed = brand.ordinal + 101)
+    val resolvedShape = shape ?: loopShape
 
     Surface(
         modifier = modifier,
-        shape = shape,
+        shape = resolvedShape,
         color = background,
     ) {
         Box(

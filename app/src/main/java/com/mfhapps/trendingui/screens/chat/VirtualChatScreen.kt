@@ -6,8 +6,8 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import com.mfhapps.trendingui.ui.motion.expressiveSpatialSpec
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -272,7 +272,7 @@ fun VirtualChatScreen() {
 
             val fabVisibility by animateFloatAsState(
                 targetValue = if (!nearBottom) 1f else 0f,
-                animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f),
+                animationSpec = expressiveSpatialSpec(),
                 label = "fabVisibility",
             )
             if (fabVisibility > 0.01f) {

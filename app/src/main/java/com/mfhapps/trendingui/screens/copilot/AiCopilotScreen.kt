@@ -404,7 +404,7 @@ private fun CopilotWorkspaceHeader() {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = "AI Copilot",
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.headlineLargeEmphasized,
             fontWeight = FontWeight.Bold,
             color = scheme.onSurface,
         )

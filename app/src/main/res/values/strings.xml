@@ -26,6 +26,7 @@
     <string name="widget_showcase_description">Jump into Pretext Engine — paragraph layout with CameraX live reflow</string>
     <string name="widget_showcase_label">Pretext Engine</string>
     <string name="widget_showcase_header">Interactive UI patterns</string>
+    <string name="widget_showcase_header_subtitle">Open a showcase</string>
     <string name="widget_pretext_title">Pretext Engine</string>
     <string name="widget_pretext_body">Paragraph layout with CameraX live reflow</string>
     <string name="widget_pretext_cta">Open Pretext</string>

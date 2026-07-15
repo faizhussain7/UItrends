@@ -144,18 +144,39 @@ fun manualViewShapeAt(
     viewW: Float,
     viewH: Float,
 ): ViewShape {
-    val w = viewW * 0.22f
-    val h = viewH * 0.45f
-    val bounds = RectF(
-        (xPx - w * 0.5f).coerceIn(0f, viewW - w),
-        (yPx - h * 0.5f).coerceIn(0f, viewH - h),
-        (xPx + w * 0.5f).coerceIn(w, viewW),
-        (yPx + h * 0.5f).coerceIn(h, viewH),
+    val w = viewW * 0.26f
+    val h = viewH * 0.52f
+    val left = (xPx - w * 0.5f).coerceIn(0f, viewW - w)
+    val top = (yPx - h * 0.5f).coerceIn(0f, viewH - h)
+    val bounds = RectF(left, top, left + w, top + h)
+    val cx = bounds.centerX()
+    val cy = bounds.centerY()
+    val halfW = bounds.width() * 0.5f
+    val halfH = bounds.height() * 0.5f
+
+    val pts = listOf(
+        cx to (cy - halfH),
+        cx + halfW * 0.28f to (cy - halfH * 0.78f),
+        cx + halfW * 0.38f to (cy - halfH * 0.52f),
+        cx + halfW * 0.92f to (cy - halfH * 0.20f),
+        cx + halfW * 0.72f to (cy - halfH * 0.02f),
+        cx + halfW * 0.58f to (cy + halfH * 0.28f),
+        cx + halfW * 0.42f to (cy + halfH * 0.62f),
+        cx + halfW * 0.22f to (cy + halfH * 0.96f),
+        cx to (cy + halfH * 0.88f),
+        cx - halfW * 0.22f to (cy + halfH * 0.96f),
+        cx - halfW * 0.42f to (cy + halfH * 0.62f),
+        cx - halfW * 0.58f to (cy + halfH * 0.28f),
+        cx - halfW * 0.72f to (cy - halfH * 0.02f),
+        cx - halfW * 0.92f to (cy - halfH * 0.20f),
+        cx - halfW * 0.38f to (cy - halfH * 0.52f),
+        cx - halfW * 0.28f to (cy - halfH * 0.78f),
     )
+
     return ViewShape(
         boundsPx = bounds,
-        polygonPx = null,
-        label = null,
+        polygonPx = PolygonObstacle(pts),
+        label = "manual",
         source = VisionSource.Manual,
         isLiveDetection = true,
     )
@@ -237,4 +258,5 @@ data class VisionTelemetry(
     val avgIouStability: Float = 0f,
     val lastAccuracy: VisionAccuracySnapshot? = null,
     val lastBackend: String? = null,
+    val ncnnReady: Boolean = false,
 )

@@ -7,13 +7,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -44,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -55,84 +48,28 @@ import coil.size.Scale
 import com.mfhapps.trendingui.legal.CREATOR_PROFILE_PHOTO_KEY
 import com.mfhapps.trendingui.navigation.demoSharedElement
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
+import com.mfhapps.trendingui.ui.components.ExpressiveMorphTempo
+import com.mfhapps.trendingui.ui.components.ExpressiveShapeCatalogTier
 import com.mfhapps.trendingui.ui.components.FilledTonalIconButton
 import com.mfhapps.trendingui.ui.components.LocalModalBackdropStyle
 import com.mfhapps.trendingui.ui.components.ZoomableImage
 import com.mfhapps.trendingui.ui.components.activeAppHazeState
 import com.mfhapps.trendingui.ui.components.modalBackdropHazeEffect
-import com.mfhapps.trendingui.ui.components.rememberMorphShape
+import com.mfhapps.trendingui.ui.components.rememberExpressiveMorphLoopShape
+import com.mfhapps.trendingui.ui.motion.expressiveEffectsSpec
 import kotlinx.coroutines.delay
-
-private val FullscreenExpressiveShapes = listOf(
-    MaterialShapes.Gem,
-    MaterialShapes.Sunny,
-    MaterialShapes.Circle,
-    MaterialShapes.Cookie4Sided,
-    MaterialShapes.SoftBoom,
-)
-
-private const val FullscreenShapeSegmentMillis = 2_400
-
-private fun smoothPhotoMorph(progress: Float): Float {
-    val t = progress.coerceIn(0f, 1f)
-    val step = t * t * (3f - 2f * t)
-    return step * step * (3f - 2f * step)
-}
 
 @Composable
 private fun rememberFullscreenPhotoFrameShape(
     expressiveShapesEnabled: Boolean,
     reduceMotion: Boolean,
-): Shape {
-    val shapes = FullscreenExpressiveShapes
-    val segmentCount = shapes.size
-
-    val introProgress by animateFloatAsState(
-        targetValue = if (expressiveShapesEnabled && !reduceMotion) 1f else 0f,
-        animationSpec = tween(durationMillis = 720, easing = FastOutSlowInEasing),
-        label = "fullscreenIntroMorph",
-    )
-
-    val infinite = rememberInfiniteTransition(label = "fullscreenPhotoMorph")
-    val loopPosition by infinite.animateFloat(
-        initialValue = 0f,
-        targetValue = segmentCount.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = FullscreenShapeSegmentMillis * segmentCount,
-                easing = FastOutSlowInEasing,
-            ),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "fullscreenPhotoMorphLoop",
-    )
-
-    val (restShape, pressedShape, morphProgress) = when {
-        reduceMotion || !expressiveShapesEnabled -> {
-            Triple(MaterialShapes.Square, MaterialShapes.Square, 0f)
-        }
-        introProgress < 1f -> {
-            Triple(MaterialShapes.Square, shapes.first(), introProgress)
-        }
-        else -> {
-            val segmentIndex = loopPosition
-                .toInt()
-                .coerceIn(0, segmentCount - 1)
-            val segmentProgress = smoothPhotoMorph(loopPosition - segmentIndex)
-            Triple(
-                shapes[segmentIndex],
-                shapes[(segmentIndex + 1) % segmentCount],
-                segmentProgress,
-            )
-        }
-    }
-
-    return rememberMorphShape(
-        rest = restShape,
-        pressed = pressedShape,
-        progress = morphProgress,
-    )
-}
+) = rememberExpressiveMorphLoopShape(
+    enabled = expressiveShapesEnabled && !reduceMotion,
+    tier = ExpressiveShapeCatalogTier.Fullscreen,
+    tempo = ExpressiveMorphTempo.Fullscreen,
+    introFrom = MaterialShapes.Square,
+    introMillis = 720,
+)
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -152,7 +89,7 @@ fun CreatorProfilePhotoFullscreen(
     var expressiveShapesEnabled by remember { mutableStateOf(reduceMotion) }
     val chromeAlpha by animateFloatAsState(
         targetValue = 1f,
-        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+        animationSpec = expressiveEffectsSpec(),
         label = "fullscreenChromeAlpha",
     )
     val frameShape = rememberFullscreenPhotoFrameShape(
@@ -257,21 +194,12 @@ fun CreatorProfilePhotoTransitionHost(
         onPhotoClick: () -> Unit,
     ) -> Unit,
 ) {
+    val effects = expressiveEffectsSpec<Float>()
     SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
         AnimatedContent(
             targetState = photoExpanded,
             transitionSpec = {
-                fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 180,
-                        easing = FastOutSlowInEasing,
-                    ),
-                ) togetherWith fadeOut(
-                    animationSpec = tween(
-                        durationMillis = 160,
-                        easing = FastOutSlowInEasing,
-                    ),
-                )
+                fadeIn(animationSpec = effects) togetherWith fadeOut(animationSpec = effects)
             },
             label = "creator-photo-expand",
         ) { expanded ->

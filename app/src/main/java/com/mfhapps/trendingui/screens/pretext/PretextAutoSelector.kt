@@ -1,5 +1,11 @@
 package com.mfhapps.trendingui.screens.pretext
 
+internal data class PretextDetectionBundle(
+    val face: VisionDetectReport,
+    val person: VisionDetectReport,
+    val objectReport: VisionDetectReport,
+)
+
 internal object PretextAutoSelector {
 
     private val REJECTED_NOTES = setOf(
@@ -19,9 +25,11 @@ internal object PretextAutoSelector {
     private const val PERSON_MAX_AREA = 0.72f
     private const val PERSON_MIN_AREA = 0.015f
 
-    private const val OBJECT_MIN_SCORE = 0.35f
+    private const val OBJECT_MIN_SCORE = 0.28f
     private const val OBJECT_MAX_AREA = 0.55f
     private const val OBJECT_MIN_AREA = 0.01f
+
+    private const val SWITCH_MARGIN = 0.18f
 
     private val PREFERRED_OBJECT_LABELS = setOf(
         "cell phone",
@@ -42,6 +50,23 @@ internal object PretextAutoSelector {
         "suitcase",
     )
 
+    data class Candidate(
+        val report: VisionDetectReport,
+        val source: VisionSource,
+        val rankScore: Float,
+        val reason: String,
+    ) {
+        fun toPick(): Pick = Pick(
+            report = report.copy(
+                backend = "auto",
+                autoPickSource = source,
+                autoPickReason = reason,
+            ),
+            source = source,
+            reason = reason,
+        )
+    }
+
     data class Pick(
         val report: VisionDetectReport,
         val source: VisionSource,
@@ -53,54 +78,49 @@ internal object PretextAutoSelector {
         val extras: List<Pick>,
     )
 
-    fun pickPrimary(
-        face: VisionDetectReport,
-        person: VisionDetectReport,
-        objectReport: VisionDetectReport,
-    ): Pick? = rankAll(face, person, objectReport).firstOrNull()
+    fun selectPrimary(
+        bundle: PretextDetectionBundle,
+        activeSource: VisionSource? = null,
+    ): Pick? = applyHysteresis(scoreAll(bundle), activeSource)?.toPick()
 
-    fun pickMulti(
-        face: VisionDetectReport,
-        person: VisionDetectReport,
-        objectReport: VisionDetectReport,
+    fun selectMulti(
+        bundle: PretextDetectionBundle,
         maxShapes: Int = 3,
+        activeSource: VisionSource? = null,
     ): MultiPick {
-        val ranked = rankAll(face, person, objectReport)
+        val ranked = scoreAll(bundle)
         if (ranked.isEmpty()) return MultiPick(null, emptyList())
-        val primary = ranked.first()
-        val extras = ranked.drop(1).take((maxShapes - 1).coerceAtLeast(0))
-        return MultiPick(primary, extras)
+        val primary = applyHysteresis(ranked, activeSource) ?: ranked.first()
+        val extras = ranked
+            .filter { it.source != primary.source }
+            .take((maxShapes - 1).coerceAtLeast(0))
+        return MultiPick(primary.toPick(), extras.map { it.toPick() })
     }
 
-    private fun rankAll(
-        face: VisionDetectReport,
-        person: VisionDetectReport,
-        objectReport: VisionDetectReport,
-    ): List<Pick> = listOfNotNull(
-        scoreFace(face)?.toPick(),
-        scorePerson(person)?.toPick(),
-        scoreObject(objectReport)?.toPick(),
-    )
+    private fun scoreAll(bundle: PretextDetectionBundle): List<Candidate> = listOfNotNull(
+        scoreFace(bundle.face),
+        scorePerson(bundle.person),
+        scoreObject(bundle.objectReport),
+    ).sortedByDescending { it.rankScore }
 
-    private data class Scored(
-        val report: VisionDetectReport,
-        val source: VisionSource,
-        val rankScore: Float,
-        val areaNorm: Float,
-        val reason: String,
-    ) {
-        fun toPick() = Pick(
-            report = report.copy(
-                backend = "auto",
-                autoPickSource = source,
-                autoPickReason = reason,
-            ),
-            source = source,
-            reason = reason,
-        )
+    private fun applyHysteresis(
+        ranked: List<Candidate>,
+        activeSource: VisionSource?,
+    ): Candidate? {
+        if (ranked.isEmpty()) return null
+        val best = ranked.first()
+        val stickySource = activeSource?.takeUnless {
+            it == VisionSource.Idle || it == VisionSource.Manual
+        } ?: return best
+        val active = ranked.find { it.source == stickySource } ?: return best
+        return if (best.source != stickySource && best.rankScore < active.rankScore * (1f + SWITCH_MARGIN)) {
+            active
+        } else {
+            best
+        }
     }
 
-    private fun scoreFace(report: VisionDetectReport): Scored? {
+    private fun scoreFace(report: VisionDetectReport): Candidate? {
         val contour = report.contour ?: return null
         val area = bboxArea(contour)
         val detScore = report.score ?: 0.5f
@@ -108,11 +128,11 @@ internal object PretextAutoSelector {
         if (area !in FACE_MIN_AREA..FACE_MAX_AREA) return null
         if (report.note == "contour-failed") return null
         val rank = detScore * areaPenalty(area, ideal = 0.06f, max = FACE_MAX_AREA)
-        val reason = "score=${"%.2f".format(detScore)} area=${"%.3f".format(area)}"
-        return Scored(report, VisionSource.Face, rank, area, reason)
+        val reason = "face score=${"%.2f".format(detScore)} area=${"%.3f".format(area)} rank=${"%.2f".format(rank)}"
+        return Candidate(report, VisionSource.Face, rank, reason)
     }
 
-    private fun scorePerson(report: VisionDetectReport): Scored? {
+    private fun scorePerson(report: VisionDetectReport): Candidate? {
         val contour = report.contour ?: return null
         val area = bboxArea(contour)
         val detScore = report.score ?: 0f
@@ -120,11 +140,11 @@ internal object PretextAutoSelector {
         if (area !in PERSON_MIN_AREA..PERSON_MAX_AREA) return null
         if (report.note in REJECTED_NOTES || report.isBlobBoxFallback()) return null
         val rank = detScore.coerceAtMost(0.5f) * 2f * areaPenalty(area, ideal = 0.18f, max = PERSON_MAX_AREA)
-        val reason = "score=${"%.3f".format(detScore)} area=${"%.3f".format(area)}"
-        return Scored(report, VisionSource.Person, rank, area, reason)
+        val reason = "person score=${"%.3f".format(detScore)} area=${"%.3f".format(area)} rank=${"%.2f".format(rank)}"
+        return Candidate(report, VisionSource.Person, rank, reason)
     }
 
-    private fun scoreObject(report: VisionDetectReport): Scored? {
+    private fun scoreObject(report: VisionDetectReport): Candidate? {
         val contour = report.contour ?: return null
         val area = bboxArea(contour)
         val detScore = report.score ?: 0.4f
@@ -133,8 +153,8 @@ internal object PretextAutoSelector {
         val label = contour.label?.lowercase() ?: ""
         val labelBoost = if (label in PREFERRED_OBJECT_LABELS) 1.15f else 1f
         val rank = detScore * labelBoost * areaPenalty(area, ideal = 0.08f, max = OBJECT_MAX_AREA)
-        val reason = "score=${"%.2f".format(detScore)} label=$label area=${"%.3f".format(area)}"
-        return Scored(report, VisionSource.Object, rank, area, reason)
+        val reason = "object score=${"%.2f".format(detScore)} label=$label area=${"%.3f".format(area)} rank=${"%.2f".format(rank)}"
+        return Candidate(report, VisionSource.Object, rank, reason)
     }
 
     private fun bboxArea(contour: VisionContour): Float {

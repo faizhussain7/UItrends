@@ -1,34 +1,24 @@
 package com.mfhapps.trendingui.ui.components
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.ContainedLoadingIndicator as MaterialContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator as MaterialLoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ButtonGroup(
     modifier: Modifier = Modifier,
@@ -36,7 +26,7 @@ fun ButtonGroup(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
         verticalAlignment = Alignment.CenterVertically,
         content = { ButtonGroupScopeImpl(this).content() },
     )
@@ -52,6 +42,7 @@ interface ButtonGroupScope {
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private class ButtonGroupScopeImpl(
     private val rowScope: RowScope,
 ) : ButtonGroupScope, RowScope by rowScope {
@@ -62,21 +53,16 @@ private class ButtonGroupScopeImpl(
         modifier: Modifier,
         content: @Composable RowScope.() -> Unit,
     ) {
-        FilledTonalButton(
-            onClick = { onCheckedChange(true) },
+        ToggleButton(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
             modifier = modifier,
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.filledTonalButtonColors(
-                containerColor = if (checked) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainerHigh
-                },
-                contentColor = if (checked) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+            shapes = ToggleButtonDefaults.shapes(),
+            colors = ToggleButtonDefaults.toggleButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ),
             content = content,
         )
@@ -90,32 +76,20 @@ fun LoadingIndicator(
     indicatorSize: Dp = 40.dp,
     color: Color = MaterialTheme.colorScheme.primary,
 ) {
-    CircularWavyProgressIndicator(
+    MaterialLoadingIndicator(
         modifier = modifier.size(indicatorSize),
-        color = color
+        color = color,
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ContainedLoadingIndicator(
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-    ) {
-        Box(
-            modifier = Modifier.size(56.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            LoadingIndicator(
-                indicatorSize = 28.dp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-        }
-    }
+    MaterialContainedLoadingIndicator(
+        modifier = modifier.size(56.dp),
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        indicatorColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
 }
-
-private fun lerp(start: Float, end: Float, fraction: Float): Float =
-    start + (end - start) * fraction.coerceIn(0f, 1f)

@@ -176,17 +176,3 @@ fun DrawScope.drawGlowOrbs(
         }
     }
 }
-
-fun vividOrbColorsForPreset(preset: MeshPreset, boost: Float = 1f): List<Color> {
-    val alpha = (0.98f * boost).coerceIn(0.82f, 1f)
-    return if (preset == MeshPreset.Midnight) {
-        listOf(
-            Color(0xFF8B7FFF),
-            Color(0xFFFF8A5C),
-            Color(0xFF45E6B0),
-            Color(0xFF6EB6FF),
-        ).map { it.copy(alpha = alpha) }
-    } else {
-        preset.colors.map { it.copy(alpha = alpha) }
-    }
-}

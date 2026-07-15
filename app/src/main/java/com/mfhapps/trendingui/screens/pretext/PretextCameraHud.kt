@@ -92,6 +92,7 @@ internal fun buildPretextCameraHudContent(
     editorialOrbs: List<ViewShape>,
     trackMode: VisionTrackMode,
     telemetry: VisionTelemetry,
+    lastDetectReport: VisionDetectReport? = null,
     stage: PretextCameraStage,
     stageTheme: PretextStageTheme,
     torchAvailable: Boolean,
@@ -113,8 +114,11 @@ internal fun buildPretextCameraHudContent(
         else -> when (trackMode) {
             VisionTrackMode.Person -> "Looking for a person…"
             VisionTrackMode.Face -> "Looking for a face…"
-            VisionTrackMode.Object -> "Looking for objects…"
-            VisionTrackMode.Auto -> "Auto: face → body → object…"
+            VisionTrackMode.Object -> objectDetectStatus(
+                telemetry = telemetry,
+                report = lastDetectReport,
+            )
+            VisionTrackMode.Auto -> "Auto: scoring face, body, and object…"
         }
     }
 
@@ -137,4 +141,24 @@ internal fun pretextContourShapeLabel(source: VisionSource): String = when (sour
     VisionSource.Object -> "Object contour"
     VisionSource.Manual -> "Manual override"
     VisionSource.Idle -> "Scanning"
+}
+
+private fun objectDetectStatus(
+    telemetry: VisionTelemetry,
+    report: VisionDetectReport?,
+): String {
+    val note = report?.note ?: telemetry.lastAccuracy?.note
+    val backend = report?.backend ?: telemetry.lastBackend
+    return when {
+        !telemetry.ncnnReady || note == "ncnn-not-ready" ->
+            "NCNN not in APK — download assets, then ./gradlew clean assembleDebug"
+        note == "non-direct-buffer" ->
+            "Camera buffer incompatible with NCNN"
+        note == "bad-packet" -> "Detection parse error"
+        note == "bad-planes" -> "Camera frame unavailable"
+        note == "layout-missing" -> "Mapping contour to screen…"
+        backend == "error" && note != null -> "Vision error · $note"
+        backend == "native-yuv-ncnn" && note == "empty-packet" -> "Looking for objects…"
+        else -> "Looking for objects…"
+    }
 }

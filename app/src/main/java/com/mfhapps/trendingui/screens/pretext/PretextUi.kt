@@ -1,6 +1,5 @@
 package com.mfhapps.trendingui.screens.pretext
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,8 +40,8 @@ import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.icons.outlined.Waves
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.ListItem
@@ -55,7 +55,14 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import com.mfhapps.trendingui.ui.components.AdaptiveFitText
+import com.mfhapps.trendingui.ui.components.CatalogMorphShapes
+import com.mfhapps.trendingui.ui.components.ExpressiveMorphTempo
+import com.mfhapps.trendingui.ui.components.ExpressiveShapeCatalogTier
+import com.mfhapps.trendingui.ui.components.ShapeClickableSurface
 import com.mfhapps.trendingui.ui.components.SwitchListItem
+import com.mfhapps.trendingui.ui.components.expressivePhaseOffset
+import com.mfhapps.trendingui.ui.components.rememberExpressiveMorphLoopShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,17 +78,13 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mfhapps.trendingui.ui.accessibility.DecorativeIcon
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 private val PretextSheetInset = 16.dp
 
@@ -109,19 +112,28 @@ private fun pretextSegmentedButtonColors() = SegmentedButtonDefaults.colors(
 )
 
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PretextHeroCard(modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
+    val heroMorph = CatalogMorphShapes.heroMorph
     val brush = Brush.linearGradient(
         listOf(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.tertiaryContainer,
+            scheme.primaryContainer,
+            scheme.tertiaryContainer,
         ),
     )
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
+    val onHero = scheme.onPrimaryContainer
+    ShapeClickableSurface(
+        onClick = {},
         shape = RoundedCornerShape(36.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
+        morphRest = heroMorph.rest,
+        morphPressed = heroMorph.pressed,
+        modifier = modifier.fillMaxWidth(),
+        color = Color.Transparent,
+        contentColor = onHero,
+        rippleColor = onHero.copy(alpha = 0.22f),
+        shadowElevation = 8.dp,
     ) {
         Box(
             Modifier
@@ -137,17 +149,23 @@ fun PretextHeroCard(modifier: Modifier = Modifier) {
                     icon = Icons.Outlined.AutoAwesome,
                     modifier = Modifier.size(72.dp),
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
-                    Text(
-                        "Pretext text engine",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    AdaptiveFitText(
+                        text = "Pretext text engine",
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        color = onHero,
+                        allowTruncation = false,
+                        minFontSize = 18.sp,
                     )
-                    Text(
-                        "Measure once. Layout in arithmetic. Reflow every frame.",
+                    AdaptiveFitText(
+                        text = "Measure once. Layout in arithmetic. Reflow every frame.",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.86f),
+                        color = onHero.copy(alpha = 0.86f),
+                        allowTruncation = false,
+                        minFontSize = 12.sp,
                     )
                 }
             }
@@ -155,7 +173,7 @@ fun PretextHeroCard(modifier: Modifier = Modifier) {
     }
 }
 
-
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ExpressiveShapeBadge(
     icon: ImageVector,
@@ -163,28 +181,36 @@ fun ExpressiveShapeBadge(
     backgroundColor: Color = MaterialTheme.colorScheme.primary,
     iconColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
-    Box(modifier, contentAlignment = Alignment.Center) {
-        Canvas(Modifier.size(64.dp)) {
-            val radius = size.minDimension / 2f
-            val center = Offset(size.width / 2f, size.height / 2f)
-            val path = Path()
-            val petals = 9
-            val inner = radius * 0.86f
-            for (i in 0 until petals * 2) {
-                val angle = (i / (petals * 2f)) * 2f * PI.toFloat() - PI.toFloat() / 2f
-                val r = if (i % 2 == 0) radius else inner
-                val x = center.x + r * cos(angle)
-                val y = center.y + r * sin(angle)
-                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-            }
-            path.close()
-            drawPath(path, color = backgroundColor)
+    val reduceMotion = com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion.current
+    val badgePhase = remember {
+        expressivePhaseOffset(kotlin.random.Random.nextInt(), ExpressiveShapeCatalogTier.Badge)
+    }
+    val badgeLoopShape = rememberExpressiveMorphLoopShape(
+        enabled = !reduceMotion,
+        tier = ExpressiveShapeCatalogTier.Badge,
+        tempo = ExpressiveMorphTempo.Soft,
+        phaseOffset = badgePhase,
+    )
+    Surface(
+        modifier = modifier,
+        shape = badgeLoopShape,
+        color = backgroundColor,
+        contentColor = iconColor,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(72.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            DecorativeIcon(
+                icon,
+                tint = iconColor,
+                modifier = Modifier.size(28.dp),
+            )
         }
-        DecorativeIcon(
-            icon,
-            tint = iconColor,
-            modifier = Modifier.size(28.dp),
-        )
     }
 }
 
@@ -634,6 +660,26 @@ fun PretextCameraOptions(
                         .padding(bottom = 8.dp),
                 )
             }
+
+            HorizontalDivider(
+                modifier = Modifier.pretextSheetInset(),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            )
+
+            SwitchListItem(
+                checked = showHalftone,
+                onCheckedChange = onShowHalftoneChange,
+                containerColor = Color.Transparent,
+                headlineContent = { Text("Newspaper Halftone") },
+                supportingContent = { Text("Apply a vintage newsprint effect to the camera.") },
+                leadingContent = {
+                    DecorativeIcon(
+                        Icons.Outlined.AutoAwesome,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
+                },
+            )
 
             HorizontalDivider(
                 modifier = Modifier.pretextSheetInset(),

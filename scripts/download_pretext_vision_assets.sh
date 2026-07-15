@@ -39,11 +39,6 @@ download \
   "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite" \
   "$ASSETS/blaze_face_short_range.tflite"
 
-# Object fallback (TFLite SSD) when NCNN is unavailable
-download \
-  "https://github.com/tensorflow/tflite-support/raw/master/tensorflow_lite_support/metadata/python/tests/testdata/object_detector/ssd_mobilenet_v1.tflite" \
-  "$ASSETS/ssd_mobilenet_coco.tflite"
-
 # Phase C — NCNN YOLOv8n (object mode, native C++)
 download \
   "https://raw.githubusercontent.com/nihui/ncnn-assets/master/models/yolov8n.ncnn.param" \

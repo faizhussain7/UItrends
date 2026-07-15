@@ -276,15 +276,15 @@ fun AppFontStylePicker(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(188.dp)
+                .height(208.dp)
                 .pointerInput(lastIndex, layoutDirection) {
                     awaitEachGesture {
                         val down = awaitFirstDown(
                             requireUnconsumed = false,
                             pass = PointerEventPass.Initial,
                         )
-                        val longPress =
-                            awaitLongPressOrCancellation(down.id) ?: return@awaitEachGesture
+                        val longPress = awaitLongPressOrCancellation(down.id)
+                        if (longPress == null) return@awaitEachGesture
 
                         val trackWidth = size.width.toFloat().coerceAtLeast(1f)
                         val startX = trackX(longPress.position.x, trackWidth)
@@ -437,11 +437,11 @@ private fun FontPickerCarouselCard(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val previewFamily = remember(style) { AppFonts.previewFont(style) }
-    val previewTypography = remember(style, previewFamily) {
+    val pair = remember(style) { AppFonts.pairFor(style) }
+    val previewTypography = remember(style, pair) {
         buildExpressiveTypography(
-            brandFont = previewFamily,
-            bodyFont = previewFamily,
+            brandFont = pair.brand,
+            bodyFont = pair.body,
         )
     }
 
@@ -476,25 +476,36 @@ private fun FontPickerCarouselCard(
                 Text(
                     text = style.label,
                     style = MaterialTheme.typography.headlineSmallEmphasized,
-                    fontFamily = previewFamily,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = style.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontFamily = previewFamily,
+                    style = MaterialTheme.typography.labelMedium,
                     color = scheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "Brand · Aa Bb 123",
+                    style = MaterialTheme.typography.titleMediumEmphasized,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "Aa Bb Cc 123",
-                    style = MaterialTheme.typography.titleMediumEmphasized,
-                    fontFamily = previewFamily,
+                    text = if (style.isPaired) {
+                        "Plain · The quick brown fox"
+                    } else {
+                        "Same face · body & labels"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

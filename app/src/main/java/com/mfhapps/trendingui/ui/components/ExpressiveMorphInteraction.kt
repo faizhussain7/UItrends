@@ -1,15 +1,12 @@
 package com.mfhapps.trendingui.ui.components
 
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toPath
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +29,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.graphics.shapes.Morph
 import androidx.graphics.shapes.RoundedPolygon
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
+import com.mfhapps.trendingui.ui.motion.expressiveFastSpatialSpec
+import com.mfhapps.trendingui.ui.motion.expressiveSpatialSpec
 
 @Immutable
 data class ExpressiveMorphPress(
@@ -81,15 +80,12 @@ fun rememberExpressiveMorphPress(
     val haptics = LocalHapticFeedback.current
     val morphProgress by animateFloatAsState(
         targetValue = if (isPressed && !reduceMotion) 1f else 0f,
-        animationSpec = spring(
-            stiffness = Spring.StiffnessMedium,
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-        ),
+        animationSpec = expressiveSpatialSpec(),
         label = "expressiveMorphProgress",
     )
     val scale by animateFloatAsState(
         targetValue = if (isPressed && !reduceMotion) 0.96f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessHigh),
+        animationSpec = expressiveFastSpatialSpec(),
         label = "expressiveMorphScale",
     )
     val shape = rememberMorphShape(rest = rest, pressed = pressed, progress = morphProgress, startAngle = startAngle)

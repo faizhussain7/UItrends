@@ -1,7 +1,6 @@
 package com.mfhapps.trendingui.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -24,6 +23,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.RoundedPolygon
+import com.mfhapps.trendingui.ui.motion.expressiveFastSpatialSpec
 
 @Immutable
 data class CatalogCardColors(
@@ -107,7 +107,7 @@ fun ShapeClickableSurface(
         val isPressed by interaction.collectIsPressedAsState()
         val scale by animateFloatAsState(
             targetValue = if (isPressed) 0.98f else 1f,
-            animationSpec = spring(stiffness = androidx.compose.animation.core.Spring.StiffnessHigh),
+            animationSpec = expressiveFastSpatialSpec(),
             label = "catalogCardPressScale",
         )
         surfaceShape = shape

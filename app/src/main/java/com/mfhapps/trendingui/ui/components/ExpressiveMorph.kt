@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.toShape
@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.MaterialShapes
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -72,13 +71,16 @@ fun ExpressivePolygonIcon(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     polygon: androidx.graphics.shapes.RoundedPolygon = MaterialShapes.Clover4Leaf,
+    ambientLoop: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
     contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     iconSize: Dp = 22.dp,
 ) {
+    val loopShape = rememberExpressiveBadgeShape(seed = System.identityHashCode(polygon))
+    val shape = if (ambientLoop) loopShape else polygon.toShape()
     Surface(
         modifier = modifier,
-        shape = polygon.toShape(),
+        shape = shape,
         color = containerColor,
         contentColor = contentColor,
         tonalElevation = 2.dp,
@@ -91,6 +93,7 @@ fun ExpressivePolygonIcon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(iconSize),
+                tint = contentColor,
             )
         }
     }

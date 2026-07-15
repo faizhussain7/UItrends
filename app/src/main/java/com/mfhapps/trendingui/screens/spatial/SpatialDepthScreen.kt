@@ -1,9 +1,9 @@
 package com.mfhapps.trendingui.screens.spatial
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import com.mfhapps.trendingui.ui.motion.ExpressiveMotion
+import com.mfhapps.trendingui.ui.motion.expressiveSpatialSpec
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -172,7 +172,7 @@ fun SpatialDepthScreen(
                 subtitle = subtitle,
                 onNavigateBack = onNavigateBack,
                 guide = guide,
-                modifier = barModifier,
+                barModifier = barModifier,
             )
         },
     ) {
@@ -270,7 +270,7 @@ private fun SpatialCollapsingTopBar(
     subtitle: String,
     onNavigateBack: () -> Unit,
     guide: DemoTrendGuide?,
-    modifier: Modifier = Modifier,
+    barModifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val nestedBackDispatcher = LocalNestedBackDispatcher.current
@@ -283,7 +283,7 @@ private fun SpatialCollapsingTopBar(
     val subtitleAlpha = (1f - collapsedFraction * 1.35f).coerceIn(0f, 1f)
 
     LargeTopAppBar(
-        modifier = modifier,
+        modifier = barModifier,
         windowInsets = appBarTopWindowInsets(),
         scrollBehavior = scrollBehavior,
         colors = rememberCollapsedTopAppBarColors(
@@ -581,9 +581,9 @@ private fun SpatialDepthCard(
     val selectionProgress by animateFloatAsState(
         targetValue = if (selected) 1f else 0f,
         animationSpec = if (reduceMotion) {
-            spring(stiffness = Spring.StiffnessHigh, dampingRatio = 1f)
+            ExpressiveMotion.fastEffects()
         } else {
-            spring(stiffness = Spring.StiffnessMedium, dampingRatio = 0.82f)
+            expressiveSpatialSpec()
         },
         label = "spatial_layer_selection",
     )

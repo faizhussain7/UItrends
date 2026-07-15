@@ -16,5 +16,5 @@ data class ThemePreferences(
     val blurModalBackdrop: Boolean = true,
     val modalBackdropStyle: ModalBackdropStyle = ModalBackdropStyle.Default,
     val syncLauncherIconWithTheme: Boolean = false,
-    val appFontStyle: AppFontStyle = AppFontStyle.Raleway,
+    val appFontStyle: AppFontStyle = AppFontStyle.Satoshi,
 )

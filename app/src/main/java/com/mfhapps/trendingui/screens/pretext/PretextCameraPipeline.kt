@@ -79,6 +79,8 @@ class PretextCameraPipeline(
                 PretextNativeGeometry.resetSmoothing()
                 tracker.clear()
                 PretextVisionLog.resetSession()
+                lastBackend = null
+                lastPublishedSource = VisionSource.Idle
             }
 
             val stage = stageProvider()
@@ -87,10 +89,23 @@ class PretextCameraPipeline(
             val detectStart = SystemClock.elapsedRealtime()
             val detectResult = try {
                 if (useAutoMulti) {
-                    val bundle = vision.detectAutoMulti(imageProxy, lensFacingProvider(), maxShapes = 3)
+                    val bundle = vision.detectAutoMulti(
+                        imageProxy,
+                        lensFacingProvider(),
+                        maxShapes = 3,
+                        activeSource = lastPublishedSource,
+                    )
                     DetectResult(bundle.primary, bundle.extras)
                 } else {
-                    DetectResult(vision.detect(imageProxy, mode, lensFacingProvider()), emptyList())
+                    DetectResult(
+                        vision.detect(
+                            imageProxy,
+                            mode,
+                            lensFacingProvider(),
+                            activeSource = if (mode == VisionTrackMode.Auto) lastPublishedSource else null,
+                        ),
+                        emptyList(),
+                    )
                 }
             } catch (e: Exception) {
                 DetectResult(VisionDetectReport(null, "error", note = e.javaClass.simpleName), emptyList())
@@ -98,6 +113,7 @@ class PretextCameraPipeline(
             val detectMs = SystemClock.elapsedRealtime() - detectStart
             lastDetectMs = detectMs
             val report = detectResult.primary
+            lastBackend = report.backend
             val contour = report.contour
 
             var accuracy: VisionAccuracySnapshot? = null
@@ -203,7 +219,7 @@ class PretextCameraPipeline(
         )
         val layout = previewLayoutCache.current(contour)
         if (layout == null) {
-            return MappedShape(tracker.currentShape, base, layoutMissing = true)
+            return MappedShape(tracker.currentShape, base?.copy(note = "layout-missing"), layoutMissing = true)
         }
         val mapStart = SystemClock.elapsedRealtime()
         val viewShape = PretextViewportMapper.mapContourToView(
@@ -215,7 +231,6 @@ class PretextCameraPipeline(
         tracker.onDetection(contour, viewShape)
         base = base?.let { PretextVisionLog.analyzeMappedShape(contour, viewShape, layout, it, mapMs) }
         lastAccuracy = base
-        lastBackend = report.backend
         base?.let { recordAccuracyWindow(it, hit = true) }
         return MappedShape(tracker.currentShape ?: viewShape, base, layoutMissing = false)
     }
@@ -235,7 +250,6 @@ class PretextCameraPipeline(
         if (useTracker) {
             tracker.onDetection(contour, viewShape)
         }
-        lastBackend = report.backend
         return viewShape
     }
 
@@ -268,6 +282,7 @@ class PretextCameraPipeline(
                     avgIouStability = avgIou,
                     lastAccuracy = lastAccuracy,
                     lastBackend = lastBackend,
+                    ncnnReady = vision.isNcnnReady,
                 ),
             )
             processedCount = 0

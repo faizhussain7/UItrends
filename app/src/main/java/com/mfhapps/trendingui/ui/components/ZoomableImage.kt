@@ -1,8 +1,6 @@
 package com.mfhapps.trendingui.ui.components
 
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
@@ -24,6 +22,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntSize
+import com.mfhapps.trendingui.ui.motion.ExpressiveMotion
 import kotlinx.coroutines.launch
 
 private const val MinZoom = 1f
@@ -71,7 +70,7 @@ fun ZoomableImage(
         animate(
             initialValue = 0f,
             targetValue = 1f,
-            animationSpec = spring(stiffness = 400f),
+            animationSpec = ExpressiveMotion.zoomSpatial,
         ) { fraction, _ ->
             scale = startScale + (zoom - startScale) * fraction
             offset = Offset(
@@ -92,7 +91,7 @@ fun ZoomableImage(
         animate(
             initialValue = 0f,
             targetValue = 1f,
-            animationSpec = tween(260),
+            animationSpec = ExpressiveMotion.contentFade,
         ) { fraction, _ ->
             scale = startScale + (MinZoom - startScale) * fraction
             offset = Offset(

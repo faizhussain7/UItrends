@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 
+
 @Composable
 fun DemoPaneHeader(
     title: String,
@@ -20,7 +21,8 @@ fun DemoPaneHeader(
 ) {
     val inDetailPane = LocalDetailPaneActive.current
     val compact = isCompactWindowWidth()
-if (inDetailPane && compact) return
+
+    if (inDetailPane && compact) return
 
     Column(
         modifier = modifier
@@ -35,12 +37,12 @@ if (inDetailPane && compact) return
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.headlineLargeEmphasized,
         )
         if (subtitle != null) {
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
             )
