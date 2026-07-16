@@ -95,7 +95,6 @@ private fun orbTint(color: Color, alpha: Float, isDark: Boolean): Color {
 }
 
 private fun themePlaygroundOrbColors(scheme: ColorScheme, isDark: Boolean): List<Color> {
-    val alpha = if (isDark) 0.72f else 0.82f
     val sources = if (isDark) {
         listOf(scheme.primary, scheme.secondary, scheme.tertiary, scheme.primary)
     } else {
@@ -107,7 +106,7 @@ private fun themePlaygroundOrbColors(scheme: ColorScheme, isDark: Boolean): List
         )
     }
     return sources.map { source ->
-        if (isDark) orbTint(source, alpha, isDark = true) else source.copy(alpha = alpha)
+        if (isDark) orbTint(source, alpha = 1f, isDark = true) else source.copy(alpha = 1f)
     }
 }
 

@@ -1,9 +1,11 @@
 package com.mfhapps.trendingui.screens.orbs
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import com.mfhapps.trendingui.ui.motion.ExpressiveMotion
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -22,29 +24,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import com.mfhapps.trendingui.ui.components.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -57,15 +58,24 @@ import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.core.sensor.GyroTilt
 import com.mfhapps.trendingui.core.sensor.rememberGyroscopeTilt
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
-import com.mfhapps.trendingui.ui.demo.DemoAnimatedSection
-import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
+import com.mfhapps.trendingui.ui.components.HapticSlider
+import com.mfhapps.trendingui.ui.components.IconButton
+import com.mfhapps.trendingui.ui.components.SwitchListItem
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
+import com.mfhapps.trendingui.ui.components.ExpressiveMorphTempo
+import com.mfhapps.trendingui.ui.components.ExpressiveShapeCatalogTier
+import com.mfhapps.trendingui.ui.components.expressivePhaseOffset
+import com.mfhapps.trendingui.ui.components.rememberExpressiveShapeMorphClock
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
+import com.mfhapps.trendingui.ui.demo.DemoAnimatedSection
+import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 private val OrbsCardShape = RoundedCornerShape(24.dp)
@@ -112,6 +122,15 @@ fun OrbsMeshScreen(
         derivedStateOf { scrollBehavior.state.collapsedFraction.coerceIn(0f, 1f) }
     }
     var selectedPreset by remember { mutableStateOf(MeshPreset.Aurora) }
+    var useMaterialShapes by remember { mutableStateOf(false) }
+    var randomOrbShapes by remember { mutableStateOf(true) }
+    var orbPresence by remember { mutableFloatStateOf(1f) }
+    val orbsAppearance = LocalOrbsAppearanceState.current
+    androidx.compose.runtime.SideEffect {
+        orbsAppearance?.expressive = useMaterialShapes
+        orbsAppearance?.presence = orbPresence
+        orbsAppearance?.randomShapes = randomOrbShapes
+    }
     val playgroundField = remember(selectedPreset, scheme) {
         selectedPreset.themeTinted(scheme)
     }
@@ -169,6 +188,9 @@ fun OrbsMeshScreen(
                                 isDark = chrome.isDark,
                                 tilt = tilt,
                                 reduceMotion = reduceMotion,
+                                presence = orbPresence,
+                                expressive = useMaterialShapes,
+                                randomShapes = randomOrbShapes,
                                 onOrbGrab = {
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 },
@@ -178,8 +200,34 @@ fun OrbsMeshScreen(
                 }
             }
 
-            item(key = "presets") {
+            item(key = "appearance") {
                 DemoAnimatedSection(index = 1) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = OrbsHorizontalPadding),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        OrbsSection(
+                            title = "Orb appearance",
+                            body = "One visibility control for the field. Material shapes loop through the M3 catalog on the playground and backdrop.",
+                            chrome = chrome,
+                        )
+                        OrbAppearanceControls(
+                            presence = orbPresence,
+                            onPresenceChange = { orbPresence = it },
+                            useMaterialShapes = useMaterialShapes,
+                            onUseMaterialShapesChange = { useMaterialShapes = it },
+                            randomShapes = randomOrbShapes,
+                            onRandomShapesChange = { randomOrbShapes = it },
+                            chrome = chrome,
+                        )
+                    }
+                }
+            }
+
+            item(key = "presets") {
+                DemoAnimatedSection(index = 2) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -210,7 +258,7 @@ fun OrbsMeshScreen(
             }
 
             item(key = "gallery-row-1") {
-                DemoAnimatedSection(index = 2) {
+                DemoAnimatedSection(index = 3) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -262,7 +310,7 @@ fun OrbsMeshScreen(
             }
 
             item(key = "blend") {
-                DemoAnimatedSection(index = 3) {
+                DemoAnimatedSection(index = 4) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -282,6 +330,9 @@ fun OrbsMeshScreen(
                                 rowSamples.forEach { sample ->
                                     BlendCompareCard(
                                         sample = sample,
+                                        presence = orbPresence,
+                                        expressive = useMaterialShapes,
+                                        randomShapes = randomOrbShapes,
                                         modifier = Modifier.weight(1f),
                                         chrome = chrome,
                                     )
@@ -293,7 +344,7 @@ fun OrbsMeshScreen(
             }
 
             item(key = "tips") {
-                DemoAnimatedSection(index = 4) {
+                DemoAnimatedSection(index = 5) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -315,10 +366,10 @@ fun OrbsMeshScreen(
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                TipLine("Tune orb alpha to theme luminance so blends read on real devices.", chrome)
+                                TipLine("Drag visibility to Off for mesh-only, or up for a clear vivid field.", chrome)
+                                TipLine("Material shapes loop the full M3 catalog on playground and screen backdrop orbs.", chrome)
                                 TipLine("Freeze gyro parallax when reduce motion is enabled.", chrome)
                                 TipLine("Prefer gradients over full-screen bitmaps for battery life.", chrome)
-                                TipLine("Use haptics on drag grab — reinforces the tactile orb metaphor.", chrome)
                             }
                         }
                     }
@@ -440,6 +491,121 @@ private fun TipLine(text: String, chrome: OrbsChrome) {
 }
 
 @Composable
+private fun OrbAppearanceControls(
+    presence: Float,
+    onPresenceChange: (Float) -> Unit,
+    useMaterialShapes: Boolean,
+    onUseMaterialShapesChange: (Boolean) -> Unit,
+    randomShapes: Boolean,
+    onRandomShapesChange: (Boolean) -> Unit,
+    chrome: OrbsChrome,
+) {
+    val presenceLabel = when {
+        presence <= 0.02f -> "Off"
+        presence < 0.35f -> "Soft"
+        presence < 0.72f -> "Clear"
+        else -> "Vivid"
+    }
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = OrbsCardShape,
+        color = chrome.readableSurface,
+        tonalElevation = 0.dp,
+    ) {
+        Column {
+            Column(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = "Visibility",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = chrome.titleColor,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = "Hide · Soft · Clear · Vivid",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = chrome.bodyColor,
+                        )
+                    }
+                    Text(
+                        text = "$presenceLabel · ${(presence * 100f).roundToInt()}%",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = chrome.sectionAccent,
+                    )
+                }
+                HapticSlider(
+                    value = presence,
+                    onValueChange = onPresenceChange,
+                    valueRange = 0f..1f,
+                    steps = 19,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            SwitchListItem(
+                checked = useMaterialShapes,
+                onCheckedChange = onUseMaterialShapesChange,
+                containerColor = Color.Transparent,
+                headlineContent = {
+                    Text(
+                        text = "Material shapes",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = chrome.titleColor,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                },
+                supportingContent = {
+                    Text(
+                        text = if (useMaterialShapes) {
+                            "Live M3 catalog on playground and backdrop orbs"
+                        } else {
+                            "Classic circular glow orbs"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = chrome.bodyColor,
+                    )
+                },
+            )
+
+            if (useMaterialShapes) {
+                SwitchListItem(
+                    checked = randomShapes,
+                    onCheckedChange = onRandomShapesChange,
+                    containerColor = Color.Transparent,
+                    headlineContent = {
+                        Text(
+                            text = "Random shapes",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = chrome.titleColor,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = if (randomShapes) {
+                                "Each orb morphs from a different catalog start"
+                            } else {
+                                "Every orb shares the same shape"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = chrome.bodyColor,
+                        )
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun OrbsDemoCard(
     modifier: Modifier = Modifier,
     contentScrimAlpha: Float = 0.18f,
@@ -483,7 +649,7 @@ private fun MeshPresetTile(
         },
         tonalElevation = 0.dp,
         border = if (selected) {
-            androidx.compose.foundation.BorderStroke(2.dp, chrome.sectionAccent)
+            BorderStroke(2.dp, chrome.sectionAccent)
         } else {
             null
         },
@@ -544,10 +710,32 @@ private fun MeshPreviewCard(
 private fun BlendCompareCard(
     sample: BlendModeSample,
     chrome: OrbsChrome,
+    presence: Float,
+    expressive: Boolean,
+    randomShapes: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
     val field = remember(scheme) { MeshPreset.Midnight.themeTinted(scheme) }
+    val animatedClock = rememberExpressiveShapeMorphClock(
+        enabled = expressive,
+        tier = ExpressiveShapeCatalogTier.OrbField,
+        tempo = ExpressiveMorphTempo.Soft,
+    )
+    val compareOrbPhases = remember {
+        List(CompareOrbCenters.size) {
+            expressivePhaseOffset(Random.nextInt(), ExpressiveShapeCatalogTier.OrbField)
+        }
+    }
+    val sharedPhase = remember {
+        expressivePhaseOffset(sample.label.hashCode(), ExpressiveShapeCatalogTier.OrbField)
+    }
+    val shapeClock = if (expressive) animatedClock else 0f
+    val orbPhases = if (randomShapes) {
+        compareOrbPhases
+    } else {
+        List(CompareOrbCenters.size) { sharedPhase }
+    }
     Surface(
         modifier = modifier.height(168.dp),
         shape = OrbsTileShape,
@@ -567,6 +755,10 @@ private fun BlendCompareCard(
                     blendMode = sample.mode,
                     strength = 0.98f,
                     radiusFraction = 0.28f,
+                    presence = presence,
+                    expressive = expressive,
+                    shapeClock = shapeClock,
+                    orbPhaseOffsets = orbPhases,
                 )
             }
             Column(
@@ -598,6 +790,9 @@ private fun InteractiveOrbsCanvas(
     isDark: Boolean,
     tilt: GyroTilt,
     reduceMotion: Boolean,
+    presence: Float,
+    expressive: Boolean,
+    randomShapes: Boolean,
     onOrbGrab: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -615,6 +810,18 @@ private fun InteractiveOrbsCanvas(
     val animOffsets = remember { List(4) { Animatable(Offset.Zero, Offset.VectorConverter) } }
     val dragOffsets = remember { List(4) { Animatable(Offset.Zero, Offset.VectorConverter) } }
     val driftDurations = remember { List(4) { Random.nextInt(9000, 15000) } }
+    val randomPhaseOffsets = remember {
+        List(4) { expressivePhaseOffset(Random.nextInt(), ExpressiveShapeCatalogTier.OrbField) }
+    }
+    val sharedPhase = remember {
+        expressivePhaseOffset(0x4F524253, ExpressiveShapeCatalogTier.OrbField)
+    }
+    val orbPhaseOffsets = if (randomShapes) randomPhaseOffsets else List(4) { sharedPhase }
+    val shapeClock = rememberExpressiveShapeMorphClock(
+        enabled = expressive,
+        tier = ExpressiveShapeCatalogTier.OrbField,
+        tempo = ExpressiveMorphTempo.Soft,
+    )
 
     animOffsets.forEachIndexed { index, anim ->
         LaunchedEffect(index, reduceMotion, meshField) {
@@ -655,7 +862,7 @@ private fun InteractiveOrbsCanvas(
                         scope.launch {
                             dragOffsets[idx].animateTo(
                                 Offset.Zero,
-                                spring(stiffness = 150f, dampingRatio = 0.5f),
+                                ExpressiveMotion.dragSettle,
                             )
                         }
                     }
@@ -664,7 +871,9 @@ private fun InteractiveOrbsCanvas(
                     val idx = draggedIndex
                     draggedIndex = -1
                     if (idx in dragOffsets.indices) {
-                        scope.launch { dragOffsets[idx].animateTo(Offset.Zero) }
+                        scope.launch {
+                            dragOffsets[idx].animateTo(Offset.Zero, ExpressiveMotion.dragSettle)
+                        }
                     }
                 },
             )
@@ -693,30 +902,21 @@ private fun InteractiveOrbsCanvas(
             val drag = dragOffsets[index].value
             val cx = size.width * (base.x + anim.x + tiltX * 0.12f) + drag.x
             val cy = size.height * (base.y + anim.y + tiltY * 0.12f) + drag.y
-            val center = Offset(cx, cy)
             val isDragged = index == draggedIndex
-            val color = orbColors[index % orbColors.size]
-            val strength = if (isDragged) 1.08f else 0.98f
 
             drawGlowOrbs(
-                colors = listOf(color),
-                normalizedCenters = listOf(
-                    Offset(center.x / size.width, center.y / size.height),
-                ),
+                colors = listOf(orbColors[index % orbColors.size]),
+                normalizedCenters = listOf(Offset(cx / size.width, cy / size.height)),
                 blendMode = BlendMode.Screen,
-                strength = strength,
+                strength = if (isDragged) 1.1f else 0.98f,
                 radiusFraction = if (isDragged) 0.30f else 0.28f,
                 vividCore = false,
+                presence = presence,
+                expressive = expressive,
+                shapeClock = shapeClock,
+                selectedIndex = if (isDragged) 0 else -1,
+                orbPhaseOffsets = listOf(orbPhaseOffsets[index]),
             )
-
-            if (isDragged) {
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.45f),
-                    radius = size.minDimension * 0.28f,
-                    center = center,
-                    style = Stroke(width = size.minDimension * 0.012f),
-                )
-            }
         }
     }
 }

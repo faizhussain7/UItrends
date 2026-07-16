@@ -6,6 +6,9 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import com.mfhapps.trendingui.ui.components.ExpressiveShapeCatalogTier
+import com.mfhapps.trendingui.ui.components.expressivePhaseOffset
 
 enum class MeshPreset(
     val title: String,
@@ -130,49 +133,164 @@ fun DrawScope.drawGlowOrbs(
     strength: Float = 1f,
     radiusFraction: Float = 0.28f,
     vividCore: Boolean = false,
+    presence: Float = 1f,
+    expressive: Boolean = false,
+    shapeClock: Float = 0f,
+    selectedIndex: Int = -1,
+    selectionStrokeColor: Color = Color.White.copy(alpha = 0.55f),
+    orbPhaseOffsets: List<Float>? = null,
 ) {
-    val strengthClamped = strength.coerceIn(0.5f, 1.35f)
-    normalizedCenters.forEachIndexed { index, norm ->
-        val color = colors[index % colors.size]
-        val center = Offset(size.width * norm.x, size.height * norm.y)
-        val radius = size.minDimension * radiusFraction * strengthClamped
-        val coreAlpha = (0.88f * strengthClamped).coerceIn(0f, 0.96f)
+    val presenceClamped = presence.coerceIn(0f, 1f)
+    if (presenceClamped <= 0.01f) return
 
-        drawCircle(
-            brush = Brush.radialGradient(
-                colorStops = arrayOf(
-                    0f to color.copy(alpha = coreAlpha),
-                    0.32f to color.copy(alpha = coreAlpha * 0.78f),
-                    0.62f to color.copy(alpha = coreAlpha * 0.45f),
-                    1f to Color.Transparent,
-                ),
+    val glow = (0.42f + 0.58f * presenceClamped).coerceIn(0f, 1f)
+    val strengthClamped = (strength * (0.88f + 0.28f * presenceClamped)).coerceIn(0.55f, 1.45f)
+    val radiusScale = 0.9f + 0.2f * presenceClamped
+
+    normalizedCenters.forEachIndexed { index, norm ->
+        val source = colors[index % colors.size]
+        val color = source.copy(alpha = 1f)
+        val center = Offset(size.width * norm.x, size.height * norm.y)
+        val radius = size.minDimension * radiusFraction * strengthClamped * radiusScale
+        val coreAlpha = (glow * 0.98f).coerceIn(0f, 1f)
+        val isSelected = index == selectedIndex
+
+        if (!expressive) {
+            drawCircularGlowOrb(
+                color = color,
                 center = center,
                 radius = radius,
-            ),
-            radius = radius,
-            center = center,
-            blendMode = blendMode,
-        )
-        drawCircle(
-            brush = Brush.radialGradient(
-                colorStops = arrayOf(
-                    0f to color.copy(alpha = coreAlpha * 0.55f),
-                    1f to Color.Transparent,
-                ),
-                center = center,
-                radius = radius * 1.55f,
-            ),
-            radius = radius * 1.55f,
-            center = center,
-            blendMode = blendMode,
-        )
-        if (vividCore) {
-            drawCircle(
-                color = color.copy(alpha = (coreAlpha * 0.92f).coerceIn(0f, 1f)),
-                radius = radius * 0.2f,
-                center = center,
+                coreAlpha = coreAlpha,
                 blendMode = blendMode,
+                vividCore = vividCore || presenceClamped >= 0.72f,
+            )
+            if (isSelected) {
+                drawCircle(
+                    color = selectionStrokeColor,
+                    radius = radius,
+                    center = center,
+                    style = Stroke(width = size.minDimension * 0.012f),
+                )
+            }
+        } else {
+            val phaseOffset = orbPhaseOffsets?.getOrNull(index)
+                ?: expressivePhaseOffset(index, ExpressiveShapeCatalogTier.OrbField)
+            drawExpressiveGlowOrb(
+                phaseOffset = phaseOffset,
+                shapeClock = shapeClock,
+                color = color,
+                center = center,
+                radius = radius,
+                coreAlpha = coreAlpha,
+                blendMode = blendMode,
+                vividCore = vividCore || presenceClamped >= 0.72f,
+                selected = isSelected,
+                selectionStrokeColor = selectionStrokeColor,
             )
         }
+    }
+}
+
+private fun DrawScope.drawCircularGlowOrb(
+    color: Color,
+    center: Offset,
+    radius: Float,
+    coreAlpha: Float,
+    blendMode: BlendMode,
+    vividCore: Boolean,
+) {
+    drawCircle(
+        brush = Brush.radialGradient(
+            colorStops = arrayOf(
+                0f to color.copy(alpha = coreAlpha),
+                0.28f to color.copy(alpha = coreAlpha * 0.86f),
+                0.58f to color.copy(alpha = coreAlpha * 0.48f),
+                1f to Color.Transparent,
+            ),
+            center = center,
+            radius = radius,
+        ),
+        radius = radius,
+        center = center,
+        blendMode = blendMode,
+    )
+    drawCircle(
+        brush = Brush.radialGradient(
+            colorStops = arrayOf(
+                0f to color.copy(alpha = coreAlpha * 0.62f),
+                1f to Color.Transparent,
+            ),
+            center = center,
+            radius = radius * 1.6f,
+        ),
+        radius = radius * 1.6f,
+        center = center,
+        blendMode = blendMode,
+    )
+    if (vividCore) {
+        drawCircle(
+            color = color.copy(alpha = (coreAlpha * 0.96f).coerceIn(0f, 1f)),
+            radius = radius * 0.22f,
+            center = center,
+            blendMode = blendMode,
+        )
+    }
+}
+
+private fun DrawScope.drawExpressiveGlowOrb(
+    phaseOffset: Float,
+    shapeClock: Float,
+    color: Color,
+    center: Offset,
+    radius: Float,
+    coreAlpha: Float,
+    blendMode: BlendMode,
+    vividCore: Boolean,
+    selected: Boolean,
+    selectionStrokeColor: Color,
+) {
+    val haloPath = ExpressiveOrbCatalog.pathForOrb(phaseOffset, shapeClock, center, radius * 1.42f)
+    val corePath = ExpressiveOrbCatalog.pathForOrb(phaseOffset, shapeClock, center, radius)
+
+    drawPath(
+        path = haloPath,
+        brush = Brush.radialGradient(
+            colorStops = arrayOf(
+                0f to color.copy(alpha = coreAlpha * 0.58f),
+                0.55f to color.copy(alpha = coreAlpha * 0.26f),
+                1f to Color.Transparent,
+            ),
+            center = center,
+            radius = radius * 1.42f,
+        ),
+        blendMode = blendMode,
+    )
+    drawPath(
+        path = corePath,
+        brush = Brush.radialGradient(
+            colorStops = arrayOf(
+                0f to color.copy(alpha = coreAlpha),
+                0.34f to color.copy(alpha = coreAlpha * 0.84f),
+                0.7f to color.copy(alpha = coreAlpha * 0.4f),
+                1f to Color.Transparent,
+            ),
+            center = center,
+            radius = radius,
+        ),
+        blendMode = blendMode,
+    )
+    if (vividCore) {
+        drawPath(
+            path = ExpressiveOrbCatalog.pathForOrb(phaseOffset, shapeClock, center, radius * 0.3f),
+            color = color.copy(alpha = (coreAlpha * 0.96f).coerceIn(0f, 1f)),
+            blendMode = blendMode,
+        )
+    }
+    if (selected) {
+        drawPath(
+            path = corePath,
+            color = selectionStrokeColor,
+            style = Stroke(width = size.minDimension * 0.012f),
+        )
     }
 }

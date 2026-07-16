@@ -10,15 +10,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import com.mfhapps.trendingui.ui.motion.expressiveEffectsSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -45,7 +44,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,7 +53,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Composable
@@ -107,7 +104,9 @@ import com.mfhapps.trendingui.ui.components.LoadingIndicator
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
-import com.mfhapps.trendingui.ui.components.rememberMorphShape
+import com.mfhapps.trendingui.ui.components.ExpressiveShapeCatalogTier
+import com.mfhapps.trendingui.ui.components.rememberExpressiveAccentShape
+import com.mfhapps.trendingui.ui.components.rememberExpressiveBadgeShape
 import com.mfhapps.trendingui.ui.settings.SettingsExpressiveDefaults
 import com.mfhapps.trendingui.ui.settings.SettingsSectionCard
 import com.mfhapps.trendingui.ui.settings.SettingsSectionDivider
@@ -133,11 +132,9 @@ private data class CreatorHeroMorphLayout(
     val contentScale: Float,
 )
 
-private fun smoothMorph(progress: Float): Float {
-    val t = progress.coerceIn(0f, 1f)
-    val step = t * t * (3f - 2f * t)
-    return step * step * (3f - 2f * step)
-}
+private fun smoothMorph(progress: Float): Float =
+    com.mfhapps.trendingui.ui.components.ExpressiveShapeMorphMath.smootherstep(progress)
+
 
 @Composable
 private fun rememberCreatorHeroMorphLayout(morph: Float): CreatorHeroMorphLayout {
@@ -398,15 +395,6 @@ private fun CreatorHeroCard(
         ),
         label = "cardMorph",
     )
-    val avatarMorph by infinite.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 13_000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "avatarMorph",
-    )
     val gradientPhase by infinite.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -417,17 +405,14 @@ private fun CreatorHeroCard(
         label = "gradientPhase",
     )
     val effectiveCardMorph = if (reduceMotion) 0f else cardMorph
-    val effectiveAvatarMorph = if (reduceMotion) 0f else avatarMorph
     val morphLayout = rememberCreatorHeroMorphLayout(effectiveCardMorph)
-    val heroShape = rememberMorphShape(
-        rest = MaterialShapes.Gem,
-        pressed = MaterialShapes.Sunny,
-        progress = effectiveCardMorph,
+    val heroShape = rememberExpressiveAccentShape(
+        seed = 11,
+        tier = ExpressiveShapeCatalogTier.Fullscreen,
     )
-    val avatarShape = rememberMorphShape(
-        rest = MaterialShapes.Circle,
-        pressed = MaterialShapes.Cookie4Sided,
-        progress = effectiveAvatarMorph,
+    val avatarShape = rememberExpressiveAccentShape(
+        seed = 17,
+        tier = ExpressiveShapeCatalogTier.Fullscreen,
     )
     val avatarPixels = with(density) { morphLayout.avatarSize.roundToPx() }
     val isDark = scheme.background.luminance() < 0.45f
@@ -587,10 +572,7 @@ private fun CreatorProfileLoadingBar(
     )
     val barAlpha by animateFloatAsState(
         targetValue = if (loading) 1f else 0f,
-        animationSpec = spring(
-            stiffness = Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioNoBouncy,
-        ),
+        animationSpec = expressiveEffectsSpec(),
         label = "creatorLoadingBarAlpha",
     )
 
@@ -615,7 +597,7 @@ private fun CreatorMetaChip(
     verticalPadding: Dp = 6.dp,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val chipShape = MaterialShapes.Pill.toShape()
+    val chipShape = rememberExpressiveBadgeShape(seed = text.hashCode())
     Surface(
         modifier = modifier,
         shape = chipShape,
@@ -637,7 +619,7 @@ private fun CreatorStatsRow(
     profile: GitHubUserProfile,
     modifier: Modifier = Modifier,
 ) {
-    val statShape = MaterialShapes.Cookie4Sided.toShape()
+    val statShape = rememberExpressiveBadgeShape(seed = 73)
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -733,7 +715,6 @@ private fun CreatorSocialRow(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val badgeShape = MaterialShapes.Gem.toShape()
     val interaction = remember { MutableInteractionSource() }
 
     Row(
@@ -751,7 +732,6 @@ private fun CreatorSocialRow(
     ) {
         CreatorBrandIcon(
             brand = brand,
-            shape = badgeShape,
             background = scheme.surfaceContainerHighest,
             modifier = Modifier.size(40.dp),
         )
@@ -854,7 +834,7 @@ private fun CreatorErrorCard(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val shape = MaterialShapes.Slanted.toShape()
+    val shape = rememberExpressiveBadgeShape(seed = 89)
 
     Column(
         modifier = modifier

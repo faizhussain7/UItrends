@@ -680,26 +680,6 @@ fun PretextCameraOptions(
                     )
                 },
             )
-
-            HorizontalDivider(
-                modifier = Modifier.pretextSheetInset(),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            )
-
-            SwitchListItem(
-                checked = showHalftone,
-                onCheckedChange = onShowHalftoneChange,
-                containerColor = Color.Transparent,
-                headlineContent = { Text("Newspaper Halftone") },
-                supportingContent = { Text("Apply a vintage newsprint effect to the camera.") },
-                leadingContent = {
-                    DecorativeIcon(
-                        Icons.Outlined.AutoAwesome,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp),
-                    )
-                },
-            )
         }
     }
 }

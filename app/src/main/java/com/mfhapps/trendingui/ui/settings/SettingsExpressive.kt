@@ -80,8 +80,7 @@ import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.toShape
+import com.mfhapps.trendingui.ui.components.rememberExpressiveBadgeShape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -1007,9 +1006,10 @@ fun SettingsIconBadge(
     contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
+    val badgeShape = rememberExpressiveBadgeShape(seed = System.identityHashCode(icon))
     Surface(
         modifier = modifier.size(40.dp),
-        shape = MaterialShapes.Gem.toShape(),
+        shape = badgeShape,
         color = containerColor,
         contentColor = contentColor,
         tonalElevation = 1.dp,
@@ -1034,11 +1034,8 @@ fun SettingsAccentSwatch(
     contentDescription: String,
 ) {
     val ringColor = MaterialTheme.colorScheme.primary
-    val swatchShape = if (selected) {
-        MaterialShapes.SoftBoom.toShape()
-    } else {
-        CircleShape
-    }
+    val selectedSwatchShape = rememberExpressiveBadgeShape(seed = 61)
+    val swatchShape = if (selected) selectedSwatchShape else CircleShape
     Box(
         modifier = modifier
             .size(36.dp)

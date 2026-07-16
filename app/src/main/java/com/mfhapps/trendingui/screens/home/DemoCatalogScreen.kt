@@ -48,21 +48,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.toShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -90,6 +88,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalConfiguration
 import android.content.res.Configuration
 import com.mfhapps.trendingui.launcher.AppLauncherIcon
@@ -101,12 +100,21 @@ import com.mfhapps.trendingui.navigation.demoCatalogEntries
 import com.mfhapps.trendingui.navigation.demoSharedContentKey
 import com.mfhapps.trendingui.navigation.toDemoPaneKey
 import com.mfhapps.trendingui.ui.accessibility.DecorativeIcon
+import com.mfhapps.trendingui.ui.components.AdaptiveFitText
 import com.mfhapps.trendingui.ui.components.BrandMark
+import com.mfhapps.trendingui.ui.components.Button
 import com.mfhapps.trendingui.ui.components.CollapsedHeaderBackdrop
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.CatalogMorphShapes
+import com.mfhapps.trendingui.ui.components.FilledTonalIconButton
 import com.mfhapps.trendingui.ui.components.ShapeClickableSurface
 import com.mfhapps.trendingui.ui.components.rememberCatalogCardColors
+import com.mfhapps.trendingui.ui.components.rememberMaterialExpressiveLoopShape
+import com.mfhapps.trendingui.ui.components.ExpressiveMorphTempo
+import com.mfhapps.trendingui.ui.components.ExpressiveShapeCatalogTier
+import com.mfhapps.trendingui.ui.components.expressivePhaseOffset
+import com.mfhapps.trendingui.ui.components.rememberExpressiveBadgeShape
+import com.mfhapps.trendingui.ui.components.rememberExpressiveMorphLoopShape
 import com.mfhapps.trendingui.ui.platform.catalogAdaptiveMinTileWidth
 import com.mfhapps.trendingui.ui.platform.catalogCollapsedBarWindowInsets
 import com.mfhapps.trendingui.ui.platform.catalogListContentWindowInsets
@@ -589,8 +597,17 @@ private fun FeaturedHeroCard(
         )
     }
     val heroMorph = CatalogMorphShapes.heroMorph
-    val iconShape = CatalogMorphShapes.iconForDemo(demo.route).toShape()
-    val accentShape = MaterialShapes.Sunny.toShape()
+    val iconShape = rememberExpressiveBadgeShape(seed = demo.route.hashCode())
+    val reduceMotion = com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion.current
+    val accentPhase = remember(demo.route) {
+        expressivePhaseOffset(demo.route.hashCode() xor 0xACC01, ExpressiveShapeCatalogTier.Accent)
+    }
+    val accentLoopShape = rememberExpressiveMorphLoopShape(
+        enabled = !reduceMotion,
+        tier = ExpressiveShapeCatalogTier.Accent,
+        tempo = ExpressiveMorphTempo.Soft,
+        phaseOffset = accentPhase,
+    )
     ShapeClickableSurface(
         onClick = onClick,
         shape = HeroCardShape,
@@ -620,7 +637,7 @@ private fun FeaturedHeroCard(
                     .offset(x = 28.dp, y = (-18).dp)
                     .size(132.dp)
                     .graphicsLayer { alpha = 0.2f }
-                    .clip(accentShape)
+                    .clip(accentLoopShape)
                     .background(heroForeground.title),
             )
             Column(
@@ -661,19 +678,19 @@ private fun FeaturedHeroCard(
                     }
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
+                    AdaptiveFitText(
                         text = demo.title,
                         style = MaterialTheme.typography.headlineLargeEmphasized,
                         color = heroForeground.title,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
+                        allowTruncation = false,
+                        minFontSize = 18.sp,
                     )
-                    Text(
+                    AdaptiveFitText(
                         text = demo.subtitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color = heroForeground.subtitle,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
+                        allowTruncation = false,
+                        minFontSize = 12.sp,
                     )
                 }
                 Row(
@@ -689,29 +706,24 @@ private fun FeaturedHeroCard(
                         animatedVisibilityScope = animatedVisibilityScope,
                     )
                     Spacer(Modifier.weight(1f))
-                    Surface(
-                        shape = MaterialTheme.shapes.largeIncreased,
-                        color = heroForeground.badgeFill,
-                        shadowElevation = 4.dp,
+                    Button(
+                        onClick = onClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = heroForeground.badgeFill,
+                            contentColor = heroForeground.badgeText,
+                        ),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Text(
-                                text = "Open demo",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = heroForeground.badgeText,
-                            )
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                                contentDescription = null,
-                                tint = heroForeground.badgeText,
-                                modifier = Modifier.size(18.dp),
-                            )
-                        }
+                        Text(
+                            text = "Open demo",
+                            style = MaterialTheme.typography.labelLargeEmphasized,
+                        )
+                        Spacer(Modifier.size(6.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
                     }
                 }
             }
@@ -861,7 +873,7 @@ private fun DemoListRow(
 ) {
     val cardColors = rememberCatalogCardColors(selected)
     val morphPair = CatalogMorphShapes.forDemo(demo.route)
-    val iconShape = morphPair.rest.toShape()
+    val iconShape = rememberExpressiveBadgeShape(seed = demo.route.hashCode())
     val scheme = MaterialTheme.colorScheme
     ShapeClickableSurface(
         onClick = onClick,
@@ -945,7 +957,7 @@ private fun BentoDemoTile(
 ) {
     val cardColors = rememberCatalogCardColors(selected)
     val morphPair = CatalogMorphShapes.forDemo(demo.route)
-    val iconShape = morphPair.rest.toShape()
+    val iconShape = rememberExpressiveBadgeShape(seed = demo.route.hashCode())
     val tileMinHeight = rememberBentoTileMinHeight(tall = tall)
     ShapeClickableSurface(
         onClick = onClick,
@@ -1007,7 +1019,7 @@ private fun CompactDemoTile(
 ) {
     val cardColors = rememberCatalogCardColors(selected)
     val morphPair = CatalogMorphShapes.forDemo(demo.route)
-    val iconShape = morphPair.rest.toShape()
+    val iconShape = rememberExpressiveBadgeShape(seed = demo.route.hashCode())
     val tileMinHeight = rememberCompactTileMinHeight()
     val scheme = MaterialTheme.colorScheme
     ShapeClickableSurface(
