@@ -4,7 +4,6 @@ package com.mfhapps.trendingui.ui.legal
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -96,17 +95,21 @@ import com.mfhapps.trendingui.legal.CreatorLinks
 import com.mfhapps.trendingui.legal.CreatorProfileUiState
 import com.mfhapps.trendingui.legal.CreatorProfileViewModel
 import com.mfhapps.trendingui.legal.github.GitHubUserProfile
-import com.mfhapps.trendingui.navigation.demoSharedElement
+import com.mfhapps.trendingui.navigation.photoSharedElementManaged
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
+import com.mfhapps.trendingui.ui.components.ExpressiveMorphTempo
+import com.mfhapps.trendingui.ui.components.ExpressiveShapeCatalogTier
 import com.mfhapps.trendingui.ui.components.IconButton
 import com.mfhapps.trendingui.ui.components.LoadingIndicator
+import com.mfhapps.trendingui.ui.components.ProvideScopedHaze
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
+import com.mfhapps.trendingui.ui.components.expressiveClickable
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
-import com.mfhapps.trendingui.ui.components.ExpressiveShapeCatalogTier
 import com.mfhapps.trendingui.ui.components.rememberExpressiveAccentShape
 import com.mfhapps.trendingui.ui.components.rememberExpressiveBadgeShape
+import com.mfhapps.trendingui.ui.components.rememberExpressiveMorphPress
 import com.mfhapps.trendingui.ui.settings.SettingsExpressiveDefaults
 import com.mfhapps.trendingui.ui.settings.SettingsSectionCard
 import com.mfhapps.trendingui.ui.settings.SettingsSectionDivider
@@ -192,109 +195,111 @@ fun WhoMadeThisScreen(
         modifier = modifier.fillMaxSize(),
         color = scheme.background,
     ) {
-        CreatorProfilePhotoTransitionHost(
-            photoExpanded = photoExpanded,
-            photoUrlFullscreen = state.photoUrlFullscreen,
-            displayName = state.displayName,
-            onPhotoExpandedChange = { photoExpanded = it },
-        ) { sharedTransitionScope, animatedVisibilityScope, onPhotoClick ->
-            val listState = rememberLazyListState()
-            val topAppBarState = rememberTopAppBarState()
-            val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
-            val collapsedFraction by remember {
-                derivedStateOf { scrollBehavior.state.collapsedFraction.coerceIn(0f, 1f) }
-            }
-            val topBarColors = rememberCollapsedTopAppBarColors(
-                collapsedFraction = collapsedFraction,
-                containerColor = Color.Transparent,
-                scrolledContainerColor = scheme.surface,
-                titleContentColor = scheme.onSurface,
-                navigationIconContentColor = scheme.onSurface,
-                actionIconContentColor = scheme.onSurface,
-            )
+        ProvideScopedHaze {
+            CreatorProfilePhotoTransitionHost(
+                photoExpanded = photoExpanded,
+                photoUrlFullscreen = state.photoUrlFullscreen,
+                displayName = state.displayName,
+                onPhotoExpandedChange = { photoExpanded = it },
+            ) { sharedTransitionScope, photoExpanded, onPhotoClick ->
+                val listState = rememberLazyListState()
+                val topAppBarState = rememberTopAppBarState()
+                val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+                val collapsedFraction by remember {
+                    derivedStateOf { scrollBehavior.state.collapsedFraction.coerceIn(0f, 1f) }
+                }
+                val topBarColors = rememberCollapsedTopAppBarColors(
+                    collapsedFraction = collapsedFraction,
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = scheme.surface,
+                    titleContentColor = scheme.onSurface,
+                    navigationIconContentColor = scheme.onSurface,
+                    actionIconContentColor = scheme.onSurface,
+                )
 
-            CollapsingBlurTopBarLayout(
-                scrollBehavior = scrollBehavior,
-                collapsedFraction = collapsedFraction,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .navigationBarsPadding(),
-                topBar = { barModifier ->
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        WhoMadeThisCollapsingTopBar(
-                            scrollBehavior = scrollBehavior,
-                            collapsedFraction = collapsedFraction,
-                            colors = topBarColors,
-                            onNavigateBack = onNavigateBack,
-                            onRefresh = viewModel::refresh,
-                            refreshEnabled = !state.loading,
-                            modifier = barModifier,
-                        )
-                        CreatorProfileLoadingBar(loading = state.loading)
-                    }
-                },
-            ) {
-                LazyColumn(
-                    state = listState,
+                CollapsingBlurTopBarLayout(
+                    scrollBehavior = scrollBehavior,
+                    collapsedFraction = collapsedFraction,
                     modifier = Modifier
                         .fillMaxSize()
-                        .appHazeSource(),
-                    contentPadding = collapsingTopBarContentPadding(
-                        extra = PaddingValues(
-                            start = SettingsExpressiveDefaults.screenHorizontalPadding,
-                            end = SettingsExpressiveDefaults.screenHorizontalPadding,
-                            bottom = 28.dp,
-                        ),
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(SettingsExpressiveDefaults.sectionSpacing),
+                        .navigationBarsPadding(),
+                    topBar = { barModifier ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            WhoMadeThisCollapsingTopBar(
+                                scrollBehavior = scrollBehavior,
+                                collapsedFraction = collapsedFraction,
+                                colors = topBarColors,
+                                onNavigateBack = onNavigateBack,
+                                onRefresh = viewModel::refresh,
+                                refreshEnabled = !state.loading,
+                                modifier = barModifier,
+                            )
+                            CreatorProfileLoadingBar(loading = state.loading)
+                        }
+                    },
                 ) {
-                    item(key = "hero") {
-                        CreatorHeroCard(
-                            state = state,
-                            onPhotoClick = onPhotoClick,
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        )
-                    }
-
-                    state.errorMessage?.let { message ->
-                        item(key = "error") {
-                            CreatorErrorCard(
-                                message = message,
-                                onRetry = viewModel::refresh,
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .appHazeSource(zIndex = 1f),
+                        contentPadding = collapsingTopBarContentPadding(
+                            extra = PaddingValues(
+                                start = SettingsExpressiveDefaults.screenHorizontalPadding,
+                                end = SettingsExpressiveDefaults.screenHorizontalPadding,
+                                bottom = 28.dp,
+                            ),
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(SettingsExpressiveDefaults.sectionSpacing),
+                    ) {
+                        item(key = "hero") {
+                            CreatorHeroCard(
+                                state = state,
+                                onPhotoClick = onPhotoClick,
+                                sharedTransitionScope = sharedTransitionScope,
+                                photoSharedVisible = !photoExpanded,
                             )
                         }
-                    }
 
-                    state.github?.let { github ->
-                        item(key = "stats") {
-                            CreatorStatsRow(profile = github)
+                        state.errorMessage?.let { message ->
+                            item(key = "error") {
+                                CreatorErrorCard(
+                                    message = message,
+                                    onRetry = viewModel::refresh,
+                                )
+                            }
                         }
-                    }
 
-                    item(key = "connect-title") {
-                        SettingsSectionTitle(
-                            title = "Contact",
-                            subtitle = "Professional profiles and correspondence",
-                        )
-                    }
+                        state.github?.let { github ->
+                            item(key = "stats") {
+                                CreatorStatsRow(profile = github)
+                            }
+                        }
 
-                    item(key = "social") {
-                        CreatorSocialCard(
-                            state = state,
-                            onOpenLink = uriHandler::openUri,
-                        )
-                    }
+                        item(key = "connect-title") {
+                            SettingsSectionTitle(
+                                title = "Contact",
+                                subtitle = "Professional profiles and correspondence",
+                            )
+                        }
 
-                    item(key = "whatsapp-title") {
-                        SettingsSectionTitle(
-                            title = "WhatsApp",
-                            subtitle = "Regional contact numbers",
-                        )
-                    }
+                        item(key = "social") {
+                            CreatorSocialCard(
+                                state = state,
+                                onOpenLink = uriHandler::openUri,
+                            )
+                        }
 
-                    item(key = "whatsapp") {
-                        CreatorWhatsAppCard(onOpenLink = uriHandler::openUri)
+                        item(key = "whatsapp-title") {
+                            SettingsSectionTitle(
+                                title = "WhatsApp",
+                                subtitle = "Regional contact numbers",
+                            )
+                        }
+
+                        item(key = "whatsapp") {
+                            CreatorWhatsAppCard(onOpenLink = uriHandler::openUri)
+                        }
                     }
                 }
             }
@@ -378,7 +383,7 @@ private fun CreatorHeroCard(
     state: CreatorProfileUiState,
     onPhotoClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
+    photoSharedVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -405,15 +410,14 @@ private fun CreatorHeroCard(
         label = "gradientPhase",
     )
     val effectiveCardMorph = if (reduceMotion) 0f else cardMorph
+    val effectiveGradientPhase = if (reduceMotion) 0.42f else gradientPhase
     val morphLayout = rememberCreatorHeroMorphLayout(effectiveCardMorph)
     val heroShape = rememberExpressiveAccentShape(
         seed = 11,
         tier = ExpressiveShapeCatalogTier.Fullscreen,
+        tempo = ExpressiveMorphTempo.Soft,
     )
-    val avatarShape = rememberExpressiveAccentShape(
-        seed = 17,
-        tier = ExpressiveShapeCatalogTier.Fullscreen,
-    )
+    val avatarShape = rememberCreatorPhotoMorphShape()
     val avatarPixels = with(density) { morphLayout.avatarSize.roundToPx() }
     val isDark = scheme.background.luminance() < 0.45f
     val hasPhoto = !state.loading || state.github != null || state.linkedIn != null
@@ -424,8 +428,8 @@ private fun CreatorHeroCard(
             scheme.secondary.copy(alpha = if (isDark) 0.24f else 0.14f),
             scheme.primaryContainer.copy(alpha = if (isDark) 0.72f else 0.88f),
         ),
-        start = Offset(x = 900f * gradientPhase, y = 0f),
-        end = Offset(x = 200f * (1f - gradientPhase), y = 900f),
+        start = Offset(x = 900f * effectiveGradientPhase, y = 0f),
+        end = Offset(x = 200f * (1f - effectiveGradientPhase), y = 900f),
     )
 
     Surface(
@@ -453,10 +457,10 @@ private fun CreatorHeroCard(
             Box(
                 modifier = Modifier
                     .size(morphLayout.avatarSize)
-                    .demoSharedElement(
+                    .photoSharedElementManaged(
                         sharedTransitionScope = sharedTransitionScope,
                         key = CREATOR_PROFILE_PHOTO_KEY,
-                        animatedVisibilityScope = animatedVisibilityScope,
+                        visible = photoSharedVisible,
                     )
                     .clip(avatarShape)
                     .background(scheme.surface)
@@ -716,15 +720,16 @@ private fun CreatorSocialRow(
 ) {
     val scheme = MaterialTheme.colorScheme
     val interaction = remember { MutableInteractionSource() }
+    val morph = rememberExpressiveMorphPress(interactionSource = interaction)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(
-                interactionSource = interaction,
-                indication = null,
-                role = Role.Button,
+            .expressiveClickable(
                 onClick = onClick,
+                role = Role.Button,
+                interactionSource = interaction,
+                morphPress = morph,
             )
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -789,15 +794,16 @@ private fun CreatorWhatsAppRow(
 ) {
     val scheme = MaterialTheme.colorScheme
     val interaction = remember { MutableInteractionSource() }
+    val morph = rememberExpressiveMorphPress(interactionSource = interaction)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(
-                interactionSource = interaction,
-                indication = null,
-                role = Role.Button,
+            .expressiveClickable(
                 onClick = onClick,
+                role = Role.Button,
+                interactionSource = interaction,
+                morphPress = morph,
             )
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,

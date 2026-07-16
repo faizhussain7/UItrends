@@ -26,6 +26,39 @@ fun Modifier.demoSharedElement(
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
+fun Modifier.photoSharedBounds(
+    sharedTransitionScope: SharedTransitionScope,
+    key: String,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    contentScale: ContentScale = ContentScale.Crop,
+): Modifier = with(sharedTransitionScope) {
+    sharedBounds(
+        sharedContentState = rememberSharedContentState(key = key),
+        animatedVisibilityScope = animatedVisibilityScope,
+        boundsTransform = BoundsTransform { _, _ -> sharedBoundsTransform() },
+        resizeMode = scaleToBounds(
+            contentScale = contentScale,
+            alignment = Alignment.Center,
+        ),
+    )
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun Modifier.photoSharedElementManaged(
+    sharedTransitionScope: SharedTransitionScope,
+    key: String,
+    visible: Boolean,
+): Modifier = with(sharedTransitionScope) {
+    sharedElementWithCallerManagedVisibility(
+        sharedContentState = rememberSharedContentState(key = key),
+        visible = visible,
+        boundsTransform = BoundsTransform { _, _ -> sharedBoundsTransform() },
+    )
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
 fun Modifier.masonrySharedBounds(
     sharedTransitionScope: SharedTransitionScope,
     key: String,

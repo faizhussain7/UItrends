@@ -32,6 +32,7 @@ enum class ExpressiveShapeCatalogTier {
     OrbField,
     Accent,
     Badge,
+    Contained,
     Fullscreen,
 }
 
@@ -150,6 +151,17 @@ object ExpressiveShapeCatalogs {
         )
     }
 
+    /** Mild shapes that stay near the bounding circle — safe for photo frames. */
+    val contained: List<RoundedPolygon> by lazy {
+        listOf(
+            MaterialShapes.Circle,
+            MaterialShapes.Cookie4Sided,
+            MaterialShapes.Cookie9Sided,
+            MaterialShapes.Cookie12Sided,
+            MaterialShapes.Circle,
+        )
+    }
+
     val fullscreen: List<RoundedPolygon> by lazy {
         listOf(
             MaterialShapes.Gem,
@@ -165,6 +177,7 @@ object ExpressiveShapeCatalogs {
         ExpressiveShapeCatalogTier.OrbField -> orbField
         ExpressiveShapeCatalogTier.Accent -> accent
         ExpressiveShapeCatalogTier.Badge -> badge
+        ExpressiveShapeCatalogTier.Contained -> contained
         ExpressiveShapeCatalogTier.Fullscreen -> fullscreen
     }
 }

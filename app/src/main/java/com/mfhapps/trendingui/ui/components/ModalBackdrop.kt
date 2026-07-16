@@ -154,6 +154,24 @@ fun ProvideAppModalBackdrop(
 }
 
 @Composable
+fun ProvideScopedHaze(
+    content: @Composable () -> Unit,
+) {
+    val context = LocalContext.current
+    val deviceSupportsBlur = remember(context) { context.supportsBackdropBlur() }
+    val parentBlurEnabled = LocalModalBackdropBlurEnabled.current
+    val blurEnabled = parentBlurEnabled && deviceSupportsBlur
+    val hazeState = rememberHazeState(blurEnabled = blurEnabled)
+
+    CompositionLocalProvider(
+        LocalAppHazeState provides hazeState,
+        LocalCatalogHazeState provides hazeState,
+        LocalCatalogHazeEnabled provides blurEnabled,
+        content = content,
+    )
+}
+
+@Composable
 internal fun ModalBackdropScrim(
     controller: ModalBackdropController,
     modifier: Modifier = Modifier,
