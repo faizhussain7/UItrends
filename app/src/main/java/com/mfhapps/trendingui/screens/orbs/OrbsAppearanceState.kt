@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 
 @Stable
 class OrbsAppearanceState {
-    var expressive by mutableStateOf(false)
+    var expressive by mutableStateOf(true)
     var presence by mutableFloatStateOf(1f)
     var randomShapes by mutableStateOf(true)
 }

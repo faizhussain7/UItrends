@@ -94,6 +94,7 @@ fun DetailPaneScaffold(
     val appBarInsets = appBarTopWindowInsets()
 
     val immersiveCollapseState = remember { ImmersiveTopBarCollapseState() }
+    val immersiveTopBarStyleState = remember { ImmersiveTopBarStyleState() }
     val immersiveCollapseFraction = if (immersiveChrome) {
         immersiveCollapseState.collapsedFraction
     } else {
@@ -106,6 +107,7 @@ fun DetailPaneScaffold(
         LocalNestedBackDispatcher provides nestedBackDispatcher,
         LocalDetailChromeStyle provides chromeStyle,
         LocalImmersiveTopBarCollapse provides if (immersiveChrome) immersiveCollapseState else null,
+        LocalImmersiveTopBarStyle provides if (immersiveChrome) immersiveTopBarStyleState else null,
     ) {
         when {
             immersiveChrome -> ImmersiveDetailSystemBars()
@@ -116,14 +118,38 @@ fun DetailPaneScaffold(
             else -> DetailMaterialSystemBars()
         }
         val topBar: @Composable () -> Unit = {
+            val adaptiveForeground = immersiveTopBarStyleState.foreground
+            val adaptiveIconTint = immersiveTopBarStyleState.iconTint
+            val adaptiveIconContainer = immersiveTopBarStyleState.iconContainer
+            val resolvedTopBarForeground = if (immersiveChrome &&
+                adaptiveForeground != Color.Unspecified
+            ) {
+                adaptiveForeground
+            } else {
+                topBarForeground
+            }
+            val resolvedChromeIconColor = if (immersiveChrome &&
+                adaptiveIconTint != Color.Unspecified
+            ) {
+                adaptiveIconTint
+            } else {
+                chromeIconColor
+            }
+            val resolvedIconContainer = if (immersiveChrome &&
+                adaptiveIconContainer != Color.Unspecified
+            ) {
+                adaptiveIconContainer
+            } else {
+                Color.Transparent
+            }
             val topBarColors = if (immersiveChrome) {
                 rememberCollapsedTopAppBarColors(
                     collapsedFraction = immersiveCollapseFraction,
                     containerColor = Color.Transparent,
                     scrolledContainerColor = Color.Transparent,
-                    titleContentColor = topBarForeground,
-                    navigationIconContentColor = chromeIconColor,
-                    actionIconContentColor = chromeIconColor,
+                    titleContentColor = resolvedTopBarForeground,
+                    navigationIconContentColor = resolvedChromeIconColor,
+                    actionIconContentColor = resolvedChromeIconColor,
                 )
             } else {
                 TopAppBarDefaults.topAppBarColors(
@@ -137,9 +163,9 @@ fun DetailPaneScaffold(
                         neuChrome -> MaterialTheme.colorScheme.surfaceContainerLow
                         else -> MaterialTheme.colorScheme.surface
                     },
-                    titleContentColor = topBarForeground,
-                    navigationIconContentColor = chromeIconColor,
-                    actionIconContentColor = chromeIconColor,
+                    titleContentColor = resolvedTopBarForeground,
+                    navigationIconContentColor = resolvedChromeIconColor,
+                    actionIconContentColor = resolvedChromeIconColor,
                 )
             }
 
@@ -169,13 +195,13 @@ fun DetailPaneScaffold(
                                 Text(
                                     text = title,
                                     style = MaterialTheme.typography.titleLargeEmphasized,
-                                    color = topBarForeground,
+                                    color = resolvedTopBarForeground,
                                 )
                                 if (subtitle != null) {
                                     Text(
                                         text = subtitle,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = topBarForeground.copy(alpha = 0.82f),
+                                        color = resolvedTopBarForeground.copy(alpha = 0.82f),
                                     )
                                 }
                             }
@@ -215,8 +241,10 @@ fun DetailPaneScaffold(
                         DetailChromeStyle.Copilot,
                         DetailChromeStyle.Default -> IconButton(
                             onClick = onBack,
+                            modifier = Modifier.padding(start = 10.dp, top = 6.dp, bottom = 6.dp),
                             colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = chromeIconColor,
+                                contentColor = resolvedChromeIconColor,
+                                containerColor = resolvedIconContainer,
                             ),
                         ) {
                             if (useGradientTopBar) {
@@ -230,7 +258,7 @@ fun DetailPaneScaffold(
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back to catalog",
-                                    tint = chromeIconColor,
+                                    tint = resolvedChromeIconColor,
                                 )
                             }
                         }
@@ -241,7 +269,8 @@ fun DetailPaneScaffold(
                         DetailPaneTopBarActions(
                             guide = guide,
                             chromeStyle = chromeStyle,
-                            iconTint = chromeIconColor,
+                            iconTint = resolvedChromeIconColor,
+                            containerColor = resolvedIconContainer,
                             content = if (copilotChrome) {
                                 { CopilotLiveStatusChip() }
                             } else {
@@ -250,7 +279,7 @@ fun DetailPaneScaffold(
                             modifier = if (brutalChrome || neuChrome || glassChrome) {
                                 Modifier.padding(end = 8.dp, top = 4.dp, bottom = 4.dp)
                             } else {
-                                Modifier
+                                Modifier.padding(end = 10.dp, top = 6.dp, bottom = 6.dp)
                             },
                         )
                     }

@@ -34,6 +34,7 @@ fun DetailPaneTopBarActions(
     modifier: Modifier = Modifier,
     sourceCodeUrl: String? = LocalDemoSourceCodeUrl.current,
     iconTint: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color = Color.Transparent,
     chromeStyle: DetailChromeStyle = LocalDetailChromeStyle.current,
     content: @Composable (() -> Unit)? = null,
 ) {
@@ -49,6 +50,7 @@ fun DetailPaneTopBarActions(
             DetailPaneSourceCodeAction(
                 url = sourceCodeUrl,
                 iconTint = iconTint,
+                containerColor = containerColor,
                 chromeStyle = chromeStyle,
             )
         }
@@ -56,6 +58,7 @@ fun DetailPaneTopBarActions(
             DetailPaneGuideAction(
                 guide = guide,
                 iconTint = iconTint,
+                containerColor = containerColor,
                 chromeStyle = chromeStyle,
             )
         }
@@ -67,6 +70,7 @@ fun DetailPaneSourceCodeAction(
     url: String,
     modifier: Modifier = Modifier,
     iconTint: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color = Color.Transparent,
     chromeStyle: DetailChromeStyle = LocalDetailChromeStyle.current,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -77,6 +81,7 @@ fun DetailPaneSourceCodeAction(
         contentDescription = "View source code on GitHub",
         modifier = modifier,
         iconTint = iconTint,
+        containerColor = containerColor,
         chromeStyle = chromeStyle,
         brutalFill = scheme.tertiaryContainer,
         brutalIconTint = scheme.onTertiaryContainer,
@@ -89,6 +94,7 @@ fun DetailPaneGuideAction(
     guide: DemoTrendGuide,
     modifier: Modifier = Modifier,
     iconTint: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color = Color.Transparent,
     chromeStyle: DetailChromeStyle = LocalDetailChromeStyle.current,
 ) {
     var showGuide by rememberSaveable { mutableStateOf(false) }
@@ -100,6 +106,7 @@ fun DetailPaneGuideAction(
         contentDescription = "UI pattern guide",
         modifier = modifier,
         iconTint = iconTint,
+        containerColor = containerColor,
         chromeStyle = chromeStyle,
         brutalFill = scheme.secondaryContainer,
         brutalIconTint = scheme.onSecondaryContainer,
@@ -121,6 +128,7 @@ private fun DetailPaneChromeIconButton(
     contentDescription: String,
     modifier: Modifier = Modifier,
     iconTint: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color = Color.Transparent,
     chromeStyle: DetailChromeStyle = LocalDetailChromeStyle.current,
     brutalFill: Color = MaterialTheme.colorScheme.secondaryContainer,
     brutalIconTint: Color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -153,7 +161,10 @@ private fun DetailPaneChromeIconButton(
         DetailChromeStyle.Default -> IconButton(
             onClick = onClick,
             modifier = modifier,
-            colors = IconButtonDefaults.iconButtonColors(contentColor = iconTint),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = iconTint,
+                containerColor = containerColor,
+            ),
         ) {
             Icon(
                 imageVector = icon,

@@ -122,7 +122,7 @@ fun OrbsMeshScreen(
         derivedStateOf { scrollBehavior.state.collapsedFraction.coerceIn(0f, 1f) }
     }
     var selectedPreset by remember { mutableStateOf(MeshPreset.Aurora) }
-    var useMaterialShapes by remember { mutableStateOf(false) }
+    var useMaterialShapes by remember { mutableStateOf(true) }
     var randomOrbShapes by remember { mutableStateOf(true) }
     var orbPresence by remember { mutableFloatStateOf(1f) }
     val orbsAppearance = LocalOrbsAppearanceState.current

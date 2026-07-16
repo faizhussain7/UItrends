@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.platform.isCompactWindowWidth
 
@@ -42,3 +44,12 @@ class ImmersiveTopBarCollapseState {
 }
 
 val LocalImmersiveTopBarCollapse = staticCompositionLocalOf<ImmersiveTopBarCollapseState?> { null }
+
+@Stable
+class ImmersiveTopBarStyleState {
+    var foreground by mutableStateOf(Color.Unspecified)
+    var iconTint by mutableStateOf(Color.Unspecified)
+    var iconContainer by mutableStateOf(Color.Unspecified)
+}
+
+val LocalImmersiveTopBarStyle = staticCompositionLocalOf<ImmersiveTopBarStyleState?> { null }

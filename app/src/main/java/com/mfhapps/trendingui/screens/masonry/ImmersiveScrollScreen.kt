@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -42,7 +44,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
@@ -51,11 +52,11 @@ import androidx.compose.material3.toShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
@@ -71,11 +72,13 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -83,11 +86,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mfhapps.trendingui.navigation.demoSharedElement
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
+import com.mfhapps.trendingui.ui.components.CatalogMorphPair
 import com.mfhapps.trendingui.ui.components.CatalogMorphShapes
 import com.mfhapps.trendingui.ui.components.Button
 import com.mfhapps.trendingui.ui.components.ExpressivePolygonIcon
@@ -96,10 +95,11 @@ import com.mfhapps.trendingui.ui.components.ShapeClickableSurface
 import com.mfhapps.trendingui.ui.components.ZoomableImage
 import com.mfhapps.trendingui.ui.detail.LocalImmersiveTopBarCollapse
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
+import com.mfhapps.trendingui.ui.detail.LocalImmersiveTopBarStyle
+import com.mfhapps.trendingui.ui.detail.ImmersiveTopBarStyleState
+import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
+import com.mfhapps.trendingui.ui.platform.isMediumOrWiderWindow
 import com.mfhapps.trendingui.ui.components.appHazeSource
-import com.mfhapps.trendingui.ui.theme.AdaptiveGradientText
-import com.mfhapps.trendingui.ui.theme.GradientForegroundRole
-import com.mfhapps.trendingui.ui.theme.LocalHomeCatalogColors
 
 private data class MasonryItem(
     val id: Int,
@@ -124,6 +124,7 @@ private val MasonryTileShape = RoundedCornerShape(24.dp)
 private val MasonryImageShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 10.dp, bottomEnd = 10.dp)
 private val MasonryFeaturedShape = RoundedCornerShape(28.dp)
 private val MasonryHeroDeckShape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
+private val MasonryDetailHeroShape = RoundedCornerShape(28.dp)
 private val MasonryDetailDeckOverlap = 32.dp
 private const val MasonryImageFadeStart = 0.62f
 
@@ -173,6 +174,12 @@ private fun masonryImageUrl(item: MasonryItem): String =
 
 private val FilterCategories = listOf("All", "Trending", "Nature", "Architecture", "Minimal")
 
+private fun ImmersiveTopBarStyleState?.publishChrome(chrome: MasonryAdaptiveChrome) {
+    this ?: return
+    foreground = chrome.topBarForeground
+    iconTint = chrome.topBarIconTint
+    iconContainer = chrome.topBarIconContainer
+}
 
 private fun Modifier.imageDissolveInto(
     blendColor: Color,
@@ -293,8 +300,13 @@ private fun MasonryFeedGrid(
     }
 
     val immersiveTopBarCollapse = LocalImmersiveTopBarCollapse.current
+    val immersiveTopBarStyle = LocalImmersiveTopBarStyle.current
+    val heroChrome = heroState.chrome
     SideEffect(scrollCollapse) {
         immersiveTopBarCollapse?.collapsedFraction = scrollCollapse
+    }
+    SideEffect(heroChrome) {
+        immersiveTopBarStyle.publishChrome(heroChrome)
     }
 
     val feedProgress by remember(gridState) {
@@ -348,23 +360,24 @@ private fun MasonryFeedGrid(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .appHazeSource()
-            .drawBehind {
-                drawRect(brush = backgroundLayers.outgoing)
-                drawRect(
-                    brush = backgroundLayers.incoming,
-                    alpha = backgroundLayers.progress,
-                )
-                val blend = (scrollCollapse * 0.55f + feedProgress * 0.45f).coerceIn(0f, 1f)
-                if (blend > 0f) {
-                    drawRect(color = scheme.background.copy(alpha = blend * 0.42f))
-                }
-            },
-    ) {
-        LazyVerticalStaggeredGrid(
+    MasonryAdaptiveTheme(chrome = heroChrome) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .appHazeSource()
+                .drawBehind {
+                    drawRect(brush = backgroundLayers.outgoing)
+                    drawRect(
+                        brush = backgroundLayers.incoming,
+                        alpha = backgroundLayers.progress,
+                    )
+                    val blend = (scrollCollapse * 0.55f + feedProgress * 0.45f).coerceIn(0f, 1f)
+                    if (blend > 0f) {
+                        drawRect(color = heroChrome.backgroundTint.copy(alpha = blend * 0.42f))
+                    }
+                },
+        ) {
+            LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(2),
             state = gridState,
             modifier = Modifier.fillMaxSize(),
@@ -425,6 +438,7 @@ private fun MasonryFeedGrid(
                 }
             }
         }
+        }
     }
 }
 
@@ -442,7 +456,7 @@ private fun ImmersiveMasonryHero(
     horizontalBleed: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val scheme = MaterialTheme.colorScheme
+    val chrome = heroState.chrome
     val accentShape = MaterialShapes.Gem.toShape()
 
     Column(
@@ -469,8 +483,8 @@ private fun ImmersiveMasonryHero(
                             colorStops = arrayOf(
                                 0f to Color.Transparent,
                                 0.42f to Color.Transparent,
-                                0.72f to scheme.scrim.copy(alpha = 0.35f),
-                                1f to scheme.scrim.copy(alpha = 0.82f),
+                                0.72f to chrome.heroScrimMid,
+                                1f to chrome.heroScrimBottom,
                             ),
                         ),
                     ),
@@ -482,7 +496,7 @@ private fun ImmersiveMasonryHero(
                     .size(88.dp)
                     .graphicsLayer { alpha = titleAlpha * 0.22f }
                     .clip(accentShape)
-                    .background(scheme.primaryContainer),
+                    .background(chrome.accentOrb),
             )
             Column(
                 modifier = Modifier
@@ -499,20 +513,20 @@ private fun ImmersiveMasonryHero(
             ) {
                 Surface(
                     shape = MaterialTheme.shapes.largeIncreased,
-                    color = scheme.primaryContainer.copy(alpha = 0.92f),
+                    color = chrome.badgeContainer,
                 ) {
                     Text(
                         text = "Immersive feed",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = scheme.onPrimaryContainer,
+                        color = chrome.badgeLabel,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
                     )
                 }
                 Text(
                     text = "Immersive Masonry",
                     style = MaterialTheme.typography.displaySmall,
-                    color = Color.White,
+                    color = chrome.onImagePrimary,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -520,7 +534,7 @@ private fun ImmersiveMasonryHero(
                 Text(
                     text = "Scroll-linked hero, palette shifts, and expressive tiles",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White.copy(alpha = 0.88f),
+                    color = chrome.onImageSecondary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(end = 8.dp, bottom = 4.dp),
@@ -534,7 +548,7 @@ private fun ImmersiveMasonryHero(
                 .offset(y = -HeroDeckOverlap)
                 .graphicsLayer { alpha = exploreAlpha },
             shape = MasonryHeroDeckShape,
-            color = scheme.surface,
+            color = chrome.deckSurface,
             tonalElevation = 2.dp,
             shadowElevation = 10.dp,
         ) {
@@ -547,7 +561,7 @@ private fun ImmersiveMasonryHero(
                 Text(
                     text = "Explore collections",
                     style = MaterialTheme.typography.titleLargeEmphasized,
-                    color = scheme.onSurface,
+                    color = chrome.deckTitle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -567,24 +581,24 @@ private fun ImmersiveMasonryHero(
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     color = if (activeFilter == index) {
-                                        scheme.onPrimaryContainer
+                                        chrome.chipLabelSelected
                                     } else {
-                                        scheme.onSurfaceVariant
+                                        chrome.chipLabel
                                     },
                                 )
                             },
                             shape = MaterialTheme.shapes.largeIncreased,
                             colors = FilterChipDefaults.filterChipColors(
-                                containerColor = scheme.surfaceContainerHigh,
-                                labelColor = scheme.onSurfaceVariant,
-                                selectedContainerColor = scheme.primaryContainer,
-                                selectedLabelColor = scheme.onPrimaryContainer,
+                                containerColor = chrome.chipContainer,
+                                labelColor = chrome.chipLabel,
+                                selectedContainerColor = chrome.chipContainerSelected,
+                                selectedLabelColor = chrome.chipLabelSelected,
                             ),
                             border = FilterChipDefaults.filterChipBorder(
                                 enabled = true,
                                 selected = activeFilter == index,
-                                borderColor = scheme.outlineVariant,
-                                selectedBorderColor = scheme.primary,
+                                borderColor = chrome.chipBorder,
+                                selectedBorderColor = chrome.chipBorderSelected,
                             ),
                         )
                     }
@@ -593,6 +607,8 @@ private fun ImmersiveMasonryHero(
         }
     }
 }
+
+private fun masonryTileSeed(item: MasonryItem): String = "masonry-tile-${item.id}"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -603,62 +619,71 @@ private fun FeaturedMasonryCard(
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
 ) {
-    val scheme = MaterialTheme.colorScheme
-    val catalogColors = LocalHomeCatalogColors.current
-    val morphPair = masonryMorphPair(item.id)
-    val badgeShape = MaterialShapes.Cookie4Sided.toShape()
-    ShapeClickableSurface(
-        onClick = onClick,
-        shape = MasonryFeaturedShape,
-        morphRest = morphPair.rest,
-        morphPressed = morphPair.pressed,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(236.dp),
-        color = scheme.surfaceContainerHigh,
-        contentColor = catalogColors.headerTitle,
-        shadowElevation = 6.dp,
-        tonalElevation = 2.dp,
-    ) {
-        MasonryCardImageBlock(
-            item = item,
-            imageBlockHeight = 236.dp,
-            imageShape = MasonryFeaturedShape,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = animatedVisibilityScope,
-            content = {
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Surface(
-                        shape = badgeShape,
-                        color = scheme.primaryContainer.copy(alpha = 0.94f),
+    val baseScheme = MaterialTheme.colorScheme
+    val tileChrome = rememberMasonryAdaptiveChrome(masonryTileSeed(item), baseScheme)
+    MasonryAdaptiveTheme(chrome = tileChrome) {
+        val scheme = MaterialTheme.colorScheme
+        val chrome = LocalMasonryAdaptiveChrome.current ?: tileChrome
+        val morphPair = masonryMorphPair(item.id)
+        val badgeShape = MaterialShapes.Cookie4Sided.toShape()
+        ShapeClickableSurface(
+            onClick = onClick,
+            shape = MasonryFeaturedShape,
+            morphRest = morphPair.rest,
+            morphPressed = morphPair.pressed,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(236.dp),
+            color = scheme.surfaceContainerHighest,
+            contentColor = scheme.onSurface,
+            shadowElevation = 6.dp,
+            tonalElevation = 2.dp,
+        ) {
+            MasonryCardImageBlock(
+                item = item,
+                imageBlockHeight = 236.dp,
+                imageShape = MasonryFeaturedShape,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                content = {
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
+                        Surface(
+                            shape = badgeShape,
+                            color = chrome.badgeContainer,
+                        ) {
+                            Text(
+                                text = "Featured",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = chrome.badgeLabel,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                            )
+                        }
                         Text(
-                            text = "Featured",
-                            style = MaterialTheme.typography.labelLarge,
+                            text = item.title,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = chrome.onImagePrimary,
                             fontWeight = FontWeight.Bold,
-                            color = scheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = item.category,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = chrome.onImageSecondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    AdaptiveGradientText(
-                        text = item.title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        role = GradientForegroundRole.Title,
-                    )
-                    AdaptiveGradientText(
-                        text = item.category,
-                        style = MaterialTheme.typography.labelLarge,
-                        role = GradientForegroundRole.Subtitle,
-                    )
-                }
-            },
-        )
+                },
+            )
+        }
     }
 }
 
@@ -671,50 +696,55 @@ private fun MasonryTileCard(
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
 ) {
-    val scheme = MaterialTheme.colorScheme
-    val morphPair = masonryMorphPair(item.id)
+    val baseScheme = MaterialTheme.colorScheme
+    val tileChrome = rememberMasonryAdaptiveChrome(masonryTileSeed(item), baseScheme)
+    MasonryAdaptiveTheme(chrome = tileChrome) {
+        val scheme = MaterialTheme.colorScheme
+        val chrome = LocalMasonryAdaptiveChrome.current ?: tileChrome
+        val morphPair = masonryMorphPair(item.id)
 
-    ShapeClickableSurface(
-        onClick = onClick,
-        shape = MasonryTileShape,
-        morphRest = morphPair.rest,
-        morphPressed = morphPair.pressed,
-        modifier = modifier.fillMaxWidth(),
-        color = scheme.surfaceContainerHigh,
-        contentColor = scheme.onSurface,
-        shadowElevation = 3.dp,
-        tonalElevation = 1.dp,
-    ) {
-        Column {
-            MasonryCardImageBlock(
-                item = item,
-                imageBlockHeight = item.imageHeightDp.dp,
-                imageShape = MasonryImageShape,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
-                bottomBlendColor = scheme.surfaceContainerHigh,
-            )
-            Column(Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.titleMediumEmphasized,
-                    color = scheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+        ShapeClickableSurface(
+            onClick = onClick,
+            shape = MasonryTileShape,
+            morphRest = morphPair.rest,
+            morphPressed = morphPair.pressed,
+            modifier = modifier.fillMaxWidth(),
+            color = scheme.surfaceContainerHighest,
+            contentColor = scheme.onSurface,
+            shadowElevation = 3.dp,
+            tonalElevation = 1.dp,
+        ) {
+            Column {
+                MasonryCardImageBlock(
+                    item = item,
+                    imageBlockHeight = item.imageHeightDp.dp,
+                    imageShape = MasonryImageShape,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    bottomBlendColor = chrome.cardBlend,
                 )
-                Surface(
-                    modifier = Modifier.padding(top = 6.dp),
-                    shape = MaterialTheme.shapes.largeIncreased,
-                    color = scheme.tertiaryContainer.copy(alpha = 0.72f),
-                ) {
+                Column(Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
                     Text(
-                        text = item.category,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = scheme.onTertiaryContainer,
+                        text = item.title,
+                        style = MaterialTheme.typography.titleMediumEmphasized,
+                        color = scheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     )
+                    Surface(
+                        modifier = Modifier.padding(top = 6.dp),
+                        shape = MaterialTheme.shapes.largeIncreased,
+                        color = scheme.tertiaryContainer,
+                    ) {
+                        Text(
+                            text = item.category,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = scheme.onTertiaryContainer,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        )
+                    }
                 }
             }
         }
@@ -733,7 +763,10 @@ private fun MasonryCardImageBlock(
     bottomBlendColor: Color? = null,
     content: (@Composable BoxScope.() -> Unit)? = null,
 ) {
+    val chrome = LocalMasonryAdaptiveChrome.current
     val scheme = MaterialTheme.colorScheme
+    val imageScrim = chrome?.imageScrimStrong ?: scheme.scrim.copy(alpha = 0.72f)
+    val accentWash = chrome?.primary?.copy(alpha = 0.22f) ?: scheme.primary.copy(alpha = 0.22f)
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -762,7 +795,7 @@ private fun MasonryCardImageBlock(
                             colorStops = arrayOf(
                                 0f to Color.Transparent,
                                 0.45f to Color.Transparent,
-                                1f to scheme.scrim.copy(alpha = 0.72f),
+                                1f to imageScrim,
                             ),
                         ),
                     ),
@@ -775,7 +808,7 @@ private fun MasonryCardImageBlock(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                scheme.primary.copy(alpha = 0.22f),
+                                accentWash,
                             ),
                         ),
                     ),
@@ -818,255 +851,340 @@ private fun MasonryItemDetail(
     val scheme = MaterialTheme.colorScheme
     val haptics = LocalHapticFeedback.current
     val reduceMotion = LocalReduceMotion.current
-    val backgroundLayers = rememberMasonryDetailBackground(
-        imageSeed = "masonry-tile-${item.id}",
+    val isWide = isMediumOrWiderWindow()
+    val adaptiveState = rememberMasonryImageAdaptiveState(
+        imageSeed = masonryTileSeed(item),
         colorScheme = scheme,
         reduceMotion = reduceMotion,
     )
-    val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + TopBarHeight + 4.dp
+    val detailChrome = adaptiveState.chrome
+    val backgroundLayers = adaptiveState.background
+    val detailTopSpacing = TopBarHeight + 12.dp
     val heroHeight = with(LocalDensity.current) {
-        (LocalWindowInfo.current.containerSize.height.toDp() * 0.56f).coerceIn(380.dp, 520.dp)
+        if (isWide) {
+            (LocalWindowInfo.current.containerSize.height.toDp() * 0.72f).coerceIn(420.dp, 640.dp)
+        } else {
+            (LocalWindowInfo.current.containerSize.height.toDp() * 0.56f).coerceIn(380.dp, 520.dp)
+        }
     }
     val meta = remember(item.id) { item.detailMeta() }
     val morphPair = remember(item.id) { masonryMorphPair(item.id) }
     var isZoomed by remember { mutableStateOf(false) }
     val immersiveTopBarCollapse = LocalImmersiveTopBarCollapse.current
-    SideEffect(Unit) {
+    val immersiveTopBarStyle = LocalImmersiveTopBarStyle.current
+    SideEffect(detailChrome) {
         immersiveTopBarCollapse?.collapsedFraction = 1f
+        immersiveTopBarStyle.publishChrome(detailChrome)
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .appHazeSource()
-            .drawBehind {
-                drawRect(brush = backgroundLayers.outgoing)
-                drawRect(
-                    brush = backgroundLayers.incoming,
-                    alpha = backgroundLayers.progress,
-                )
-            },
-    ) {
-        Column(
+    MasonryAdaptiveTheme(chrome = detailChrome) {
+        val adaptedScheme = MaterialTheme.colorScheme
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .navigationBarsPadding()
-                .verticalScroll(rememberScrollState(), enabled = !isZoomed),
+                .appHazeSource()
+                .drawBehind {
+                    drawRect(brush = backgroundLayers.outgoing)
+                    drawRect(
+                        brush = backgroundLayers.incoming,
+                        alpha = backgroundLayers.progress,
+                    )
+                },
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(heroHeight + topInset),
-            ) {
-                Box(
+            if (isWide) {
+                Row(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(heroHeight),
+                        .fillMaxSize()
+                        .windowInsetsPadding(appBarTopWindowInsets())
+                        .navigationBarsPadding()
+                        .padding(top = detailTopSpacing, start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    ZoomableImage(
-                        modifier = Modifier.fillMaxSize(),
-                        onZoomChanged = { zoomed ->
-                            if (zoomed != isZoomed) {
-                                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                            }
-                            isZoomed = zoomed
-                        },
+                    Box(
+                        modifier = Modifier
+                            .weight(0.54f)
+                            .fillMaxHeight(),
                     ) {
-                        AsyncImage(
-                            model = masonryImageUrl(item),
-                            contentDescription = item.title,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .demoSharedElement(
-                                    sharedTransitionScope = sharedTransitionScope,
-                                    key = masonryImageKey(item.id),
-                                    animatedVisibilityScope = animatedVisibilityScope,
-                                ),
-                            contentScale = ContentScale.Crop,
+                        MasonryDetailHeroImage(
+                            item = item,
+                            detailChrome = detailChrome,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            onZoomChanged = { zoomed ->
+                                if (zoomed != isZoomed) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                }
+                                isZoomed = zoomed
+                            },
+                            modifier = Modifier.fillMaxSize(),
                         )
                     }
+                    Surface(
+                        modifier = Modifier
+                            .weight(0.46f)
+                            .fillMaxHeight(),
+                        shape = MasonryHeroDeckShape,
+                        color = adaptedScheme.surface,
+                        tonalElevation = 2.dp,
+                        shadowElevation = 10.dp,
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState(), enabled = !isZoomed)
+                                .padding(horizontal = 20.dp, vertical = 20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            MasonryDetailBody(
+                                item = item,
+                                meta = meta,
+                                morphPair = morphPair,
+                                haptics = haptics,
+                            )
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(appBarTopWindowInsets())
+                        .navigationBarsPadding()
+                        .verticalScroll(rememberScrollState(), enabled = !isZoomed),
+                ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(heroHeight * 0.35f)
-                            .align(Alignment.BottomCenter)
-                            .background(
-                                Brush.verticalGradient(
-                                    colorStops = arrayOf(
-                                        0f to Color.Transparent,
-                                        1f to scheme.scrim.copy(alpha = 0.45f),
-                                    ),
-                                ),
-                            ),
-                    )
+                            .height(heroHeight + detailTopSpacing),
+                    ) {
+                        MasonryDetailHeroImage(
+                            item = item,
+                            detailChrome = detailChrome,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            onZoomChanged = { zoomed ->
+                                if (zoomed != isZoomed) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                }
+                                isZoomed = zoomed
+                            },
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .height(heroHeight),
+                        )
+                    }
+
                     Surface(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 16.dp, end = 16.dp),
-                        shape = MaterialTheme.shapes.largeIncreased,
-                        color = scheme.primaryContainer.copy(alpha = 0.94f),
-                        shadowElevation = 4.dp,
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .offset(y = -MasonryDetailDeckOverlap),
+                        shape = MasonryHeroDeckShape,
+                        color = adaptedScheme.surface,
+                        tonalElevation = 2.dp,
+                        shadowElevation = 10.dp,
                     ) {
-                        Text(
-                            text = item.category,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = scheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            MasonryDetailBody(
+                                item = item,
+                                meta = meta,
+                                morphPair = morphPair,
+                                haptics = haptics,
+                            )
+                        }
                     }
+
+                    Spacer(Modifier.height(28.dp))
                 }
             }
+        }
+    }
+}
 
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .offset(y = -MasonryDetailDeckOverlap),
-                shape = MasonryHeroDeckShape,
-                color = scheme.surface,
-                tonalElevation = 2.dp,
-                shadowElevation = 10.dp,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun MasonryDetailHeroImage(
+    item: MasonryItem,
+    detailChrome: MasonryAdaptiveChrome,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onZoomChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        ZoomableImage(
+            modifier = Modifier.fillMaxSize(),
+            onZoomChanged = onZoomChanged,
+        ) {
+            MasonrySharedImage(
+            item = item,
+            imageShape = MasonryDetailHeroShape,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
+            modifier = Modifier.fillMaxSize(),
+            )
+        }
+        Surface(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 16.dp, end = 16.dp),
+            shape = MaterialTheme.shapes.largeIncreased,
+            color = detailChrome.badgeContainer,
+            shadowElevation = 4.dp,
+        ) {
+            Text(
+                text = item.category,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = detailChrome.badgeLabel,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun MasonryDetailBody(
+    item: MasonryItem,
+    meta: MasonryDetailMeta,
+    morphPair: CatalogMorphPair,
+    haptics: HapticFeedback,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val chrome = LocalMasonryAdaptiveChrome.current
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        ExpressivePolygonIcon(
+            icon = Icons.Outlined.AutoAwesome,
+            polygon = morphPair.rest,
+            modifier = Modifier.size(44.dp),
+            containerColor = scheme.primaryContainer,
+            contentColor = scheme.onPrimaryContainer,
+        )
+        Text(
+            text = item.title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = scheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        MasonryDetailMetric(label = "Views", value = meta.views, modifier = Modifier.weight(1f))
+        MasonryDetailMetric(label = "Read", value = meta.readTime, modifier = Modifier.weight(1f))
+        MasonryDetailMetric(label = "Saves", value = meta.saves, modifier = Modifier.weight(1f))
+    }
+
+    HorizontalDivider(color = scheme.outlineVariant)
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "About this tile",
+            style = MaterialTheme.typography.titleMediumEmphasized,
+            color = scheme.onSurface,
+        )
+        Text(
+            text = item.body,
+            style = MaterialTheme.typography.bodyLarge,
+            color = scheme.onSurfaceVariant,
+        )
+    }
+
+    MasonryDetailSectionCard(
+        title = "Gallery notes",
+        body = meta.note,
+    )
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Tags",
+            style = MaterialTheme.typography.titleSmallEmphasized,
+            color = scheme.onSurface,
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            meta.tags.forEach { tag ->
+                Surface(
+                    shape = MaterialTheme.shapes.largeIncreased,
+                    color = chrome?.tagContainer ?: scheme.secondaryContainer,
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        ExpressivePolygonIcon(
-                            icon = Icons.Outlined.AutoAwesome,
-                            polygon = morphPair.rest,
-                            modifier = Modifier.size(44.dp),
-                            containerColor = scheme.primaryContainer,
-                            contentColor = scheme.onPrimaryContainer,
-                        )
-                        Text(
-                            text = item.title,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = scheme.onSurface,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        MasonryDetailMetric(label = "Views", value = meta.views, modifier = Modifier.weight(1f))
-                        MasonryDetailMetric(label = "Read", value = meta.readTime, modifier = Modifier.weight(1f))
-                        MasonryDetailMetric(label = "Saves", value = meta.saves, modifier = Modifier.weight(1f))
-                    }
-
-                    HorizontalDivider(color = scheme.outlineVariant.copy(alpha = 0.45f))
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "About this tile",
-                            style = MaterialTheme.typography.titleMediumEmphasized,
-                            color = scheme.onSurface,
-                        )
-                        Text(
-                            text = item.body,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = scheme.onSurfaceVariant,
-                        )
-                    }
-
-                    MasonryDetailSectionCard(
-                        title = "Gallery notes",
-                        body = meta.note,
+                    Text(
+                        text = tag,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = chrome?.tagLabel ?: scheme.onSecondaryContainer,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "Tags",
-                            style = MaterialTheme.typography.titleSmallEmphasized,
-                            color = scheme.onSurface,
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            meta.tags.forEach { tag ->
-                                Surface(
-                                    shape = MaterialTheme.shapes.largeIncreased,
-                                    color = scheme.secondaryContainer.copy(alpha = 0.82f),
-                                ) {
-                                    Text(
-                                        text = tag,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = scheme.onSecondaryContainer,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Button(
-                            onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                            },
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text("Save")
-                        }
-                        FilledTonalButton(
-                            onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                            },
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text("Share")
-                        }
-                    }
-
-                    Surface(
-                        shape = MaterialTheme.shapes.largeIncreased,
-                        color = scheme.surfaceContainerHigh,
-                        tonalElevation = 1.dp,
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        ) {
-                            ExpressivePolygonIcon(
-                                icon = Icons.Outlined.TouchApp,
-                                polygon = MaterialShapes.Sunny,
-                                modifier = Modifier.size(36.dp),
-                                containerColor = scheme.tertiaryContainer,
-                                contentColor = scheme.onTertiaryContainer,
-                                iconSize = 18.dp,
-                            )
-                            Text(
-                                text = "Pinch or double-tap the hero image to zoom in full screen.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = scheme.onSurfaceVariant,
-                            )
-                        }
-                    }
                 }
             }
+        }
+    }
 
-            Spacer(Modifier.height(28.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Button(
+            onClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+            },
+            modifier = Modifier.weight(1f),
+        ) {
+            Text("Save")
+        }
+        FilledTonalButton(
+            onClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+            },
+            modifier = Modifier.weight(1f),
+        ) {
+            Text("Share")
+        }
+    }
+
+    Surface(
+        shape = MaterialTheme.shapes.largeIncreased,
+        color = scheme.surfaceContainerHigh,
+        tonalElevation = 1.dp,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            ExpressivePolygonIcon(
+                icon = Icons.Outlined.TouchApp,
+                polygon = MaterialShapes.Sunny,
+                modifier = Modifier.size(36.dp),
+                containerColor = scheme.tertiaryContainer,
+                contentColor = scheme.onTertiaryContainer,
+                iconSize = 18.dp,
+            )
+            Text(
+                text = "Pinch or double-tap the hero image to zoom in full screen.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = scheme.onSurfaceVariant,
+            )
         }
     }
 }
