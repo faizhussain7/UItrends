@@ -141,6 +141,7 @@ jobs:
           CREATOR_LINKEDIN_FETCH_USER_AGENT: ${{ vars.CREATOR_LINKEDIN_FETCH_USER_AGENT }}
         run: |
           chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace downloadPretextVisionAssets
           ./gradlew --no-daemon --stacktrace bundleRelease assembleRelease
 
       - name: Prepare versioned release artifacts
