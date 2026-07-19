@@ -27,6 +27,15 @@ on:
         description: Upload AAB to Google Play
         type: boolean
         default: false
+      play_release_status:
+        description: >-
+          Play release status. Use draft while the Play app is still a draft
+          (first uploads / listing incomplete) — Play rejects completed releases
+          on draft apps. Use completed only after the app is created and you want
+          the release rolled out on the selected track.
+        type: choice
+        options: [draft, completed]
+        default: draft
   push:
     tags:
       - v*
@@ -40,7 +49,6 @@ concurrency:
 
 jobs:
   release:
-    # Skip the second run when this workflow creates the release tag via workflow_dispatch.
     if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -205,4 +213,4 @@ jobs:
           track: ${{ inputs.track }}
           whatsNewDirectory: release/whatsnew
           mappingFile: app/build/outputs/mapping/release/mapping.txt
-          status: completed
+          status: ${{ inputs.play_release_status }}
