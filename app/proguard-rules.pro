@@ -93,6 +93,22 @@
 -keep class androidx.core.splashscreen.** { *; }
 -keep class androidx.startup.** { *; }
 
+-keep class * extends androidx.room.RoomDatabase {
+    <init>();
+    public ** createInvalidationTracker();
+    public void clearAllTables();
+}
+-keep class androidx.room.RoomDatabase$JournalMode { *; }
+-keep class androidx.work.** {
+    <init>(...);
+}
+-keep class * extends androidx.work.ListenableWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
+-keep class * extends androidx.work.InputMerger {
+    <init>();
+}
+
 # --- Optional / transitive dependency noise ---
 -dontwarn org.bouncycastle.**
 -dontwarn org.conscrypt.**
