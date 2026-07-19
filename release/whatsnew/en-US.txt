@@ -1,11 +1,1 @@
 • Update release.yml
-• Update Android SDK and build-tools versions
-• Add Play Store assets zip
-• Pretext reflow, legal docs, UI scaffolds & fonts
-• Enhance spatial depth screen with sections and improved chrome
-• Add adaptive theming system for masonry layouts
-• Migrate to Expressive Shape system and add orb visibility controls
-• Refactor animation system and add expressive UI patterns
-• Add app widget and shortcuts with deep linking
-• Add safe-area, adaptive layout and UI refinements
-• Add crea
