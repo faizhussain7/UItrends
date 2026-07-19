@@ -167,7 +167,17 @@ jobs:
             RELEASE_FILES="${RELEASE_FILES}
           ${OUT}/mapping-${VERSION}.txt"
           fi
+          NATIVE_SYMBOLS="$(find app/build/outputs -type f -name 'native-debug-symbols.zip' | head -n 1)"
+          if [[ -z "${NATIVE_SYMBOLS}" || ! -s "${NATIVE_SYMBOLS}" ]]; then
+            echo "::error::native-debug-symbols.zip not found under app/build/outputs. Check ndk.debugSymbolLevel on the release build type."
+            find app/build/outputs -maxdepth 4 -type f -print || true
+            exit 1
+          fi
+          cp "${NATIVE_SYMBOLS}" "${OUT}/native-debug-symbols-${VERSION}.zip"
+          RELEASE_FILES="${RELEASE_FILES}
+          ${OUT}/native-debug-symbols-${VERSION}.zip"
           echo "artifact_dir=${OUT}" >> "${GITHUB_OUTPUT}"
+          echo "native_debug_symbols=${OUT}/native-debug-symbols-${VERSION}.zip" >> "${GITHUB_OUTPUT}"
           {
             echo "files<<EOF"
             echo "${RELEASE_FILES}"
@@ -213,4 +223,5 @@ jobs:
           track: ${{ inputs.track }}
           whatsNewDirectory: release/whatsnew
           mappingFile: app/build/outputs/mapping/release/mapping.txt
+          debugSymbols: ${{ steps.artifacts.outputs.native_debug_symbols }}
           status: ${{ inputs.play_release_status }}
