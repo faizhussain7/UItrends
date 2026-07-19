@@ -41,35 +41,58 @@ object AppFonts {
         )
     }
 
-    private val inter by lazy { variableFamily(R.font.inter_variable) }
-    private val satoshi by lazy {
-        variableFamily(R.font.satoshi_variable, listOf(300, 400, 500, 600, 700, 900))
+    private val unbounded by lazy {
+        variableFamily(R.font.unbounded_variable, listOf(200, 300, 400, 500, 600, 700, 800, 900))
     }
-    private val lato by lazy { staticFamily(R.font.lato_regular) }
-    private val alegreya by lazy { variableFamily(R.font.alegreya_variable) }
-    private val lora by lazy { variableFamily(R.font.lora_variable, listOf(400, 500, 600, 700)) }
-    private val poppins by lazy { staticFamily(R.font.poppins_regular) }
-    private val roboto by lazy { variableFamily(R.font.roboto_variable) }
-    private val openSans by lazy {
-        variableFamily(R.font.open_sans_variable, listOf(300, 400, 500, 600, 700, 800))
+    private val manrope by lazy {
+        variableFamily(R.font.manrope_variable, listOf(200, 300, 400, 500, 600, 700, 800))
     }
-    private val montserrat by lazy { variableFamily(R.font.montserrat_variable) }
-    private val raleway by lazy { variableFamily(R.font.raleway_variable) }
+    private val fraunces by lazy {
+        variableFamily(R.font.fraunces_variable, listOf(100, 200, 300, 400, 500, 600, 700, 800, 900))
+    }
+    private val publicSans by lazy {
+        variableFamily(R.font.public_sans_variable, listOf(100, 200, 300, 400, 500, 600, 700, 800, 900))
+    }
+    private val bricolageGrotesque by lazy {
+        variableFamily(R.font.bricolage_grotesque_variable, listOf(200, 300, 400, 500, 600, 700, 800))
+    }
+    private val plusJakartaSans by lazy {
+        variableFamily(R.font.plus_jakarta_sans_variable, listOf(200, 300, 400, 500, 600, 700, 800))
+    }
+    private val syne by lazy {
+        variableFamily(R.font.syne_variable, listOf(400, 500, 600, 700, 800))
+    }
+    private val dmSans by lazy {
+        variableFamily(R.font.dm_sans_variable, listOf(100, 200, 300, 400, 500, 600, 700, 800, 900))
+    }
+    private val anybody by lazy {
+        variableFamily(R.font.anybody_variable, listOf(100, 200, 300, 400, 500, 600, 700, 800, 900))
+    }
+    private val outfit by lazy {
+        variableFamily(R.font.outfit_variable, listOf(100, 200, 300, 400, 500, 600, 700, 800, 900))
+    }
+    private val bigShouldersDisplay by lazy {
+        variableFamily(R.font.big_shoulders_display_variable, listOf(100, 200, 300, 400, 500, 600, 700, 800, 900))
+    }
+    private val sourceSans3 by lazy {
+        variableFamily(R.font.source_sans_3_variable, listOf(200, 300, 400, 500, 600, 700, 800, 900))
+    }
+    private val youngSerif by lazy { staticFamily(R.font.young_serif_regular) }
+    private val figtree by lazy {
+        variableFamily(R.font.figtree_variable, listOf(300, 400, 500, 600, 700, 800, 900))
+    }
 
-    val brand: FontFamily get() = satoshi
-    val body: FontFamily get() = inter
+    val brand: FontFamily get() = unbounded
+    val body: FontFamily get() = manrope
 
     fun pairFor(style: AppFontStyle): AppFontPair = when (style) {
-        AppFontStyle.Satoshi -> AppFontPair(brand = satoshi, body = inter)
-        AppFontStyle.Montserrat -> AppFontPair(brand = montserrat, body = openSans)
-        AppFontStyle.Raleway -> AppFontPair(brand = raleway, body = inter)
-        AppFontStyle.Lora -> AppFontPair(brand = lora, body = openSans)
-        AppFontStyle.Alegreya -> AppFontPair(brand = alegreya, body = inter)
-        AppFontStyle.OpenSans -> AppFontPair(brand = openSans, body = openSans)
-        AppFontStyle.Inter -> AppFontPair(brand = inter, body = inter)
-        AppFontStyle.Poppins -> AppFontPair(brand = poppins, body = inter)
-        AppFontStyle.Lato -> AppFontPair(brand = lato, body = inter)
-        AppFontStyle.Roboto -> AppFontPair(brand = roboto, body = roboto)
+        AppFontStyle.UnboundedManrope -> AppFontPair(brand = unbounded, body = manrope)
+        AppFontStyle.FrauncesPublicSans -> AppFontPair(brand = fraunces, body = publicSans)
+        AppFontStyle.BricolageJakarta -> AppFontPair(brand = bricolageGrotesque, body = plusJakartaSans)
+        AppFontStyle.SyneDmSans -> AppFontPair(brand = syne, body = dmSans)
+        AppFontStyle.AnybodyOutfit -> AppFontPair(brand = anybody, body = outfit)
+        AppFontStyle.BigShouldersSource -> AppFontPair(brand = bigShouldersDisplay, body = sourceSans3)
+        AppFontStyle.YoungSerifFigtree -> AppFontPair(brand = youngSerif, body = figtree)
         AppFontStyle.System -> AppFontPair(brand = FontFamily.Default, body = FontFamily.Default)
     }
 

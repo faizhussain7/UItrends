@@ -6,65 +6,47 @@ enum class AppFontStyle(
     val plainName: String,
     val description: String,
 ) {
-    Satoshi(
-        label = "Satoshi × Inter",
-        brandName = "Satoshi",
-        plainName = "Inter",
-        description = "Expressive geometric brand · screen-first UI plain",
+    UnboundedManrope(
+        label = "Unbounded × Manrope",
+        brandName = "Unbounded",
+        plainName = "Manrope",
+        description = "Bold display brand · calm UI plain",
     ),
-    Montserrat(
-        label = "Montserrat × Open Sans",
-        brandName = "Montserrat",
-        plainName = "Open Sans",
-        description = "Urban geometry · humanist reading pair",
+    FrauncesPublicSans(
+        label = "Fraunces × Public Sans",
+        brandName = "Fraunces",
+        plainName = "Public Sans",
+        description = "Soft expressive serif · accessible UI plain",
     ),
-    Raleway(
-        label = "Raleway × Inter",
-        brandName = "Raleway",
-        plainName = "Inter",
-        description = "Elegant display · crisp UI plain",
+    BricolageJakarta(
+        label = "Bricolage Grotesque × Plus Jakarta Sans",
+        brandName = "Bricolage Grotesque",
+        plainName = "Plus Jakarta Sans",
+        description = "Characterful grotesque · product UI plain",
     ),
-    Lora(
-        label = "Lora × Open Sans",
-        brandName = "Lora",
-        plainName = "Open Sans",
-        description = "Editorial serif brand · warm sans plain",
+    SyneDmSans(
+        label = "Syne × DM Sans",
+        brandName = "Syne",
+        plainName = "DM Sans",
+        description = "Artful display brand · dense UI plain",
     ),
-    Alegreya(
-        label = "Alegreya × Inter",
-        brandName = "Alegreya",
-        plainName = "Inter",
-        description = "Literary serif brand · modern UI plain",
+    AnybodyOutfit(
+        label = "Anybody × Outfit",
+        brandName = "Anybody",
+        plainName = "Outfit",
+        description = "Width-playful display · geometric UI plain",
     ),
-    OpenSans(
-        label = "Open Sans",
-        brandName = "Open Sans",
-        plainName = "Open Sans",
-        description = "Friendly humanist throughout",
+    BigShouldersSource(
+        label = "Big Shoulders Display × Source Sans 3",
+        brandName = "Big Shoulders Display",
+        plainName = "Source Sans 3",
+        description = "Condensed poster brand · classic UI plain",
     ),
-    Inter(
-        label = "Inter",
-        brandName = "Inter",
-        plainName = "Inter",
-        description = "Modern UI sans throughout",
-    ),
-    Poppins(
-        label = "Poppins × Inter",
-        brandName = "Poppins",
-        plainName = "Inter",
-        description = "Rounded geometric brand · UI plain",
-    ),
-    Lato(
-        label = "Lato × Inter",
-        brandName = "Lato",
-        plainName = "Inter",
-        description = "Humanist display · UI plain",
-    ),
-    Roboto(
-        label = "Roboto",
-        brandName = "Roboto",
-        plainName = "Roboto",
-        description = "Material / Android baseline",
+    YoungSerifFigtree(
+        label = "Young Serif × Figtree",
+        brandName = "Young Serif",
+        plainName = "Figtree",
+        description = "Quirky editorial brand · warm UI plain",
     ),
     System(
         label = "System default",
@@ -78,14 +60,19 @@ enum class AppFontStyle(
 
     companion object {
         fun fromStoredName(name: String?): AppFontStyle {
-            if (name == null) return Satoshi
+            if (name == null) return UnboundedManrope
             entries.find { it.name == name }?.let { return it }
             return when (name) {
-                "Expressive" -> Satoshi
-                "Editorial" -> Lora
-                "Brand" -> Raleway
+                "FrauncesManrope", "InstrumentSerif", "SyneOutfit", "SoraManrope",
+                "DmPair", "Satoshi", "Inter", "Poppins", "Lato", "Roboto",
+                "OpenSans", "Montserrat", "Raleway", "Expressive", "Brand",
+                "Jakarta", "DmSans", "OutfitManrope", "SoraDmSans",
+                "GeistPublicSans", "FigtreeSourceSans", "RedHat",
+                "InterTightPublicSans", "SpaceOutfit", "SpaceNewsreader",
+                -> UnboundedManrope
+                "Lora", "Alegreya", "Editorial" -> FrauncesPublicSans
                 "System" -> System
-                else -> Satoshi
+                else -> UnboundedManrope
             }
         }
     }

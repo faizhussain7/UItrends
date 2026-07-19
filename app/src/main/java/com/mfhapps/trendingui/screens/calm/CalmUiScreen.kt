@@ -729,7 +729,7 @@ private fun CalmReaderTopBar(
     TopAppBar(
         title = {
             Column {
-                Text("Calm UI", style = MaterialTheme.typography.titleLarge)
+                Text("Calm UI", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 if (eInk) {
                     Text(
                         eInkVariantLabel,

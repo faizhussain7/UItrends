@@ -47,25 +47,27 @@ import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
-import com.mfhapps.trendingui.ui.components.appHazeSource
+import com.mfhapps.trendingui.ui.detail.DemoHeroTitleCollapsingScaffold
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import com.mfhapps.trendingui.ui.theme.LocalHomeCatalogColors
 import com.mfhapps.trendingui.ui.theme.launcherIconGradientBackground
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.sin
 
-private val DetailTopBarHeight = 56.dp
-private const val HeroImageHeightDp = 300
+private const val HeroImageHeightDp = 280
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun KineticTypographyScreen() {
+fun KineticTypographyScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
     val scheme = MaterialTheme.colorScheme
     val catalogColors = LocalHomeCatalogColors.current
     val scroll = rememberScrollState()
     val reduceMotion = LocalReduceMotion.current
-    val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + DetailTopBarHeight
-    val heroHeight = HeroImageHeightDp.dp + topInset
+    val heroHeight = HeroImageHeightDp.dp
 
     var prevScroll by remember { mutableIntStateOf(0) }
     var lastTickMs by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -120,77 +122,76 @@ fun KineticTypographyScreen() {
     val waveWord = "WAVE"
     val expandWord = "EXPAND"
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .appHazeSource()
-            .background(scheme.background)
-            .navigationBarsPadding()
-            .verticalScroll(scroll),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(heroHeight),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .launcherIconGradientBackground()
-                    .graphicsLayer {
-                        alpha = (1f - scroll.value / 500f).coerceIn(0.2f, 1f)
-                    },
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colorStops = arrayOf(
-                                0f to scheme.scrim.copy(alpha = 0.35f),
-                                0.45f to Color.Transparent,
-                                0.72f to scheme.scrim.copy(alpha = 0.5f),
-                                1f to scheme.background.copy(alpha = 0.92f),
-                            ),
-                        ),
-                    ),
-            )
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = "Kinetic Type",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = catalogColors.headerTitle,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = "Scroll-driven typography",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = catalogColors.headerSubtitle,
-                )
-                Text(
-                    text = "Header merges with detail chrome",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = catalogColors.headerSubtitle.copy(alpha = 0.85f),
-                    modifier = Modifier.graphicsLayer {
-                        alpha = (scroll.value / 280f).coerceIn(0f, 1f)
-                    },
-                )
-            }
-        }
-
+    DemoHeroTitleCollapsingScaffold(
+        title = "Kinetic Type",
+        onNavigateBack = onNavigateBack,
+        guide = guide,
+        scrollValuePx = scroll.value,
+        heroTitleThresholdDp = 220.dp,
+        modifier = Modifier.background(scheme.background),
+        bottomPadding = 32.dp,
+    ) { contentPadding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(top = 8.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(28.dp),
+                .fillMaxSize()
+                .verticalScroll(scroll)
+                .padding(contentPadding),
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(heroHeight),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .launcherIconGradientBackground()
+                        .graphicsLayer {
+                            alpha = (1f - scroll.value / 500f).coerceIn(0.2f, 1f)
+                        },
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colorStops = arrayOf(
+                                    0f to scheme.scrim.copy(alpha = 0.35f),
+                                    0.45f to Color.Transparent,
+                                    0.72f to scheme.scrim.copy(alpha = 0.5f),
+                                    1f to scheme.background.copy(alpha = 0.92f),
+                                ),
+                            ),
+                        ),
+                )
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = "Kinetic Type",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = catalogColors.headerTitle,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "Scroll-driven typography",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = catalogColors.headerSubtitle,
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 8.dp, bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(28.dp),
+            ) {
             KineticSectionLabel(
                 title = "Stagger reveal",
                 body = "Letters appear in sequence on load; respects reduce motion.",
@@ -328,6 +329,7 @@ fun KineticTypographyScreen() {
                 style = MaterialTheme.typography.bodyMedium,
                 color = scheme.onSurfaceVariant,
             )
+        }
         }
     }
 }

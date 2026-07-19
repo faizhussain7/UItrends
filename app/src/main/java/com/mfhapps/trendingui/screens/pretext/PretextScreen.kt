@@ -4,8 +4,15 @@ package com.mfhapps.trendingui.screens.pretext
 
 import android.graphics.Typeface
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +30,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -64,7 +70,8 @@ import com.mfhapps.trendingui.navigation.pretextModeEnterForward
 import com.mfhapps.trendingui.navigation.pretextModeExitForward
 import com.mfhapps.trendingui.navigation.pretextModePopEnter
 import com.mfhapps.trendingui.navigation.pretextModePopExit
-import com.mfhapps.trendingui.core.FpsOverlay
+import com.mfhapps.trendingui.core.FpsMeasureChip
+import com.mfhapps.trendingui.core.rememberComposeFps
 import com.mfhapps.trendingui.core.text.MeasuredTextLayout
 import com.mfhapps.trendingui.core.text.PreparedText
 import com.mfhapps.trendingui.core.text.PrepareOptions
@@ -77,9 +84,17 @@ import com.mfhapps.trendingui.ui.components.MeasuredTextBlock
 import com.mfhapps.trendingui.ui.components.PretextLineCanvas
 import com.mfhapps.trendingui.ui.components.PretextParagraphCanvas
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import com.mfhapps.trendingui.ui.detail.DetailPaneTopBarActions
 import com.mfhapps.trendingui.ui.detail.LocalNestedBackDispatcher
+import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
 import com.mfhapps.trendingui.ui.components.appHazeSource
+import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
+import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
 import com.mfhapps.trendingui.ui.detail.NestedBackEffect
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import kotlinx.coroutines.Dispatchers
@@ -100,7 +115,7 @@ fun PretextScreen(
     guide: DemoTrendGuide? = null,
 ) {
     var screenMode by rememberSaveable { mutableStateOf(PretextScreenMode.Playground) }
-    var cameraMeasureMode by remember { mutableStateOf(PretextMeasureMode.Engine) }
+    var cameraMeasureMode by remember { mutableStateOf(PretextMeasureMode.ViewMeasure) }
     var visionTrackMode by remember { mutableStateOf(VisionTrackMode.Person) }
     var showBoundingBox by remember { mutableStateOf(true) }
     var cameraStage by remember { mutableStateOf(PretextCameraStage.CameraOverlay) }
@@ -170,23 +185,47 @@ private fun PretextPlaygroundScaffold(
     val nestedBackDispatcher = LocalNestedBackDispatcher.current
     val listState = rememberPretextPlaygroundListState()
     val showCameraInHeader by rememberPretextPlaygroundCameraInHeader(listState)
+    val density = LocalDensity.current
+    val scheme = MaterialTheme.colorScheme
+    val heroThresholdPx = remember(density) { with(density) { 220.dp.roundToPx() } }
+    val heroFadePx = remember(density) { with(density) { 56.dp.roundToPx() } }
+    val collapsedFraction by remember(listState, heroThresholdPx, heroFadePx) {
+        derivedStateOf {
+            val scrollY = listState.firstVisibleItemScrollOffset +
+                listState.firstVisibleItemIndex * heroThresholdPx
+            if (scrollY <= heroThresholdPx) {
+                0f
+            } else {
+                ((scrollY - heroThresholdPx).toFloat() / heroFadePx).coerceIn(0f, 1f)
+            }
+        }
+    }
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+    val fps = rememberComposeFps()
+    var lastMeasureMs by remember { mutableLongStateOf(0L) }
+    val showFpsChip by remember {
+        derivedStateOf { collapsedFraction > 0.01f }
+    }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
+    CollapsingBlurTopBarLayout(
+        scrollBehavior = scrollBehavior,
+        collapsedFraction = collapsedFraction,
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding(),
+        topBar = { barModifier ->
             TopAppBar(
+                modifier = barModifier,
                 title = {
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    if (collapsedFraction > 0.01f) {
                         Text(
-                            "Pretext",
-                            style = MaterialTheme.typography.titleLargeEmphasized,
+                            text = "Pretext",
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            "Text engine + live camera",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = scheme.onSurface,
+                            maxLines = 1,
+                            modifier = Modifier.graphicsLayer { alpha = collapsedFraction },
                         )
                     }
                 },
@@ -201,11 +240,32 @@ private fun PretextPlaygroundScaffold(
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = "Back to catalog",
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = scheme.onSurface,
                         )
                     }
                 },
                 actions = {
+                    AnimatedVisibility(
+                        visible = showFpsChip,
+                        enter = fadeIn(spring(stiffness = Spring.StiffnessMedium)) +
+                            scaleIn(
+                                initialScale = 0.86f,
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                            ),
+                        exit = fadeOut(spring(stiffness = Spring.StiffnessHigh)) +
+                            scaleOut(
+                                targetScale = 0.86f,
+                                animationSpec = spring(stiffness = Spring.StiffnessHigh),
+                            ),
+                    ) {
+                        FpsMeasureChip(
+                            fps = fps,
+                            lastMeasureMs = lastMeasureMs,
+                            modifier = Modifier
+                                .padding(end = 4.dp)
+                                .graphicsLayer { alpha = collapsedFraction },
+                        )
+                    }
                     PretextPlaygroundCameraHeaderAction(
                         visible = showCameraInHeader,
                         onClick = { onScreenModeChange(PretextScreenMode.Camera) },
@@ -213,21 +273,31 @@ private fun PretextPlaygroundScaffold(
                     )
                     DetailPaneTopBarActions(
                         guide = guide,
-                        iconTint = MaterialTheme.colorScheme.onSurface,
+                        iconTint = scheme.onSurface,
                     )
                 },
                 windowInsets = appBarTopWindowInsets(),
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                colors = rememberCollapsedTopAppBarColors(
+                    collapsedFraction = collapsedFraction,
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = scheme.surface,
+                    titleContentColor = scheme.onSurface,
+                    navigationIconContentColor = scheme.onSurface,
+                    actionIconContentColor = scheme.onSurface,
                 ),
             )
         },
-    ) { innerPadding ->
+    ) {
         PretextPlaygroundContent(
             listState = listState,
             screenMode = screenMode,
             onScreenModeChange = onScreenModeChange,
-            scaffoldPadding = innerPadding,
+            fps = fps,
+            lastMeasureMs = lastMeasureMs,
+            onLastMeasureMsChange = { lastMeasureMs = it },
+            scaffoldPadding = collapsingTopBarContentPadding(
+                extra = PaddingValues(bottom = 16.dp),
+            ),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
@@ -241,6 +311,9 @@ private fun PretextPlaygroundContent(
     listState: LazyListState,
     screenMode: PretextScreenMode,
     onScreenModeChange: (PretextScreenMode) -> Unit,
+    fps: Int,
+    lastMeasureMs: Long,
+    onLastMeasureMsChange: (Long) -> Unit,
     scaffoldPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
@@ -282,7 +355,6 @@ private fun PretextPlaygroundContent(
     var benchViewMs by remember { mutableLongStateOf(0L) }
     var ratio by remember { mutableStateOf("—") }
     var running by remember { mutableStateOf(false) }
-    var lastMeasure by remember { mutableLongStateOf(0L) }
 
     val benchmarkItems = remember {
         TextScript.entries.flatMap { script ->
@@ -377,7 +449,7 @@ private fun PretextPlaygroundContent(
             }
         }
         layout10kNs = ns
-        lastMeasure = prepareMs + (ns / 1_000_000 / 10)
+        onLastMeasureMsChange(prepareMs + (ns / 1_000_000 / 10))
     }
 
     val perLayoutMicroseconds = if (layout10kNs > 0) layout10kNs / 10_000 / 1_000 else 0L
@@ -410,17 +482,16 @@ private fun PretextPlaygroundContent(
             } else {
                 "—"
             }
-            lastMeasure = benchEngineMs
+            onLastMeasureMsChange(benchEngineMs)
             running = false
         }
     }
 
-    FpsOverlay(lastMeasureMs = lastMeasure) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(top = scaffoldPadding.calculateTopPadding()),
-        ) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = scaffoldPadding.calculateTopPadding()),
+    ) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -437,7 +508,10 @@ private fun PretextPlaygroundContent(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    PretextHeroCard()
+                    PretextHeroCard(
+                        fps = fps,
+                        lastMeasureMs = lastMeasureMs,
+                    )
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(32.dp),
@@ -674,7 +748,6 @@ private fun PretextPlaygroundContent(
                         .zIndex(1f),
                 )
             }
-        }
     }
 }
 

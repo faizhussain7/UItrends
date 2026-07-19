@@ -151,7 +151,6 @@ object ExpressiveShapeCatalogs {
         )
     }
 
-    /** Mild shapes that stay near the bounding circle — safe for photo frames. */
     val contained: List<RoundedPolygon> by lazy {
         listOf(
             MaterialShapes.Circle,

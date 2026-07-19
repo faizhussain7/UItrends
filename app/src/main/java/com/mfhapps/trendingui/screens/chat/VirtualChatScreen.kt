@@ -13,7 +13,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import com.mfhapps.trendingui.ui.components.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,17 +49,21 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mfhapps.trendingui.core.text.MeasuredTextLayout
 import com.mfhapps.trendingui.core.text.PreparedText
 import com.mfhapps.trendingui.core.text.TextMeasurementEngine
-import com.mfhapps.trendingui.ui.components.DemoScreenContainer
+import com.mfhapps.trendingui.ui.components.FloatingActionButton
 import com.mfhapps.trendingui.ui.components.LoadingIndicator
+import com.mfhapps.trendingui.ui.detail.DemoHeroTitleCollapsingScaffold
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -91,10 +93,12 @@ private val DAYS = listOf("Yesterday", "Today")
 
 @OptIn(ExperimentalFoundationApi::class, FlowPreview::class)
 @Composable
-fun VirtualChatScreen() {
+fun VirtualChatScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
     val density = LocalDensity.current
-
-
+    val scheme = MaterialTheme.colorScheme
     val fontSize = with(density) { 15.sp.toPx() / density.density }
     val lineHeightSp = 20.sp
     val lineHeightPx = with(density) { lineHeightSp.toPx() }
@@ -106,6 +110,7 @@ fun VirtualChatScreen() {
     var streamPrepared by remember { mutableStateOf<PreparedText?>(null) }
     var streamLayout by remember { mutableStateOf<MeasuredTextLayout?>(null) }
     var streamWidthPx by remember { mutableIntStateOf(maxWidthPx) }
+    var didInitialScroll by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
@@ -137,7 +142,6 @@ fun VirtualChatScreen() {
         messages = built
     }
 
-
     val displayItems: List<ChatListItem> = remember(messages) {
         val out = mutableListOf<ChatListItem>()
         var lastDay = -1
@@ -165,15 +169,12 @@ fun VirtualChatScreen() {
             prepared, targetLines = 3, lineHeightPx, 80, maxWidthPx,
         )
         streamWidthPx = width
-
-
         scope.launch {
             flow {
                 full.forEach { ch -> delay(30); emit(ch) }
             }.collect { streamingText += it }
         }
     }
-
 
     LaunchedEffect(streamPrepared, streamWidthPx) {
         val prep = streamPrepared ?: return@LaunchedEffect
@@ -187,10 +188,25 @@ fun VirtualChatScreen() {
             }
     }
 
-
-    LaunchedEffect(displayItems.size, streamLayout?.lineCount) {
+    LaunchedEffect(messages.size) {
+        if (messages.isEmpty() || didInitialScroll) return@LaunchedEffect
+        snapshotFlow { listState.layoutInfo.totalItemsCount }
+            .first { it > 1 }
         val total = listState.layoutInfo.totalItemsCount
-        if (total > 0) listState.animateScrollToItem(total - 1)
+        if (total > 0) {
+            listState.scrollToItem(total - 1)
+            didInitialScroll = true
+        }
+    }
+
+    LaunchedEffect(streamLayout?.lineCount, thinking) {
+        if (!didInitialScroll) return@LaunchedEffect
+        val info = listState.layoutInfo
+        val lastVisible = info.visibleItemsInfo.lastOrNull()?.index ?: return@LaunchedEffect
+        val nearBottom = info.totalItemsCount - lastVisible < 4
+        if (nearBottom && info.totalItemsCount > 0) {
+            listState.animateScrollToItem(info.totalItemsCount - 1)
+        }
     }
 
     val nearBottom by remember {
@@ -202,18 +218,58 @@ fun VirtualChatScreen() {
         }
     }
 
-    DemoScreenContainer(
+    val heroTitleThresholdDp = 120.dp
+    val heroThresholdPx = remember(density, heroTitleThresholdDp) {
+        with(density) { heroTitleThresholdDp.roundToPx() }
+    }
+    val headerScrollPx by remember(listState, heroThresholdPx) {
+        derivedStateOf {
+            listState.firstVisibleItemScrollOffset +
+                listState.firstVisibleItemIndex * heroThresholdPx
+        }
+    }
+
+    DemoHeroTitleCollapsingScaffold(
         title = "Virtual Chat",
-        subtitle = "500 shrink-wrapped bubbles · debounced streaming layout",
+        onNavigateBack = onNavigateBack,
+        guide = guide,
+        scrollValuePx = headerScrollPx,
+        heroTitleThresholdDp = heroTitleThresholdDp,
         modifier = Modifier.fillMaxSize(),
-    ) {
-        Box(Modifier.fillMaxSize()) {
+        bottomPadding = 88.dp,
+    ) { contentPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+        ) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 88.dp),
+                contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
+                item(key = "hero", contentType = "hero") {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            text = "Virtual Chat",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = scheme.onBackground,
+                        )
+                        Text(
+                            text = "500 shrink-wrapped bubbles · debounced streaming layout",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = scheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
                 items(
                     count = displayItems.size,
                     key = { displayItems[it].key },
@@ -247,8 +303,6 @@ fun VirtualChatScreen() {
                     }
                 } else if (streamingText.isNotEmpty()) {
                     item(key = "stream", contentType = "stream_bubble") {
-
-
                         val layout = streamLayout
                         if (layout != null) {
                             MeasuredStreamBubble(
@@ -268,7 +322,6 @@ fun VirtualChatScreen() {
                     }
                 }
             }
-
 
             val fabVisibility by animateFloatAsState(
                 targetValue = if (!nearBottom) 1f else 0f,

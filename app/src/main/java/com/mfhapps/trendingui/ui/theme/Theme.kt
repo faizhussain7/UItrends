@@ -128,7 +128,7 @@ fun UITrendsTheme(
     brandAccentColor: BrandAccentColor = BrandAccentColor.Rose,
     homeGradientStyle: HomeGradientStyle = HomeGradientStyle.RoseBloom,
     homeLayoutStyle: HomeLayoutStyle = HomeLayoutStyle.FeaturedList,
-    appFontStyle: AppFontStyle = AppFontStyle.Raleway,
+    appFontStyle: AppFontStyle = AppFontStyle.UnboundedManrope,
     customGradient: CustomGradientConfig = CustomGradientConfig.Default,
     splashHeld: Boolean = false,
     splashExitGeneration: Int = 0,

@@ -10,6 +10,7 @@ import com.mfhapps.trendingui.core.text.PositionedTextLayout
 import com.mfhapps.trendingui.core.text.PreparedText
 import com.mfhapps.trendingui.core.text.RectObstacle
 import com.mfhapps.trendingui.core.text.TextMeasurementEngine
+import com.mfhapps.trendingui.core.text.ViewPaintColumnMeasureSource
 import kotlin.math.ceil
 
 object PretextCameraReflowScheduler {
@@ -104,7 +105,11 @@ object PretextCameraReflowScheduler {
         headlinePrepared: PreparedText? = null,
         bodyPrepared: PreparedText? = null,
     ): PositionedTextLayout = computeLayout(
+        measureMode = PretextMeasureMode.Engine,
         prepared = prepared,
+        sourceText = prepared.originalText,
+        fontSizePx = prepared.fontSizePx,
+        typeface = prepared.typeface,
         shapes = listOfNotNull(shape),
         region = region,
         lineHeightPx = lineHeightPx,
@@ -117,7 +122,11 @@ object PretextCameraReflowScheduler {
     )
 
     fun computeLayout(
-        prepared: PreparedText,
+        measureMode: PretextMeasureMode,
+        prepared: PreparedText?,
+        sourceText: String,
+        fontSizePx: Float,
+        typeface: Typeface,
         shapes: List<ViewShape>,
         region: LayoutRegion,
         lineHeightPx: Float,
@@ -135,10 +144,37 @@ object PretextCameraReflowScheduler {
             emptyList()
         }
 
+        val useViewPaint = measureMode == PretextMeasureMode.ViewMeasure &&
+            (style == PretextCameraTextLayoutStyle.ColumnWrap ||
+                style == PretextCameraTextLayoutStyle.Uniform)
+
+        if (useViewPaint) {
+            val paintPolygons = if (style == PretextCameraTextLayoutStyle.Uniform) {
+                emptyList()
+            } else {
+                polygons
+            }
+            val paintRects = if (style == PretextCameraTextLayoutStyle.Uniform) {
+                emptyList()
+            } else {
+                rects
+            }
+            return TextMeasurementEngine.layoutColumn(
+                source = ViewPaintColumnMeasureSource(sourceText, fontSizePx, typeface),
+                region = region,
+                lineHeightPx = lineHeightPx,
+                rectObstacles = paintRects,
+                polygonObstacles = paintPolygons,
+            )
+        }
+
+        val prep = prepared
+            ?: return PositionedTextLayout(lines = emptyList(), height = 0)
+
         return when (style) {
             PretextCameraTextLayoutStyle.Uniform -> {
                 val measured = TextMeasurementEngine.layout(
-                    prepared = prepared,
+                    prepared = prep,
                     containerWidthPx = region.width.toInt().coerceAtLeast(1),
                     lineHeightPx = lineHeightPx,
                 )
@@ -147,7 +183,7 @@ object PretextCameraReflowScheduler {
 
             PretextCameraTextLayoutStyle.DynamicFloat -> {
                 layoutDynamicAroundShapes(
-                    prepared = prepared,
+                    prepared = prep,
                     shapes = shapes,
                     region = region,
                     lineHeightPx = lineHeightPx,
@@ -157,8 +193,8 @@ object PretextCameraReflowScheduler {
             PretextCameraTextLayoutStyle.Newspaper,
             PretextCameraTextLayoutStyle.Magazine,
             -> {
-                val headline = headlinePrepared ?: prepared
-                val body = bodyPrepared ?: prepared
+                val headline = headlinePrepared ?: prep
+                val body = bodyPrepared ?: prep
                 val columns = when (style) {
                     PretextCameraTextLayoutStyle.Magazine -> 2
                     else -> if (pageWidthPx >= 720f) 3 else 2
@@ -183,7 +219,7 @@ object PretextCameraReflowScheduler {
 
             PretextCameraTextLayoutStyle.ColumnWrap -> {
                 TextMeasurementEngine.layoutColumn(
-                    prepared = prepared,
+                    prepared = prep,
                     region = region,
                     lineHeightPx = lineHeightPx,
                     rectObstacles = rects,

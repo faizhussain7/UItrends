@@ -309,7 +309,7 @@ fun SettingsScreen(
                     item(key = "legal-title") {
                         SettingsSectionTitle(
                             title = "Legal & open source",
-                            subtitle = "Terms, usage, licenses, and GitHub.",
+                            subtitle = "Privacy, terms, licenses, and GitHub.",
                         )
                     }
 

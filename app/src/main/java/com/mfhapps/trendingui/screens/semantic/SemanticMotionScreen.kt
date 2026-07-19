@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import com.mfhapps.trendingui.ui.detail.demoDetailScrollBottomGap
-import com.mfhapps.trendingui.ui.detail.demoDetailScrollInsets
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -86,8 +84,8 @@ import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.LoadingIndicator
 import com.mfhapps.trendingui.ui.demo.DemoAnimatedSection
-import com.mfhapps.trendingui.ui.detail.DemoPaneHeader
-import com.mfhapps.trendingui.ui.detail.LocalDetailPaneActive
+import com.mfhapps.trendingui.ui.detail.DemoHeroTitleCollapsingScaffold
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -96,94 +94,115 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
-fun SemanticMotionScreen() {
+fun SemanticMotionScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
     val scheme = MaterialTheme.colorScheme
-    val inDetailPane = LocalDetailPaneActive.current
     val scroll = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(scheme.background)
-            .demoDetailScrollInsets()
-            .verticalScroll(scroll)
-            .padding(horizontal = 20.dp)
-            .padding(top = if (inDetailPane) 8.dp else 16.dp)
-            .demoDetailScrollBottomGap(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        DemoPaneHeader(
-            title = "Semantic Motion",
-            subtitle = "Motion that explains what happened — not decoration.",
-        )
-
-        DemoAnimatedSection(index = 0) {
-            SemanticSection(
-                title = "Cause → effect",
-                body = "Animations should answer “what changed?” — download started, item removed, action succeeded.",
-            )
-        }
-
-        DemoAnimatedSection(index = 1) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SemanticSection(
-                    title = "Drag to archive",
-                    body = "Drag near the folder — it opens larger, then inhales the download card inside.",
+    DemoHeroTitleCollapsingScaffold(
+        title = "Semantic Motion",
+        onNavigateBack = onNavigateBack,
+        guide = guide,
+        scrollValuePx = scroll.value,
+        heroTitleThresholdDp = 160.dp,
+        modifier = Modifier.background(scheme.background),
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scroll)
+                .padding(contentPadding)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = "Semantic Motion",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = scheme.onBackground,
                 )
-                DragToFolderDemo()
+                Text(
+                    text = "Motion that explains what happened — not decoration.",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = scheme.onSurfaceVariant,
+                )
+            }
+
+            DemoAnimatedSection(index = 0) {
+                SemanticSection(
+                    title = "Cause → effect",
+                    body = "Animations should answer “what changed?” — download started, item removed, action succeeded.",
+                )
+            }
+
+            DemoAnimatedSection(index = 1) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SemanticSection(
+                        title = "Drag to archive",
+                        body = "Drag near the folder — it opens larger, then inhales the download card inside.",
+                    )
+                    DragToFolderDemo()
+                }
+            }
+
+            DemoAnimatedSection(index = 2) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SemanticSection(
+                        title = "Swipe to delete",
+                        body = "Swipe toward the bin — it grows red, then shakes with a ripple burst when the item is gone.",
+                    )
+                    SwipeToDeleteDemo()
+                }
+            }
+
+            DemoAnimatedSection(index = 3) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SemanticSection(
+                        title = "State transition",
+                        body = "Idle → loading → success uses cross-fade so the result is obvious.",
+                    )
+                    AsyncStateDemo()
+                }
+            }
+
+            DemoAnimatedSection(index = 4) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SemanticSection(
+                        title = "Reveal on demand",
+                        body = "Expand and collapse tie height to meaning — details appear only when requested.",
+                    )
+                    ExpandableDetailDemo()
+                }
+            }
+
+            DemoAnimatedSection(index = 5) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SemanticSection(
+                        title = "Emphasis feedback",
+                        body = "A short spring scale confirms toggle state without leaving the layout.",
+                    )
+                    EmphasisToggleDemo()
+                }
+            }
+
+            DemoAnimatedSection(index = 6) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SemanticSection(
+                        title = "Predictive back undo",
+                        body = "After delete, pull the system back gesture — the banner tracks progress.",
+                    )
+                    PredictiveUndoDemo()
+                }
             }
         }
-
-        DemoAnimatedSection(index = 2) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SemanticSection(
-                    title = "Swipe to delete",
-                    body = "Swipe toward the bin — it grows red, then shakes with a ripple burst when the item is gone.",
-                )
-                SwipeToDeleteDemo()
-            }
-        }
-
-        DemoAnimatedSection(index = 3) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SemanticSection(
-                    title = "State transition",
-                    body = "Idle → loading → success uses cross-fade so the result is obvious.",
-                )
-                AsyncStateDemo()
-            }
-        }
-
-        DemoAnimatedSection(index = 4) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SemanticSection(
-                    title = "Reveal on demand",
-                    body = "Expand and collapse tie height to meaning — details appear only when requested.",
-                )
-                ExpandableDetailDemo()
-            }
-        }
-
-        DemoAnimatedSection(index = 5) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SemanticSection(
-                    title = "Emphasis feedback",
-                    body = "A short spring scale confirms toggle state without leaving the layout.",
-                )
-                EmphasisToggleDemo()
-            }
-        }
-
-        DemoAnimatedSection(index = 6) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SemanticSection(
-                    title = "Predictive back undo",
-                    body = "After delete, pull the system back gesture — the banner tracks progress.",
-                )
-                PredictiveUndoDemo()
-            }
-        }
-
     }
 }
 

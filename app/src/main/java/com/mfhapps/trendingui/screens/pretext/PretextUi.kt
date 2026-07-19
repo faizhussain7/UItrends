@@ -1,6 +1,7 @@
 package com.mfhapps.trendingui.screens.pretext
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material.icons.outlined.Edit
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,6 +46,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -114,7 +117,11 @@ private fun pretextSegmentedButtonColors() = SegmentedButtonDefaults.colors(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PretextHeroCard(modifier: Modifier = Modifier) {
+fun PretextHeroCard(
+    modifier: Modifier = Modifier,
+    fps: Int? = null,
+    lastMeasureMs: Long = 0L,
+) {
     val scheme = MaterialTheme.colorScheme
     val heroMorph = CatalogMorphShapes.heroMorph
     val brush = Brush.linearGradient(
@@ -150,12 +157,12 @@ fun PretextHeroCard(modifier: Modifier = Modifier) {
                     modifier = Modifier.size(72.dp),
                 )
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier.weight(1f),
                 ) {
                     AdaptiveFitText(
                         text = "Pretext text engine",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
                         color = onHero,
                         allowTruncation = false,
                         minFontSize = 18.sp,
@@ -167,6 +174,16 @@ fun PretextHeroCard(modifier: Modifier = Modifier) {
                         allowTruncation = false,
                         minFontSize = 12.sp,
                     )
+                    if (fps != null) {
+                        Text(
+                            text = "FPS $fps · ${lastMeasureMs}ms",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = onHero.copy(alpha = 0.72f),
+                            fontSize = 10.sp,
+                            maxLines = 1,
+                        )
+                    }
                 }
             }
         }
@@ -690,8 +707,14 @@ fun PretextMeasureSelector(
     selected: PretextMeasureMode,
     onSelected: (PretextMeasureMode) -> Unit,
     modifier: Modifier = Modifier,
+    speed: PretextMeasureSpeed = PretextMeasureSpeed(),
 ) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         Text(
             "Measurement",
             style = MaterialTheme.typography.labelLarge,
@@ -705,6 +728,8 @@ fun PretextMeasureSelector(
         ) {
             val colors = pretextSegmentedButtonColors()
             PretextMeasureMode.entries.forEachIndexed { index, mode ->
+                val tag = speed.speedTag(mode)
+                val timing = speed.format(mode)
                 SegmentedButton(
                     selected = selected == mode,
                     onClick = { onSelected(mode) },
@@ -724,20 +749,41 @@ fun PretextMeasureSelector(
                             },
                         )
                     },
-                    label = { Text(mode.label) },
+                    label = {
+                        Text(
+                            text = buildString {
+                                append(mode.shortLabel)
+                                if (speed.nanosFor(mode) > 0L) {
+                                    append('\n')
+                                    append(timing)
+                                    if (tag != null) {
+                                        append(" · ")
+                                        append(tag)
+                                    }
+                                }
+                            },
+                            style = MaterialTheme.typography.labelLarge,
+                            maxLines = 2,
+                        )
+                    },
                 )
             }
         }
+        val comparison = speed.comparisonLabel
         Text(
-            when (selected) {
-                PretextMeasureMode.Engine ->
-                    "Paint.prepare() once, layoutColumn() reflows around tracked objects per frame."
-                PretextMeasureMode.ViewMeasure ->
-                    "Classic TextView wrapping — no obstacle reflow."
+            text = comparison.ifEmpty {
+                when (selected) {
+                    PretextMeasureMode.Engine ->
+                        "Paint.prepare() once, layoutColumn() reflows around tracked objects per frame."
+                    PretextMeasureMode.ViewMeasure ->
+                        "Shared slot-carving · Paint.breakText per band. Layout styles available below."
+                }
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.pretextSheetInset(),
+            modifier = Modifier
+                .pretextSheetInset()
+                .padding(bottom = 4.dp),
         )
     }
 }
@@ -889,9 +935,9 @@ enum class PretextScreenMode(val label: String, val subtitle: String) {
     Camera("Live camera", "Native vision · paragraph reflow"),
 }
 
-enum class PretextMeasureMode(val label: String) {
-    Engine("Pretext engine"),
-    ViewMeasure("View.measure"),
+enum class PretextMeasureMode(val label: String, val shortLabel: String) {
+    Engine("Pretext engine", "Engine"),
+    ViewMeasure("View.measure", "View"),
 }
 
 

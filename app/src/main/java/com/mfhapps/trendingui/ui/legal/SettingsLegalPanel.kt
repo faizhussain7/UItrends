@@ -1,6 +1,5 @@
 package com.mfhapps.trendingui.ui.legal
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,19 +26,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import com.mfhapps.trendingui.ui.components.expressiveClickable
-import com.mfhapps.trendingui.ui.components.rememberExpressiveMorphPress
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.legal.AppLinks
 import com.mfhapps.trendingui.legal.LegalDocumentKind
-import com.mfhapps.trendingui.legal.legalDocument
+import com.mfhapps.trendingui.ui.components.expressiveClickable
+import com.mfhapps.trendingui.ui.components.rememberExpressiveMorphPress
 import com.mfhapps.trendingui.ui.settings.SettingsIconBadge
 import com.mfhapps.trendingui.ui.settings.SettingsSectionCard
 import com.mfhapps.trendingui.ui.settings.SettingsSectionDivider
@@ -68,24 +65,31 @@ private val settingsLegalEntries = listOf(
         action = SettingsLegalAction.WhoMadeThis,
     ),
     SettingsLegalEntry(
-        title = "How to use UITrends",
-        subtitle = "Catalog, demos, settings, and accessibility",
+        title = LegalDocumentKind.HowToUse.title,
+        subtitle = LegalDocumentKind.HowToUse.subtitle,
         icon = Icons.AutoMirrored.Outlined.MenuBook,
         badgeColors = { it.primaryContainer to it.onPrimaryContainer },
         action = SettingsLegalAction.Document(LegalDocumentKind.HowToUse),
     ),
     SettingsLegalEntry(
-        title = "Terms & conditions",
-        subtitle = "Agreement, warranty, and liability",
+        title = LegalDocumentKind.Privacy.title,
+        subtitle = LegalDocumentKind.Privacy.subtitle,
+        icon = Icons.Outlined.Policy,
+        badgeColors = { it.tertiaryContainer to it.onTertiaryContainer },
+        action = SettingsLegalAction.Document(LegalDocumentKind.Privacy),
+    ),
+    SettingsLegalEntry(
+        title = LegalDocumentKind.Terms.title,
+        subtitle = LegalDocumentKind.Terms.subtitle,
         icon = Icons.Outlined.Gavel,
         badgeColors = { it.secondaryContainer to it.onSecondaryContainer },
         action = SettingsLegalAction.Document(LegalDocumentKind.Terms),
     ),
     SettingsLegalEntry(
-        title = "Usage restrictions",
-        subtitle = "Permitted use, model weights, and redistribution",
-        icon = Icons.Outlined.Policy,
-        badgeColors = { it.tertiaryContainer to it.onTertiaryContainer },
+        title = LegalDocumentKind.UsageRestrictions.title,
+        subtitle = LegalDocumentKind.UsageRestrictions.subtitle,
+        icon = Icons.Outlined.Info,
+        badgeColors = { it.surfaceVariant to it.onSurfaceVariant },
         action = SettingsLegalAction.Document(LegalDocumentKind.UsageRestrictions),
     ),
     SettingsLegalEntry(
@@ -153,7 +157,7 @@ fun SettingsLegalPanel(
 
     activeDocument?.let { kind ->
         LegalDocumentSheet(
-            document = legalDocument(kind),
+            kind = kind,
             onDismiss = { activeDocument = null },
         )
     }

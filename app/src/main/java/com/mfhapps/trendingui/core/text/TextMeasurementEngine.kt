@@ -508,17 +508,55 @@ object TextMeasurementEngine {
         rectObstacles: List<RectObstacle> = emptyList(),
         polygonObstacles: List<PolygonObstacle> = emptyList(),
         minSlotWidthPx: Float = 48f,
+    ): PositionedTextLayout = layoutColumn(
+        source = EngineColumnMeasureSource(prepared, startUnitIndex),
+        region = region,
+        lineHeightPx = lineHeightPx,
+        circleObstacles = circleObstacles,
+        rectObstacles = rectObstacles,
+        polygonObstacles = polygonObstacles,
+        minSlotWidthPx = minSlotWidthPx,
+    )
+
+    fun layoutColumnViewMeasure(
+        text: String,
+        fontSizePx: Float,
+        typeface: Typeface,
+        region: LayoutRegion,
+        lineHeightPx: Float,
+        rectObstacles: List<RectObstacle> = emptyList(),
+        polygonObstacles: List<PolygonObstacle> = emptyList(),
+        minSlotWidthPx: Float = 48f,
+    ): PositionedTextLayout = layoutColumn(
+        source = ViewPaintColumnMeasureSource(text, fontSizePx, typeface),
+        region = region,
+        lineHeightPx = lineHeightPx,
+        rectObstacles = rectObstacles,
+        polygonObstacles = polygonObstacles,
+        minSlotWidthPx = minSlotWidthPx,
+    )
+
+    fun layoutColumn(
+        source: PretextColumnMeasureSource,
+        region: LayoutRegion,
+        lineHeightPx: Float,
+        circleObstacles: List<CircleObstacle> = emptyList(),
+        rectObstacles: List<RectObstacle> = emptyList(),
+        polygonObstacles: List<PolygonObstacle> = emptyList(),
+        minSlotWidthPx: Float = 48f,
     ): PositionedTextLayout {
-        val unitCount = prepared.breakableUnits.size
-        var textCursor = LayoutCursor(startUnitIndex.coerceIn(0, unitCount), 0)
         var lineTop = region.y
         val estLines = if (lineHeightPx > 0f) (region.height / lineHeightPx).toInt() + 2 else 8
-        val positioned = ArrayList<PositionedLine>(estLines * (1 + circleObstacles.size + rectObstacles.size))
+        val positioned = ArrayList<PositionedLine>(
+            estLines * (1 + circleObstacles.size + rectObstacles.size + polygonObstacles.size),
+        )
         val regionBottom = region.y + region.height
-        val blocked = ArrayList<Interval>(circleObstacles.size + rectObstacles.size + polygonObstacles.size)
+        val blocked = ArrayList<Interval>(
+            circleObstacles.size + rectObstacles.size + polygonObstacles.size,
+        )
         val base = Interval(region.x, region.x + region.width)
 
-        while (lineTop + lineHeightPx <= regionBottom && textCursor.segmentIndex < unitCount) {
+        while (lineTop + lineHeightPx <= regionBottom && source.hasMore()) {
             val bandTop = lineTop
             val bandBottom = lineTop + lineHeightPx
             blocked.clear()
@@ -534,26 +572,23 @@ object TextMeasurementEngine {
             }
 
             val slots = carveTextLineSlots(base, blocked, minSlotWidthPx)
-
             if (slots.isEmpty()) {
                 lineTop += lineHeightPx
                 continue
             }
 
             for (i in slots.indices) {
-                if (textCursor.segmentIndex >= unitCount) break
+                if (!source.hasMore()) break
                 val slot = slots[i]
-                val slotWidth = slot.right - slot.left
-                val line = computeNextLine(prepared, textCursor, slotWidth) ?: break
+                val piece = source.nextLine(slot.right - slot.left) ?: break
                 positioned.add(
                     PositionedLine(
                         x = slot.left,
                         y = lineTop,
-                        text = line.text,
-                        width = line.width,
+                        text = piece.text,
+                        width = piece.widthPx,
                     ),
                 )
-                textCursor = line.end
             }
             lineTop += lineHeightPx
         }
@@ -567,7 +602,11 @@ object TextMeasurementEngine {
             }
             ceil((maxY + lineHeightPx).toDouble()).toInt()
         }
-        return PositionedTextLayout(lines = positioned, height = height, endUnitIndex = textCursor.segmentIndex)
+        return PositionedTextLayout(
+            lines = positioned,
+            height = height,
+            endUnitIndex = source.endUnitIndex,
+        )
     }
 
 

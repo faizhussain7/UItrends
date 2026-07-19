@@ -57,7 +57,12 @@ fun DemoDetailHost(
                 paneKey == DemoPaneKey.Pretext ||
                 paneKey == DemoPaneKey.Glass ||
                 paneKey == DemoPaneKey.Brutal ||
-                paneKey == DemoPaneKey.Neumorphism,
+                paneKey == DemoPaneKey.Neumorphism ||
+                paneKey == DemoPaneKey.Bento ||
+                paneKey == DemoPaneKey.Chat ||
+                paneKey == DemoPaneKey.ZeroUi ||
+                paneKey == DemoPaneKey.Kinetic ||
+                paneKey == DemoPaneKey.Semantic,
             contentOwnsTitle = paneKey == DemoPaneKey.Masonry ||
                 paneKey == DemoPaneKey.Kinetic ||
                 paneKey == DemoPaneKey.Brutal ||
@@ -67,14 +72,23 @@ fun DemoDetailHost(
                 paneKey == DemoPaneKey.Orbs ||
                 paneKey == DemoPaneKey.Spatial ||
                 paneKey == DemoPaneKey.Copilot ||
-                paneKey == DemoPaneKey.Pretext,
+                paneKey == DemoPaneKey.Pretext ||
+                paneKey == DemoPaneKey.Bento ||
+                paneKey == DemoPaneKey.Chat ||
+                paneKey == DemoPaneKey.ZeroUi ||
+                paneKey == DemoPaneKey.Semantic,
             contentProvidesActions = paneKey == DemoPaneKey.Pretext ||
                 paneKey == DemoPaneKey.Calm ||
                 paneKey == DemoPaneKey.Orbs ||
                 paneKey == DemoPaneKey.Spatial ||
                 paneKey == DemoPaneKey.Glass ||
                 paneKey == DemoPaneKey.Brutal ||
-                paneKey == DemoPaneKey.Neumorphism,
+                paneKey == DemoPaneKey.Neumorphism ||
+                paneKey == DemoPaneKey.Bento ||
+                paneKey == DemoPaneKey.Chat ||
+                paneKey == DemoPaneKey.ZeroUi ||
+                paneKey == DemoPaneKey.Kinetic ||
+                paneKey == DemoPaneKey.Semantic,
             glassHazeEnabled = glassHazeEnabled,
             chromeStyle = when (paneKey) {
                 DemoPaneKey.Brutal -> DetailChromeStyle.NeoBrutal
@@ -101,8 +115,14 @@ private fun DemoScreenForPane(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Pretext),
         )
-        DemoPaneKey.Chat -> VirtualChatScreen()
-        DemoPaneKey.Bento -> BentoGridScreen()
+        DemoPaneKey.Chat -> VirtualChatScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.Chat),
+        )
+        DemoPaneKey.Bento -> BentoGridScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.Bento),
+        )
         DemoPaneKey.Glass -> GlassmorphismScreen(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Glass),
@@ -111,7 +131,10 @@ private fun DemoScreenForPane(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Orbs),
         )
-        DemoPaneKey.Kinetic -> KineticTypographyScreen()
+        DemoPaneKey.Kinetic -> KineticTypographyScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.Kinetic),
+        )
         DemoPaneKey.Brutal -> NeoBrutalismScreen(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Brutal),
@@ -120,12 +143,18 @@ private fun DemoScreenForPane(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Neumorphism),
         )
-        DemoPaneKey.ZeroUi -> ZeroUiScreen()
+        DemoPaneKey.ZeroUi -> ZeroUiScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.ZeroUi),
+        )
         DemoPaneKey.Spatial -> SpatialDepthScreen(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Spatial),
         )
-        DemoPaneKey.Semantic -> SemanticMotionScreen()
+        DemoPaneKey.Semantic -> SemanticMotionScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.Semantic),
+        )
         DemoPaneKey.Copilot -> AiCopilotScreen()
         DemoPaneKey.Calm -> CalmUiScreen(
             onNavigateBack = onNavigateBack,

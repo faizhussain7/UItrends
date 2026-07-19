@@ -51,7 +51,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.ButtonGroup
-import com.mfhapps.trendingui.ui.components.DemoScreenContainer
+import com.mfhapps.trendingui.ui.detail.DemoLargeCollapsingScaffold
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 
 private enum class BentoType { Hero, Weather, Music, Stats, Calendar, Actions }
 
@@ -64,7 +65,10 @@ private data class BentoItem(
 )
 
 @Composable
-fun BentoGridScreen() {
+fun BentoGridScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
     var editMode by remember { mutableStateOf(false) }
     var pressedId by remember { mutableIntStateOf(-1) }
     val reduceMotion = LocalReduceMotion.current
@@ -84,15 +88,19 @@ fun BentoGridScreen() {
         )
     }
 
-    DemoScreenContainer(
+    DemoLargeCollapsingScaffold(
         title = "Bento Grid",
         subtitle = "Staggered grid · hero anchor · long-press edit",
+        onNavigateBack = onNavigateBack,
+        guide = guide,
         modifier = Modifier.fillMaxSize(),
-    ) {
+    ) { contentPadding ->
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 24.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            contentPadding = contentPadding,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalItemSpacing = 12.dp,
         ) {

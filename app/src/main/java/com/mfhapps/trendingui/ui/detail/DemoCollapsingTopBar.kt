@@ -2,6 +2,7 @@ package com.mfhapps.trendingui.ui.detail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -47,15 +48,127 @@ import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import com.mfhapps.trendingui.ui.neumorphism.NeuChromeIconButton
 
 enum class DemoCollapsingHeaderMode {
-
     LargeCollapsing,
-
     HeroTitle,
 }
 
 private val CollapsedTopBarHeight = 76.dp
 private val CompactTopBarHeight = 72.dp
 private val HeroTitleFadeDistance = 56.dp
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DemoLargeCollapsingScaffold(
+    title: String,
+    subtitle: String,
+    onNavigateBack: () -> Unit,
+    guide: DemoTrendGuide?,
+    modifier: Modifier = Modifier,
+    chromeStyle: DetailChromeStyle = LocalDetailChromeStyle.current,
+    bottomPadding: Dp = 28.dp,
+    content: @Composable BoxScope.(contentPadding: PaddingValues) -> Unit,
+) {
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val collapsedFraction by remember {
+        derivedStateOf { scrollBehavior.state.collapsedFraction.coerceIn(0f, 1f) }
+    }
+
+    CollapsingBlurTopBarLayout(
+        scrollBehavior = scrollBehavior,
+        collapsedFraction = collapsedFraction,
+        modifier = modifier
+            .fillMaxSize()
+            .navigationBarsPadding(),
+        topBar = { barModifier ->
+            DemoCollapsingLargeTopBar(
+                title = title,
+                subtitle = subtitle,
+                chromeStyle = chromeStyle,
+                scrollBehavior = scrollBehavior,
+                collapsedFraction = collapsedFraction,
+                onNavigateBack = onNavigateBack,
+                guide = guide,
+                barModifier = barModifier,
+            )
+        },
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .appHazeSource(),
+        ) {
+            content(
+                collapsingTopBarContentPadding(
+                    extra = PaddingValues(bottom = bottomPadding),
+                ),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DemoHeroTitleCollapsingScaffold(
+    title: String,
+    onNavigateBack: () -> Unit,
+    guide: DemoTrendGuide?,
+    scrollValuePx: Int,
+    modifier: Modifier = Modifier,
+    chromeStyle: DetailChromeStyle = LocalDetailChromeStyle.current,
+    heroTitleThresholdDp: Dp = 200.dp,
+    bottomPadding: Dp = 28.dp,
+    content: @Composable BoxScope.(contentPadding: PaddingValues) -> Unit,
+) {
+    val density = LocalDensity.current
+    val heroThresholdPx = remember(density, heroTitleThresholdDp) {
+        with(density) { heroTitleThresholdDp.roundToPx() }
+    }
+    val heroFadePx = remember(density) {
+        with(density) { HeroTitleFadeDistance.roundToPx() }
+    }
+    val collapsedFraction by remember(scrollValuePx, heroThresholdPx, heroFadePx) {
+        derivedStateOf {
+            if (scrollValuePx <= heroThresholdPx) {
+                0f
+            } else {
+                ((scrollValuePx - heroThresholdPx).toFloat() / heroFadePx).coerceIn(0f, 1f)
+            }
+        }
+    }
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+
+    CollapsingBlurTopBarLayout(
+        scrollBehavior = scrollBehavior,
+        collapsedFraction = collapsedFraction,
+        modifier = modifier
+            .fillMaxSize()
+            .navigationBarsPadding(),
+        topBar = { barModifier ->
+            DemoHeroTitleTopBar(
+                title = title,
+                chromeStyle = chromeStyle,
+                onNavigateBack = onNavigateBack,
+                guide = guide,
+                barModifier = barModifier,
+                collapsedFraction = collapsedFraction,
+            )
+        },
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .appHazeSource(),
+        ) {
+            content(
+                collapsingTopBarContentPadding(
+                    extra = PaddingValues(bottom = bottomPadding),
+                ),
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

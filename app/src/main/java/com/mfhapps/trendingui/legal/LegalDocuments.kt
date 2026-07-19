@@ -2,8 +2,39 @@ package com.mfhapps.trendingui.legal
 
 enum class LegalDocumentKind {
     HowToUse,
+    Privacy,
     Terms,
     UsageRestrictions,
+    ;
+
+    val title: String
+        get() = when (this) {
+            HowToUse -> "How to use UITrends"
+            Privacy -> "Privacy Policy"
+            Terms -> "Terms & conditions"
+            UsageRestrictions -> "Usage restrictions"
+        }
+
+    val subtitle: String
+        get() = when (this) {
+            HowToUse -> "Catalog, demos, settings, and accessibility"
+            Privacy -> "How UITrends handles data on your device"
+            Terms -> "Using the UITrends app"
+            UsageRestrictions -> "What you may and may not do"
+        }
+
+    val googleDocId: String?
+        get() = when (this) {
+            Privacy -> AppLinks.PRIVACY_GOOGLE_DOC_ID
+            Terms -> AppLinks.TERMS_GOOGLE_DOC_ID
+            HowToUse, UsageRestrictions -> null
+        }
+
+    val isRemote: Boolean
+        get() = !googleDocId.isNullOrBlank()
+
+    val viewUrl: String?
+        get() = googleDocId?.let(AppLinks::googleDocViewUrl)
 }
 
 data class LegalDocument(
@@ -11,6 +42,7 @@ data class LegalDocument(
     val title: String,
     val subtitle: String,
     val sections: List<LegalSection>,
+    val viewUrl: String? = null,
 )
 
 data class LegalSection(
@@ -19,15 +51,27 @@ data class LegalSection(
     val bullets: List<String> = emptyList(),
 )
 
-fun legalDocument(kind: LegalDocumentKind): LegalDocument = when (kind) {
+sealed interface LegalDocumentUiState {
+    data object Loading : LegalDocumentUiState
+    data class Ready(val document: LegalDocument) : LegalDocumentUiState
+    data class Error(
+        val title: String,
+        val message: String,
+        val viewUrl: String?,
+    ) : LegalDocumentUiState
+}
+
+fun bundledLegalDocument(kind: LegalDocumentKind): LegalDocument = when (kind) {
     LegalDocumentKind.HowToUse -> howToUseDocument()
-    LegalDocumentKind.Terms -> termsDocument()
     LegalDocumentKind.UsageRestrictions -> usageRestrictionsDocument()
+    LegalDocumentKind.Privacy,
+    LegalDocumentKind.Terms,
+    -> error("${kind.name} must be loaded remotely")
 }
 
 private fun howToUseDocument() = LegalDocument(
     kind = LegalDocumentKind.HowToUse,
-    title = "How to use UITrends",
+    title = LegalDocumentKind.HowToUse.title,
     subtitle = "Explore UI patterns on your device",
     sections = listOf(
         LegalSection(
@@ -72,52 +116,10 @@ private fun howToUseDocument() = LegalDocument(
     ),
 )
 
-private fun termsDocument() = LegalDocument(
-    kind = LegalDocumentKind.Terms,
-    title = "Terms & conditions",
-    subtitle = "Using the UITrends app",
-    sections = listOf(
-        LegalSection(
-            heading = "Agreement",
-            paragraphs = listOf(
-                "By installing or using UITrends (“the app”), you agree to these terms. If you do not agree, do not use the app.",
-                "The app is provided by MFH Apps as an educational showcase of user-interface techniques. It is not a production service-level agreement.",
-            ),
-        ),
-        LegalSection(
-            heading = "License to use",
-            paragraphs = listOf(
-                "MFH Apps grants you a personal, non-exclusive, non-transferable license to use the app for learning, evaluation, and demonstration on devices you control.",
-                "Source code for the project is available under the MIT License on GitHub. Your use of the source is governed by that license and by each third-party dependency’s license.",
-            ),
-        ),
-        LegalSection(
-            heading = "No warranty",
-            paragraphs = listOf(
-                "THE APP IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.",
-                "Demos may include experimental APIs, alpha Material components, and camera/ML features that can change or break between releases.",
-            ),
-        ),
-        LegalSection(
-            heading = "Limitation of liability",
-            paragraphs = listOf(
-                "TO THE MAXIMUM EXTENT PERMITTED BY LAW, MFH APPS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF DATA, PROFITS, OR GOODWILL, ARISING FROM YOUR USE OF THE APP.",
-            ),
-        ),
-        LegalSection(
-            heading = "Changes",
-            paragraphs = listOf(
-                "These terms may be updated in future app releases. Continued use after an update constitutes acceptance of the revised terms.",
-                "For the latest project license text, see the MIT LICENSE file in the repository.",
-            ),
-        ),
-    ),
-)
-
 private fun usageRestrictionsDocument() = LegalDocument(
     kind = LegalDocumentKind.UsageRestrictions,
-    title = "Usage restrictions",
-    subtitle = "What you may and may not do",
+    title = LegalDocumentKind.UsageRestrictions.title,
+    subtitle = LegalDocumentKind.UsageRestrictions.subtitle,
     sections = listOf(
         LegalSection(
             heading = "Permitted use",

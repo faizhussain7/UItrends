@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -18,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.rememberControlHaptics
-
 
 @Composable
 fun SwitchListItem(
@@ -54,17 +51,11 @@ fun SwitchListItem(
         supportingContent = supportingContent,
         leadingContent = leadingContent,
         trailingContent = {
-            Switch(
+            AppSwitch(
                 checked = checked,
                 onCheckedChange = ::applyCheckedChange,
                 enabled = enabled,
                 interactionSource = interactionSource,
-                colors = SwitchDefaults.colors(
-                    disabledCheckedThumbColor = MaterialTheme.colorScheme.surface,
-                    disabledCheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                    disabledUncheckedThumbColor = MaterialTheme.colorScheme.surface,
-                    disabledUncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                ),
             )
         },
         colors = if (containerColor == Color.Unspecified) {
@@ -74,7 +65,6 @@ fun SwitchListItem(
         },
     )
 }
-
 
 @Composable
 fun SwitchPreferenceRow(

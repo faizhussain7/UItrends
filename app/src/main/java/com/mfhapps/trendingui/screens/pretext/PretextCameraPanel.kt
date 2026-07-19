@@ -3,7 +3,6 @@ package com.mfhapps.trendingui.screens.pretext
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Typeface
-import android.widget.TextView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -71,9 +70,9 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import com.mfhapps.trendingui.ui.components.AppModalBottomSheet
+import com.mfhapps.trendingui.ui.components.AppModalSheetStack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -126,7 +125,6 @@ import com.mfhapps.trendingui.core.text.PolygonObstacle
 import com.mfhapps.trendingui.core.text.PositionedTextLayout
 import com.mfhapps.trendingui.core.text.PreparedText
 import com.mfhapps.trendingui.core.text.TextMeasurementEngine
-import com.mfhapps.trendingui.native.PretextNativeGeometry
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.LoadingIndicator
 import com.mfhapps.trendingui.ui.components.PretextPositionedCanvas
@@ -214,7 +212,7 @@ fun PretextCameraPanel(
         trackModeState = trackMode
     }
 
-    val appContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    val appContext = LocalContext.current.applicationContext
     val lensFacingState = remember { mutableIntStateOf(cameraSession.lensFacing) }
     LaunchedEffect(cameraSession.lensFacing) {
         lensFacingState.intValue = cameraSession.lensFacing
@@ -292,15 +290,13 @@ fun PretextCameraPanel(
         }
     }
 
-    LaunchedEffect(fontSizePx, measureMode) {
-        if (measureMode == PretextMeasureMode.Engine) {
-            withContext(Dispatchers.Default) {
-                prepared = TextMeasurementEngine.prepareSync(
-                    PARAGRAPH,
-                    fontSizePx,
-                    Typeface.create(Typeface.SERIF, Typeface.NORMAL),
-                )
-            }
+    LaunchedEffect(fontSizePx) {
+        withContext(Dispatchers.Default) {
+            prepared = TextMeasurementEngine.prepareSync(
+                PARAGRAPH,
+                fontSizePx,
+                Typeface.create(Typeface.SERIF, Typeface.NORMAL),
+            )
         }
     }
 
@@ -331,6 +327,7 @@ fun PretextCameraPanel(
     }
 
     val hud = rememberPretextCameraHudState()
+    var measureSpeed by remember { mutableStateOf(PretextMeasureSpeed()) }
 
     val hudContent = buildPretextCameraHudContent(
         manualOverride = manualOverride,
@@ -393,10 +390,6 @@ fun PretextCameraPanel(
             trackModeState == VisionTrackMode.Face
 
         LaunchedEffect(layoutShapes, measureMode, faceReflowActive) {
-            if (measureMode != PretextMeasureMode.Engine) {
-                layoutShapesSnapshot = emptyList()
-                return@LaunchedEffect
-            }
             val pollMs = if (faceReflowActive) 33L else 66L
             while (isActive) {
                 val fp = PretextCameraReflowScheduler.layoutFingerprint(layoutShapes)
@@ -409,6 +402,9 @@ fun PretextCameraPanel(
         }
 
         val layoutStyleForReflow = textLayoutStyle
+        val cameraTypeface = remember {
+            Typeface.create(Typeface.SERIF, Typeface.NORMAL)
+        }
 
         var layout by remember { mutableStateOf<PositionedTextLayout?>(null) }
 
@@ -422,9 +418,11 @@ fun PretextCameraPanel(
             hPx,
             layoutShapesSnapshot,
             layoutFingerprint,
+            fontSizePx,
+            lineHeightPx,
+            paddingPx,
         ) {
-            val prep = prepared
-            if (measureMode != PretextMeasureMode.Engine || prep == null || wPx <= 0f || hPx <= 0f) {
+            if (wPx <= 0f || hPx <= 0f) {
                 layout = null
                 return@LaunchedEffect
             }
@@ -434,20 +432,38 @@ fun PretextCameraPanel(
                 width = wPx - paddingPx * 2f,
                 height = hPx - paddingPx * 2f,
             )
-            layout = withContext(Dispatchers.Default) {
-                PretextCameraReflowScheduler.computeLayout(
-                    prepared = prep,
-                    shapes = layoutShapesSnapshot,
-                    region = region,
-                    lineHeightPx = lineHeightPx,
-                    style = layoutStyleForReflow,
-                    pageWidthPx = wPx,
-                    pageHeightPx = hPx,
-                    paddingPx = paddingPx,
-                    headlinePrepared = headlinePrepared,
-                    bodyPrepared = bodyPrepared,
+            val needsPrepared = measureMode == PretextMeasureMode.Engine ||
+                layoutStyleForReflow == PretextCameraTextLayoutStyle.DynamicFloat ||
+                layoutStyleForReflow == PretextCameraTextLayoutStyle.Newspaper ||
+                layoutStyleForReflow == PretextCameraTextLayoutStyle.Magazine
+            if (needsPrepared && prepared == null) {
+                layout = null
+                return@LaunchedEffect
+            }
+
+            val request = CameraReflowRequest(
+                prepared = prepared,
+                sourceText = PARAGRAPH,
+                fontSizePx = fontSizePx,
+                typeface = cameraTypeface,
+                shapes = layoutShapesSnapshot,
+                region = region,
+                lineHeightPx = lineHeightPx,
+                style = layoutStyleForReflow,
+                pageWidthPx = wPx,
+                pageHeightPx = hPx,
+                paddingPx = paddingPx,
+                headlinePrepared = headlinePrepared,
+                bodyPrepared = bodyPrepared,
+            )
+            val result = withContext(Dispatchers.Default) {
+                PretextCameraReflowBenchmark.run(
+                    request = request,
+                    activeMode = measureMode,
                 )
             }
+            layout = result.layout
+            measureSpeed = measureSpeed.blend(result.sample)
         }
 
         AndroidView(
@@ -538,40 +554,20 @@ fun PretextCameraPanel(
         }
 
         val textColor = stageTheme.textColor
-        when (measureMode) {
-            PretextMeasureMode.Engine -> {
-                val engineLayout = layout
-                if (engineLayout == null) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        LoadingIndicator(indicatorSize = 36.dp, color = textColor)
-                    }
-                } else {
-                    PretextPositionedCanvas(
-                        layout = engineLayout,
-                        fontSizePx = fontSizePx,
-                        lineHeightPx = lineHeightPx,
-                        textColor = textColor,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+        val engineLayout = layout
+        if (engineLayout == null) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                LoadingIndicator(indicatorSize = 36.dp, color = textColor)
             }
-            PretextMeasureMode.ViewMeasure -> {
-                val onSurfaceArgb = MaterialTheme.colorScheme.onSurface.toArgbInt()
-                AndroidView(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    factory = { ctx ->
-                        TextView(ctx).apply {
-                            text = PARAGRAPH
-                            textSize = 13f
-                            setShadowLayer(4f, 0f, 1f, android.graphics.Color.argb(160, 0, 0, 0))
-                            typeface = Typeface.create(Typeface.SERIF, Typeface.NORMAL)
-                        }
-                    },
-                    update = { tv ->
-                        tv.setTextColor(textColor.toArgb())
-                    },
-                )
-            }
+        } else {
+            PretextPositionedCanvas(
+                layout = engineLayout,
+                fontSizePx = fontSizePx,
+                lineHeightPx = lineHeightPx,
+                textColor = textColor,
+                typeface = cameraTypeface,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
 
         val contourOutlineAlpha = when {
@@ -645,6 +641,8 @@ fun PretextCameraPanel(
         PretextCameraChromeOverlay(
             hud = hud,
             content = hudContent,
+            measureMode = measureMode,
+            measureSpeed = measureSpeed,
             onExitCamera = onExitCamera,
             onTorch = { torchOn = cameraSession.toggleTorch() },
             onFlip = {
@@ -662,6 +660,7 @@ fun PretextCameraPanel(
         CameraSettingsSheet(
             measureMode = measureMode,
             onMeasureModeChange = onMeasureModeChange,
+            measureSpeed = measureSpeed,
             textLayoutStyle = textLayoutStyle,
             onTextLayoutStyleChange = { textLayoutStyle = it },
             trackMode = trackMode,
@@ -785,6 +784,8 @@ private fun nearestOrbIndex(orbs: List<ViewShape>, x: Float, y: Float): Int {
 private fun BoxScope.PretextCameraChromeOverlay(
     hud: PretextCameraHudState,
     content: PretextCameraHudContent,
+    measureMode: PretextMeasureMode,
+    measureSpeed: PretextMeasureSpeed,
     onExitCamera: () -> Unit,
     onTorch: () -> Unit,
     onFlip: () -> Unit,
@@ -822,20 +823,71 @@ private fun BoxScope.PretextCameraChromeOverlay(
         )
     }
 
-    if (content.showDragHint) {
-        AnimatedVisibility(
-            visible = hud.isChromeVisible,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding(),
+    Column(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(start = 12.dp, end = 12.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (content.showDragHint) {
+            AnimatedVisibility(
+                visible = hud.isChromeVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                DragHintPill()
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
         ) {
-            DragHintPill(
-                modifier = Modifier.padding(bottom = 22.dp),
+            PretextMeasureSpeedChip(
+                measureMode = measureMode,
+                measureSpeed = measureSpeed,
             )
         }
     }
+}
+
+@Composable
+private fun PretextMeasureSpeedChip(
+    measureMode: PretextMeasureMode,
+    measureSpeed: PretextMeasureSpeed,
+    modifier: Modifier = Modifier,
+) {
+    val tag = measureSpeed.speedTag(measureMode)
+    Text(
+        text = buildString {
+            append(measureMode.shortLabel)
+            if (measureSpeed.nanosFor(measureMode) > 0L) {
+                append(" · ")
+                append(measureSpeed.format(measureMode))
+                if (tag != null) {
+                    append(" · ")
+                    append(tag)
+                }
+            }
+        },
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Medium,
+        color = Color.White.copy(alpha = 0.92f),
+        fontSize = 10.sp,
+        maxLines = 1,
+        modifier = modifier
+            .background(
+                when (tag) {
+                    "fast" -> Color(0xFF1B5E20).copy(alpha = 0.72f)
+                    "slow" -> Color(0xFF4E342E).copy(alpha = 0.72f)
+                    else -> Color.Black.copy(alpha = 0.45f)
+                },
+                RoundedCornerShape(999.dp),
+            )
+            .padding(horizontal = 7.dp, vertical = 3.dp),
+    )
 }
 
 @Composable
@@ -1396,6 +1448,7 @@ private fun TrackingOutline(
 private fun CameraSettingsSheet(
     measureMode: PretextMeasureMode,
     onMeasureModeChange: (PretextMeasureMode) -> Unit,
+    measureSpeed: PretextMeasureSpeed,
     textLayoutStyle: PretextCameraTextLayoutStyle,
     onTextLayoutStyleChange: (PretextCameraTextLayoutStyle) -> Unit,
     trackMode: VisionTrackMode,
@@ -1419,172 +1472,220 @@ private fun CameraSettingsSheet(
     telemetry: VisionTelemetry,
     onDismiss: () -> Unit,
 ) {
+    var page by rememberSaveable { mutableStateOf(CameraSettingsPage.Root) }
+    var goingForward by rememberSaveable { mutableStateOf(true) }
     var advancedExpanded by rememberSaveable { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            page = CameraSettingsPage.Root
+            goingForward = true
+        }
+    }
+
     AppModalBottomSheet(
         onDismiss = onDismiss,
-        scrollable = true,
+        scrollable = false,
     ) {
-        Column(
-            Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                "Camera settings",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-            )
+        AppModalSheetStack(
+            page = page,
+            isRoot = page == CameraSettingsPage.Root,
+            goingForward = goingForward,
+            onPop = {
+                goingForward = false
+                page = CameraSettingsPage.Root
+            },
+        ) { current ->
+            when (current) {
+                CameraSettingsPage.Root -> {
+                    Text(
+                        "Camera settings",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    PretextStageSelector(
-                        stage,
-                        onStageChange,
-                        modifier = Modifier.padding(top = 4.dp),
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            PretextStageSelector(
+                                stage,
+                                onStageChange,
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            )
+                            PretextMeasureSelector(
+                                selected = measureMode,
+                                onSelected = onMeasureModeChange,
+                                speed = measureSpeed,
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            )
+                            PretextMeasureEngineGuideEntry(
+                                measureMode = measureMode,
+                                onOpen = {
+                                    goingForward = true
+                                    page = CameraSettingsPage.EngineGuide
+                                },
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            )
+                            PretextCameraLayoutSelector(
+                                textLayoutStyle,
+                                onTextLayoutStyleChange,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                        }
+                    }
+
+                    PretextCameraOptions(
+                        trackMode = trackMode,
+                        onTrackModeSelected = onTrackModeChange,
+                        showBoundingBox = showBoundingBox,
+                        onShowBoundingBoxChange = onShowBoundingBoxChange,
+                        showSpotlight = showSpotlight,
+                        onShowSpotlightChange = onShowSpotlightChange,
+                        spotlightStrength = spotlightStrength,
+                        onSpotlightStrengthChange = onSpotlightStrengthChange,
+                        showBlur = showBlur,
+                        onShowBlurChange = onShowBlurChange,
+                        blurRadiusDp = blurRadiusDp,
+                        onBlurRadiusDpChange = onBlurRadiusDpChange,
+                        showHalftone = showHalftone,
+                        onShowHalftoneChange = onShowHalftoneChange,
                     )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                    )
-                    PretextMeasureSelector(measureMode, onMeasureModeChange)
-                    if (measureMode == PretextMeasureMode.Engine) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                        )
-                        PretextCameraLayoutSelector(
-                            textLayoutStyle,
-                            onTextLayoutStyleChange,
-                            modifier = Modifier.padding(bottom = 4.dp),
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ) {
+                        SwitchListItem(
+                            checked = tooltipBlurEnabled,
+                            onCheckedChange = onTooltipBlurEnabledChange,
+                            containerColor = Color.Transparent,
+                            headlineContent = { Text("Blur camera tooltip") },
+                            supportingContent = {
+                                Text("Use a frosted backdrop behind the camera tooltip on this screen.")
+                            },
+                            leadingContent = {
+                                DecorativeIcon(
+                                    Icons.Outlined.BlurOn,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp),
+                                )
+                            },
                         )
                     }
-                }
-            }
 
-            PretextCameraOptions(
-                trackMode = trackMode,
-                onTrackModeSelected = onTrackModeChange,
-                showBoundingBox = showBoundingBox,
-                onShowBoundingBoxChange = onShowBoundingBoxChange,
-                showSpotlight = showSpotlight,
-                onShowSpotlightChange = onShowSpotlightChange,
-                spotlightStrength = spotlightStrength,
-                onSpotlightStrengthChange = onSpotlightStrengthChange,
-                showBlur = showBlur,
-                onShowBlurChange = onShowBlurChange,
-                blurRadiusDp = blurRadiusDp,
-                onBlurRadiusDpChange = onBlurRadiusDpChange,
-                showHalftone = showHalftone,
-                onShowHalftoneChange = onShowHalftoneChange,
-            )
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ) {
-                SwitchListItem(
-                    checked = tooltipBlurEnabled,
-                    onCheckedChange = onTooltipBlurEnabledChange,
-                    containerColor = Color.Transparent,
-                    headlineContent = { Text("Blur camera tooltip") },
-                    supportingContent = { Text("Use a frosted backdrop behind the camera tooltip on this screen.") },
-                    leadingContent = {
-                        DecorativeIcon(
-                            Icons.Outlined.BlurOn,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp),
-                        )
-                    },
-                )
-            }
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ) {
-                Column {
-                    ListItem(
-                        headlineContent = { Text("Advanced") },
-                        supportingContent = { Text("Pipeline stats and diagnostics.") },
-                        leadingContent = {
-                            DecorativeIcon(
-                                Icons.Outlined.Tune,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(22.dp),
-                            )
-                        },
-                        trailingContent = {
-                            Icon(
-                                if (advancedExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                                contentDescription = null,
-                            )
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        modifier = Modifier.pointerInput(advancedExpanded) {
-                            detectTapGestures { advancedExpanded = !advancedExpanded }
-                        },
-                    )
-                    AnimatedVisibility(visible = advancedExpanded) {
-                        Column(
-                            Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(bottom = 12.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Text(
-                                buildString {
-                                    append("Vision: ")
-                                    append("%.1f".format(telemetry.processedFps))
-                                    append(" fps · ")
-                                    append(telemetry.droppedFrames)
-                                    append(" dropped/s · hit ")
-                                    append("%.0f".format(telemetry.detectHitRate * 100f))
-                                    append('%')
-                                    telemetry.lastBackend?.let {
-                                        append(" · ")
-                                        append(it)
-                                    }
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ) {
+                        Column {
+                            ListItem(
+                                headlineContent = { Text("Advanced") },
+                                supportingContent = { Text("Pipeline stats and diagnostics.") },
+                                leadingContent = {
+                                    DecorativeIcon(
+                                        Icons.Outlined.Tune,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(22.dp),
+                                    )
                                 },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                trailingContent = {
+                                    Icon(
+                                        if (advancedExpanded) {
+                                            Icons.Outlined.ExpandLess
+                                        } else {
+                                            Icons.Outlined.ExpandMore
+                                        },
+                                        contentDescription = null,
+                                    )
+                                },
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                                modifier = Modifier.pointerInput(advancedExpanded) {
+                                    detectTapGestures { advancedExpanded = !advancedExpanded }
+                                },
                             )
-                            telemetry.lastAccuracy?.let { a ->
-                                Text(
-                                    buildString {
-                                        append("Shape: ")
-                                        append(a.tracking.name.lowercase())
-                                        append(" · area ")
-                                        append("%.0f".format(a.normBBoxArea * 100f))
-                                        append("% norm")
-                                        if (a.polygonVertices > 0) {
-                                            append(" · ")
-                                            append(a.polygonVertices)
-                                            append(" pts")
-                                        }
-                                        a.iouVsPrevious?.let {
-                                            append(" · IoU ")
-                                            append("%.2f".format(it))
-                                        }
-                                        append(" · detect ")
-                                        append(a.detectMs)
-                                        append("ms")
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                            AnimatedVisibility(visible = advancedExpanded) {
+                                Column(
+                                    Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .padding(bottom = 12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    Text(
+                                        buildString {
+                                            append("Vision: ")
+                                            append("%.1f".format(telemetry.processedFps))
+                                            append(" fps · ")
+                                            append(telemetry.droppedFrames)
+                                            append(" dropped/s · hit ")
+                                            append("%.0f".format(telemetry.detectHitRate * 100f))
+                                            append('%')
+                                            telemetry.lastBackend?.let {
+                                                append(" · ")
+                                                append(it)
+                                            }
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    telemetry.lastAccuracy?.let { a ->
+                                        Text(
+                                            buildString {
+                                                append("Shape: ")
+                                                append(a.tracking.name.lowercase())
+                                                append(" · area ")
+                                                append("%.0f".format(a.normBBoxArea * 100f))
+                                                append("% norm")
+                                                if (a.polygonVertices > 0) {
+                                                    append(" · ")
+                                                    append(a.polygonVertices)
+                                                    append(" pts")
+                                                }
+                                                a.iouVsPrevious?.let {
+                                                    append(" · IoU ")
+                                                    append("%.2f".format(it))
+                                                }
+                                                append(" · detect ")
+                                                append(a.detectMs)
+                                                append("ms")
+                                            },
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
+                }
+
+                CameraSettingsPage.EngineGuide -> {
+                    PretextMeasureEngineGuidePage(
+                        mode = measureMode,
+                        speed = measureSpeed,
+                        onBack = {
+                            goingForward = false
+                            page = CameraSettingsPage.Root
+                        },
+                        onModeChange = onMeasureModeChange,
+                    )
                 }
             }
         }
@@ -1626,8 +1727,6 @@ private fun CameraPermissionCard(
         }
     }
 }
-
-private fun Color.toArgbInt(): Int = this.toArgb()
 
 private fun buildPath(polygon: PolygonObstacle): Path = Path().apply {
     val pts = polygon.points

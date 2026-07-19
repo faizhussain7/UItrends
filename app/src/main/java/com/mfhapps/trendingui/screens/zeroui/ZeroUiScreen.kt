@@ -76,10 +76,8 @@ import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.ButtonGroup
 import com.mfhapps.trendingui.ui.demo.DemoAnimatedSection
-import com.mfhapps.trendingui.ui.detail.DemoPaneHeader
-import com.mfhapps.trendingui.ui.detail.LocalDetailPaneActive
-import com.mfhapps.trendingui.ui.detail.demoDetailScrollBottomGap
-import com.mfhapps.trendingui.ui.detail.demoDetailScrollInsets
+import com.mfhapps.trendingui.ui.detail.DemoCollapsingScrollScaffold
+import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -94,25 +92,15 @@ private val SearchSuggestions = listOf(
 private const val AutoHideMs = 5_000L
 
 @Composable
-fun ZeroUiScreen() {
+fun ZeroUiScreen(
+    onNavigateBack: () -> Unit = {},
+    guide: DemoTrendGuide? = null,
+) {
     val scheme = MaterialTheme.colorScheme
-    val inDetailPane = LocalDetailPaneActive.current
-    val scroll = rememberScrollState()
     val focusManager = LocalFocusManager.current
     val density = LocalDensity.current
     val keyboard = LocalSoftwareKeyboardController.current
     val imeBottomPx = WindowInsets.ime.getBottom(density)
-
-    LaunchedEffect(scroll) {
-        snapshotFlow { scroll.isScrollInProgress }
-            .distinctUntilChanged()
-            .collect { scrolling ->
-                if (scrolling) {
-                    focusManager.clearFocus()
-                    keyboard?.hide()
-                }
-            }
-    }
 
     var wasImeOpen by remember { mutableStateOf(false) }
     LaunchedEffect(imeBottomPx) {
@@ -123,31 +111,29 @@ fun ZeroUiScreen() {
         wasImeOpen = imeOpen
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(scheme.background)
-            .demoDetailScrollInsets()
-            .verticalScroll(scroll)
-            .padding(horizontal = 20.dp)
-            .padding(top = if (inDetailPane) 8.dp else 16.dp)
-            .demoDetailScrollBottomGap(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    DemoCollapsingScrollScaffold(
+        title = "Zero UI",
+        subtitle = "Chrome appears only when focus, gesture, or idle rules demand it.",
+        chromeStyle = com.mfhapps.trendingui.ui.detail.LocalDetailChromeStyle.current,
+        onNavigateBack = onNavigateBack,
+        guide = guide,
+        modifier = Modifier.background(scheme.background),
+        verticalSpacing = 8.dp,
     ) {
-        DemoPaneHeader(
-            title = "Zero UI",
-            subtitle = "Chrome appears only when focus, gesture, or idle rules demand it.",
-        )
-
         DemoAnimatedSection(index = 0) {
-            ZeroUiSection(
-                title = "Content first",
-                body = "Readers, maps, and assistants hide toolbars until the user signals intent — tap, focus, or long-press.",
-            )
+            Box(Modifier.padding(horizontal = 20.dp)) {
+                ZeroUiSection(
+                    title = "Content first",
+                    body = "Readers, maps, and assistants hide toolbars until the user signals intent — tap, focus, or long-press.",
+                )
+            }
         }
 
         DemoAnimatedSection(index = 1) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 ZeroUiSection(
                     title = "Focus reveals suggestions",
                     body = "Chips show only while focused — scrolling or dismissing the keyboard clears focus.",
@@ -157,7 +143,10 @@ fun ZeroUiScreen() {
         }
 
         DemoAnimatedSection(index = 2) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 ZeroUiSection(
                     title = "Tap to reveal actions",
                     body = "Tap the content area — actions slide in and auto-hide after five seconds of idle time.",
@@ -167,7 +156,10 @@ fun ZeroUiScreen() {
         }
 
         DemoAnimatedSection(index = 3) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 ZeroUiSection(
                     title = "Long-press selection",
                     body = "No permanent edit toolbar — long-press enters selection mode with a compact action group.",
@@ -177,7 +169,10 @@ fun ZeroUiScreen() {
         }
 
         DemoAnimatedSection(index = 4) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 ZeroUiSection(
                     title = "Reader chrome",
                     body = "Tap the article canvas to peek playback-style controls along the bottom edge.",
@@ -187,7 +182,10 @@ fun ZeroUiScreen() {
         }
 
         DemoAnimatedSection(index = 5) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 ZeroUiSection(
                     title = "Idle hides controls",
                     body = "Touch the player to show transport controls; they fade away when you stop interacting.",
