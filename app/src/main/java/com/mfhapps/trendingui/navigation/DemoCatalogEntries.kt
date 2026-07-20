@@ -150,6 +150,20 @@ val demoCatalogEntries = listOf(
     ),
 )
 
+val featuredDemoTitles: Set<String> = setOf(
+    "Bento Grid",
+    "Immersive Masonry",
+    "Orbs & Mesh",
+    "Pretext Engine",
+)
+
+fun DemoCatalogEntry.isFeatured(): Boolean = title in featuredDemoTitles
+
+fun featuredHeroDemo(): DemoCatalogEntry =
+    demoCatalogEntries.firstOrNull { it.title == "Pretext Engine" }
+        ?: demoCatalogEntries.firstOrNull { it.isFeatured() }
+        ?: demoCatalogEntries.first()
+
 fun demoEntryForRoute(routeClassName: String): DemoCatalogEntry? =
     demoCatalogEntries.firstOrNull { it.route::class.simpleName == routeClassName }
 

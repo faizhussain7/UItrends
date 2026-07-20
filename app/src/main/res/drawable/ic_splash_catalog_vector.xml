@@ -12,8 +12,8 @@
             android:name="splash_frame"
             android:pivotX="54.0"
             android:pivotY="54.0"
-            android:scaleX="1.6296296296296295"
-            android:scaleY="1.6296296296296295">
+            android:scaleX="2.037037037037037"
+            android:scaleY="2.037037037037037">
         <group
             android:name="motif_bijapur"
             android:pivotX="54.0"

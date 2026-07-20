@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.PhoneAndroid
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -780,6 +781,7 @@ fun SettingsAboutPanel(
     versionName: String,
     versionCode: Int,
     modifier: Modifier = Modifier,
+    onRateApp: (() -> Unit)? = null,
 ) {
     val deviceName = remember {
         "${Build.MANUFACTURER} ${Build.MODEL}".trim()
@@ -806,6 +808,44 @@ fun SettingsAboutPanel(
             value = "$versionName ($versionCode)",
             icon = Icons.Outlined.Apps,
         )
+        if (onRateApp != null) {
+            SettingsSectionDivider()
+            SettingsAboutActionRow(
+                title = "Rate app",
+                value = "Share feedback on Google Play",
+                icon = Icons.Outlined.StarBorder,
+                onClick = onRateApp,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsAboutActionRow(
+    title: String,
+    value: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        SettingsIconBadge(
+            icon = icon,
+            containerColor = scheme.primaryContainer,
+            contentColor = scheme.onPrimaryContainer,
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, color = scheme.onSurface)
+            Text(value, style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant)
+        }
     }
 }
 

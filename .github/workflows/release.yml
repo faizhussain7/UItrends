@@ -147,6 +147,8 @@ jobs:
           CREATOR_WHATSAPP_INDIA_DISPLAY: ${{ vars.CREATOR_WHATSAPP_INDIA_DISPLAY }}
           CREATOR_WHATSAPP_SAUDI_DISPLAY: ${{ vars.CREATOR_WHATSAPP_SAUDI_DISPLAY }}
           CREATOR_LINKEDIN_FETCH_USER_AGENT: ${{ vars.CREATOR_LINKEDIN_FETCH_USER_AGENT }}
+          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+          ADMOB_BANNER_UNIT_ID: ${{ secrets.ADMOB_BANNER_UNIT_ID }}
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon --stacktrace downloadPretextVisionAssets

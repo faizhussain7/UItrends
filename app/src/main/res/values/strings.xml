@@ -6,9 +6,9 @@
     <string name="launcher_icon_rauza">Star Hex Interlace</string>
     <string name="launcher_icon_hyderabad">Octagon Square</string>
     <string name="launcher_icon_confirm_title">Change app icon?</string>
-    <string name="launcher_icon_confirm_message">Your home screen icon will update. On some phones the app may close once — that is normal for this feature. Open the app again to see the matching splash screen.</string>
+    <string name="launcher_icon_confirm_message">The app will restart so the new home screen icon and splash screen apply correctly.</string>
     <string name="launcher_icon_confirm_new">New icon: %1$s</string>
-    <string name="launcher_icon_confirm_change">Change icon</string>
+    <string name="launcher_icon_confirm_change">Change and restart</string>
     <string name="launcher_icon_confirm_cancel">Cancel</string>
     <string name="launcher_icon_changed">Icon updated</string>
     <string name="action_torch">Toggle torch</string>
@@ -32,7 +32,17 @@
     <string name="widget_pretext_cta">Open Pretext</string>
     <string name="widget_more_label">More showcases</string>
     <string name="widget_tile_pretext_subtitle">Typography</string>
+    <string name="pretext_recording_notification_channel">Pretext recording</string>
+    <string name="pretext_recording_notification_channel_description">Shows while a Pretext clip is being recorded.</string>
+    <string name="pretext_recording_notification_title">Recording Pretext clip</string>
+    <string name="pretext_recording_notification_body">Return to UITrends to continue capture.</string>
+    <string name="pretext_recording_notification_stop">Stop</string>
     <string name="widget_tile_glass_subtitle">Blur &amp; depth</string>
     <string name="widget_tile_masonry_subtitle">Immersive</string>
     <string name="widget_tile_settings_subtitle">Look &amp; feel</string>
+    <string name="masonry_save_success">Saved to Pictures/UITrends</string>
+    <string name="masonry_save_failed">Could not save image</string>
+    <string name="masonry_share_failed">Could not share image</string>
+    <string name="masonry_saving">Saving…</string>
+    <string name="masonry_sharing">Preparing share…</string>
 </resources>

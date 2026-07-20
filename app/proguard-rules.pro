@@ -109,6 +109,14 @@
     <init>();
 }
 
+-keep class com.google.android.gms.ads.** { *; }
+-dontwarn com.google.android.gms.ads.**
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+
+-keep class androidx.media3.** { *; }
+-dontwarn androidx.media3.**
+
 # --- Optional / transitive dependency noise ---
 -dontwarn org.bouncycastle.**
 -dontwarn org.conscrypt.**

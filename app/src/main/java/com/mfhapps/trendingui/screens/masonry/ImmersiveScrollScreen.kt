@@ -83,7 +83,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import kotlinx.coroutines.launch
+import com.mfhapps.trendingui.R
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.CircularWavyProgressIndicator
+import android.widget.Toast
 import com.mfhapps.trendingui.navigation.demoSharedElement
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
 import com.mfhapps.trendingui.ui.components.CatalogMorphPair
@@ -169,8 +176,10 @@ private fun masonryMorphPair(itemId: Int) = CatalogMorphShapes.forIndex(itemId)
 
 private fun masonryImageKey(itemId: Int): String = "masonry-image-$itemId"
 
-private fun masonryImageUrl(item: MasonryItem): String =
-    "https://picsum.photos/seed/masonry-tile-${item.id}/800/1000"
+private fun masonryImageUrl(item: MasonryItem, thumb: Boolean = true): String {
+    val size = if (thumb) "480/600" else "800/1000"
+    return "https://picsum.photos/seed/masonry-tile-${item.id}/$size"
+}
 
 private val FilterCategories = listOf("All", "Trending", "Nature", "Architecture", "Minimal")
 
@@ -818,7 +827,7 @@ private fun MasonryCardImageBlock(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun MasonrySharedImage(
     item: MasonryItem,
@@ -826,9 +835,18 @@ private fun MasonrySharedImage(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
+    thumb: Boolean = true,
 ) {
-    AsyncImage(
-        model = masonryImageUrl(item),
+    val context = LocalContext.current
+    val url = masonryImageUrl(item, thumb = thumb)
+    val request = remember(url, thumb) {
+        ImageRequest.Builder(context)
+            .data(url)
+            .crossfade(true)
+            .build()
+    }
+    SubcomposeAsyncImage(
+        model = request,
         contentDescription = item.title,
         modifier = modifier
             .demoSharedElement(
@@ -838,6 +856,18 @@ private fun MasonrySharedImage(
             )
             .clip(imageShape),
         contentScale = ContentScale.Crop,
+        loading = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularWavyProgressIndicator(
+                    modifier = Modifier.size(36.dp),
+                )
+            }
+        },
     )
 }
 
@@ -1023,11 +1053,12 @@ private fun MasonryDetailHeroImage(
             onZoomChanged = onZoomChanged,
         ) {
             MasonrySharedImage(
-            item = item,
-            imageShape = MasonryDetailHeroShape,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = animatedVisibilityScope,
-            modifier = Modifier.fillMaxSize(),
+                item = item,
+                imageShape = MasonryDetailHeroShape,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                modifier = Modifier.fillMaxSize(),
+                thumb = false,
             )
         }
         Surface(
@@ -1058,6 +1089,9 @@ private fun MasonryDetailBody(
 ) {
     val scheme = MaterialTheme.colorScheme
     val chrome = LocalMasonryAdaptiveChrome.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var mediaBusy by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -1144,16 +1178,48 @@ private fun MasonryDetailBody(
     ) {
         Button(
             onClick = {
+                if (mediaBusy) return@Button
                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                mediaBusy = true
+                Toast.makeText(context, R.string.masonry_saving, Toast.LENGTH_SHORT).show()
+                scope.launch {
+                    val result = MasonryMediaActions.saveToGallery(
+                        context = context,
+                        imageUrl = masonryImageUrl(item, thumb = false),
+                        displayName = item.title,
+                    )
+                    mediaBusy = false
+                    val message = when (result) {
+                        MasonryMediaResult.Success -> R.string.masonry_save_success
+                        is MasonryMediaResult.Failure -> R.string.masonry_save_failed
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
             },
+            enabled = !mediaBusy,
             modifier = Modifier.weight(1f),
         ) {
             Text("Save")
         }
         FilledTonalButton(
             onClick = {
+                if (mediaBusy) return@FilledTonalButton
                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                mediaBusy = true
+                Toast.makeText(context, R.string.masonry_sharing, Toast.LENGTH_SHORT).show()
+                scope.launch {
+                    val result = MasonryMediaActions.shareImage(
+                        context = context,
+                        imageUrl = masonryImageUrl(item, thumb = false),
+                        title = item.title,
+                    )
+                    mediaBusy = false
+                    if (result is MasonryMediaResult.Failure) {
+                        Toast.makeText(context, R.string.masonry_share_failed, Toast.LENGTH_SHORT).show()
+                    }
+                }
             },
+            enabled = !mediaBusy,
             modifier = Modifier.weight(1f),
         ) {
             Text("Share")

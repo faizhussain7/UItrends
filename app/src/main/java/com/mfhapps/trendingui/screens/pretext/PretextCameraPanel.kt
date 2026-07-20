@@ -1,6 +1,8 @@
 package com.mfhapps.trendingui.screens.pretext
 
+import android.app.Activity
 import android.Manifest
+import android.graphics.Rect
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -42,20 +44,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cameraswitch
+import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.TouchApp
-import androidx.compose.material.icons.outlined.Tune
 import com.mfhapps.trendingui.ui.components.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -68,11 +71,13 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import com.mfhapps.trendingui.ui.platform.appBarTopWindowInsets
 import com.mfhapps.trendingui.ui.components.AppModalBottomSheet
 import com.mfhapps.trendingui.ui.components.AppModalSheetStack
+import com.mfhapps.trendingui.ui.components.ButtonGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -101,12 +106,15 @@ import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.mfhapps.trendingui.R
+import com.mfhapps.trendingui.TrendingApplication
+import com.mfhapps.trendingui.launcher.LauncherIconManager
 import com.mfhapps.trendingui.ui.accessibility.DecorativeIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
@@ -114,11 +122,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.material3.LocalContentColor
 import android.graphics.Paint
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.mfhapps.trendingui.core.text.LayoutRegion
 import com.mfhapps.trendingui.core.text.PolygonObstacle
@@ -129,6 +140,7 @@ import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.LoadingIndicator
 import com.mfhapps.trendingui.ui.components.PretextPositionedCanvas
 import com.mfhapps.trendingui.ui.components.SwitchListItem
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -158,9 +170,11 @@ fun PretextCameraPanel(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val activity = context as Activity
     val lifecycleOwner = LocalLifecycleOwner.current
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
+    val launcherIcon = remember(context) { LauncherIconManager.readActiveOrDefault(context) }
 
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -189,8 +203,27 @@ fun PretextCameraPanel(
     var previewView by remember { mutableStateOf<PreviewView?>(null) }
     val previewLayoutCache = remember { PretextPreviewLayoutCache() }
     val cameraSession = remember { PretextCameraSession(context) }
+    val appContainer = remember(context) {
+        (context.applicationContext as TrendingApplication).container
+    }
     var torchOn by remember { mutableStateOf(false) }
     var torchAvailable by remember { mutableStateOf(false) }
+    val recordingController = remember(appContainer) { appContainer.pretextRecordingController }
+    val recordingSession by recordingController.state.collectAsStateWithLifecycle(
+        initialValue = PretextRecordingSessionState.Idle,
+    )
+    val isRecording = recordingSession is PretextRecordingSessionState.Active
+    val recordingStartedAt = (recordingSession as? PretextRecordingSessionState.Active)?.startedAtMillis ?: 0L
+    val recordingRepository = remember { appContainer.pretextRecordings }
+    val recordingSettingsRepository = remember { appContainer.pretextRecordingSettings }
+    val recordingSettings by recordingSettingsRepository.settings.collectAsStateWithLifecycle(
+        initialValue = PretextRecordingSettings(),
+    )
+    val recordingProfile = remember(recordingSettings) {
+        recordingSettingsRepository.resolveProfile(recordingSettings)
+    }
+    var showRecordingsSheet by remember { mutableStateOf(false) }
+    var captureBounds by remember { mutableStateOf<Rect?>(null) }
     val telemetryState = remember { mutableStateOf(VisionTelemetry()) }
     var telemetry by telemetryState
 
@@ -300,10 +333,34 @@ fun PretextCameraPanel(
         }
     }
 
+    DisposableEffect(activity, recordingController) {
+        recordingController.attachActivity(activity)
+        recordingController.setCaptureBoundsProvider { captureBounds }
+        onDispose {
+            recordingController.detachActivity(activity)
+            recordingController.setCaptureBoundsProvider { null }
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, recordingController) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> recordingController.onUiHidden()
+                Lifecycle.Event.ON_RESUME -> recordingController.onUiVisible()
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             previewLayoutCache.detach()
             pipeline.close()
+            recordingController.releaseIfIdle()
             cameraSession.close()
             PretextVisionLog.resetSession()
         }
@@ -326,7 +383,12 @@ fun PretextCameraPanel(
         return
     }
 
-    val hud = rememberPretextCameraHudState()
+    val hud = rememberPretextCameraHudState(isRecording = isRecording)
+    LaunchedEffect(isRecording) {
+        if (!isRecording) {
+            hud.reveal()
+        }
+    }
     var measureSpeed by remember { mutableStateOf(PretextMeasureSpeed()) }
 
     val hudContent = buildPretextCameraHudContent(
@@ -466,10 +528,27 @@ fun PretextCameraPanel(
             measureSpeed = measureSpeed.blend(result.sample)
         }
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned { coordinates ->
+                    if (isRecording) return@onGloballyPositioned
+                    val bounds = coordinates.boundsInWindow()
+                    captureBounds = Rect(
+                        bounds.left.toInt(),
+                        bounds.top.toInt(),
+                        bounds.right.toInt(),
+                        bounds.bottom.toInt(),
+                    )
+                },
+        ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
-                PreviewView(ctx).apply { scaleType = PreviewView.ScaleType.FILL_CENTER }
+                PreviewView(ctx).apply {
+                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                    scaleType = PreviewView.ScaleType.FILL_CENTER
+                }
             },
             update = { pv ->
                 previewView = pv
@@ -638,14 +717,29 @@ fun PretextCameraPanel(
             )
         }
 
+        if (isRecording) {
+            PretextRecordingWatermark(
+                launcherIcon = launcherIcon,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .pretextRecordingWatermarkPlacement(chromeVisible = hud.isChromeVisible),
+            )
+        }
+        }
+
         PretextCameraChromeOverlay(
             hud = hud,
             content = hudContent,
             measureMode = measureMode,
             measureSpeed = measureSpeed,
-            onExitCamera = onExitCamera,
+            isRecording = isRecording,
+            recordingStartedAt = recordingStartedAt,
+            onExitCamera = {
+                if (!isRecording) onExitCamera()
+            },
             onTorch = { torchOn = cameraSession.toggleTorch() },
             onFlip = {
+                if (isRecording) return@PretextCameraChromeOverlay
                 val pv = previewView ?: return@PretextCameraChromeOverlay
                 scope.launch {
                     cameraSession.flipCamera(pv, lifecycleOwner, pipeline)
@@ -653,6 +747,46 @@ fun PretextCameraPanel(
                     torchAvailable = cameraSession.hasTorch()
                 }
             },
+            onToggleRecord = {
+                if (isRecording) {
+                    recordingController.stopRecording { saved ->
+                        hud.reveal()
+                    }
+                } else {
+                    val file = PretextVideoActions.createOutputFile(context)
+                    val snapshot = captureBounds
+                    if (snapshot == null) {
+                        file.delete()
+                        return@PretextCameraChromeOverlay
+                    }
+                    hud.hide()
+                    if (!recordingController.startRecording(file, recordingProfile, snapshot)) {
+                        file.delete()
+                        hud.reveal()
+                    }
+                }
+            },
+            onOpenRecordings = { showRecordingsSheet = true },
+            onOpenRecordingSettings = {
+                if (!isRecording) {
+                    hud.openRecordingSettings()
+                }
+            },
+        )
+    }
+
+    if (showRecordingsSheet) {
+        PretextRecordingsSheet(
+            repository = recordingRepository,
+            onDismiss = { showRecordingsSheet = false },
+        )
+    }
+
+    if (hud.isRecordingSettingsOpen) {
+        PretextRecordingSettingsSheet(
+            settings = recordingSettings,
+            repository = recordingSettingsRepository,
+            onDismiss = { hud.closeRecordingSettings() },
         )
     }
 
@@ -786,12 +920,17 @@ private fun BoxScope.PretextCameraChromeOverlay(
     content: PretextCameraHudContent,
     measureMode: PretextMeasureMode,
     measureSpeed: PretextMeasureSpeed,
+    isRecording: Boolean,
+    recordingStartedAt: Long,
     onExitCamera: () -> Unit,
     onTorch: () -> Unit,
     onFlip: () -> Unit,
+    onToggleRecord: () -> Unit,
+    onOpenRecordings: () -> Unit,
+    onOpenRecordingSettings: () -> Unit,
 ) {
     AnimatedVisibility(
-        visible = hud.isChromeVisible,
+        visible = hud.isChromeVisible && !isRecording,
         enter = fadeIn() + slideInVertically(initialOffsetY = { -it / 2 }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { -it / 2 }),
         modifier = Modifier
@@ -809,6 +948,8 @@ private fun BoxScope.PretextCameraChromeOverlay(
             stageTheme = content.stageTheme,
             torchAvailable = content.torchAvailable,
             torchOn = content.torchOn,
+            isRecording = isRecording,
+            recordingStartedAt = recordingStartedAt,
             onExitCamera = onExitCamera,
             onTorch = {
                 hud.reveal()
@@ -841,14 +982,105 @@ private fun BoxScope.PretextCameraChromeOverlay(
                 DragHintPill()
             }
         }
+        AnimatedVisibility(
+            visible = hud.isChromeVisible,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
+        ) {
+            PretextRecordingDock(
+                isRecording = isRecording,
+                recordingStartedAt = recordingStartedAt,
+                onToggleRecord = {
+                    hud.reveal()
+                    onToggleRecord()
+                },
+                onOpenRecordings = {
+                    hud.reveal()
+                    onOpenRecordings()
+                },
+                onOpenRecordingSettings = {
+                    hud.reveal()
+                    onOpenRecordingSettings()
+                },
+            )
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
         ) {
-            PretextMeasureSpeedChip(
-                measureMode = measureMode,
-                measureSpeed = measureSpeed,
-            )
+            if (!isRecording) {
+                PretextMeasureSpeedChip(
+                    measureMode = measureMode,
+                    measureSpeed = measureSpeed,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun PretextRecordingDock(
+    isRecording: Boolean,
+    recordingStartedAt: Long,
+    onToggleRecord: () -> Unit,
+    onOpenRecordings: () -> Unit,
+    onOpenRecordingSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val elapsedLabel = rememberRecordingElapsedLabel(isRecording, recordingStartedAt)
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(28.dp),
+        color = Color.Black.copy(alpha = 0.58f),
+        contentColor = Color.White,
+    ) {
+        ButtonGroup(modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
+            ToggleButton(
+                checked = false,
+                onCheckedChange = { onOpenRecordings() },
+            ) {
+                Icon(
+                    Icons.Outlined.VideoLibrary,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(6.dp))
+                Text("Clips", style = MaterialTheme.typography.labelLarge)
+            }
+            ToggleButton(
+                checked = false,
+                onCheckedChange = {
+                    if (!isRecording) onOpenRecordingSettings()
+                },
+                modifier = Modifier.alpha(if (isRecording) 0.45f else 1f),
+            ) {
+                Icon(
+                    Icons.Outlined.Tune,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(6.dp))
+                Text("Setup", style = MaterialTheme.typography.labelLarge)
+            }
+            ToggleButton(
+                checked = isRecording,
+                onCheckedChange = { onToggleRecord() },
+            ) {
+                Icon(
+                    if (isRecording) Icons.Filled.Stop else Icons.Filled.FiberManualRecord,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = if (isRecording) Color(0xFFFF8A80) else LocalContentColor.current,
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = if (isRecording) "Stop · $elapsedLabel" else "Record",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = if (isRecording) FontWeight.SemiBold else FontWeight.Medium,
+                )
+            }
         }
     }
 }
@@ -900,6 +1132,8 @@ private fun CameraTopHud(
     stageTheme: PretextStageTheme,
     torchAvailable: Boolean,
     torchOn: Boolean,
+    isRecording: Boolean,
+    recordingStartedAt: Long,
     onExitCamera: () -> Unit,
     onTorch: () -> Unit,
     onFlip: () -> Unit,
@@ -910,6 +1144,7 @@ private fun CameraTopHud(
         containerColor = Color.Black.copy(0.58f),
         contentColor = Color.White,
     )
+    val elapsedLabel = rememberRecordingElapsedLabel(isRecording, recordingStartedAt)
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
@@ -932,12 +1167,12 @@ private fun CameraTopHud(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 StatusPill(
-                    text = statusText,
-                    active = statusActive,
+                    text = if (isRecording) "Recording $elapsedLabel" else statusText,
+                    active = statusActive || isRecording,
                     dark = stageTheme.hudOnDark,
                     mono = stageTheme.monoHud,
                 )
-                if (statusActive) {
+                if (statusActive && !isRecording) {
                     ShapeBadge(label = shapeLabel, dark = stageTheme.hudOnDark, mono = stageTheme.monoHud)
                 }
             }
@@ -956,6 +1191,7 @@ private fun CameraTopHud(
                 }
                 FilledTonalIconButton(
                     onClick = onFlip,
+                    enabled = !isRecording,
                     colors = hudButtonColors,
                 ) {
                     Icon(
@@ -965,6 +1201,7 @@ private fun CameraTopHud(
                 }
                 FilledIconButton(
                     onClick = onOpenSettings,
+                    enabled = !isRecording,
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.94f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -1220,7 +1457,7 @@ private fun AsciiScanOverlay(
             color = accent.copy(alpha = 0.55f).toArgb()
             textSize = cell * 0.85f
             isAntiAlias = true
-            typeface = android.graphics.Typeface.MONOSPACE
+            typeface = Typeface.MONOSPACE
         }
         drawContext.canvas.nativeCanvas.apply {
             for (row in 0 until rows) {
@@ -1260,16 +1497,6 @@ private fun StudioPaperMaskOverlay(
         }
         drawPath(paperPath, brush = brush)
     }
-}
-
-@Composable
-private fun StudioBackdrop(modifier: Modifier = Modifier, alpha: Float) {
-    val surface = MaterialTheme.colorScheme.surface
-    val container = MaterialTheme.colorScheme.surfaceContainerLow
-    val brush = remember(surface, container) {
-        Brush.verticalGradient(listOf(surface, container))
-    }
-    Box(modifier = modifier.alpha(alpha).background(brush))
 }
 
 @Composable
@@ -1403,8 +1630,6 @@ private fun TrackingOutline(
         val bounds = shape.boundsPx
         val bw = bounds.width()
         val bh = bounds.height()
-        val cx = bounds.centerX()
-        val cy = bounds.centerY()
 
         val polygonPx = shape.polygonPx
         if (polygonPx != null) {

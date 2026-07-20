@@ -1,6 +1,5 @@
 package com.mfhapps.trendingui.screens.settings
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mfhapps.trendingui.R
@@ -48,7 +46,6 @@ fun HomeAppearanceSettings(
     onLauncherIconChange: (AppLauncherIcon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     var pendingLauncherIcon by remember { mutableStateOf<AppLauncherIcon?>(null) }
 
     Column(
@@ -78,7 +75,7 @@ fun HomeAppearanceSettings(
             SettingsHomeRowHeader(
                 icon = Icons.Outlined.Apps,
                 title = "App icon",
-                subtitle = "Uses Android activity aliases; may close the app once",
+                subtitle = "Changing the icon restarts the app",
             )
             SettingsCardContent {
                 AppIconPicker(
@@ -131,11 +128,6 @@ fun HomeAppearanceSettings(
                     onClick = {
                         onLauncherIconChange(icon)
                         pendingLauncherIcon = null
-                        Toast.makeText(
-                            context,
-                            R.string.launcher_icon_changed,
-                            Toast.LENGTH_SHORT,
-                        ).show()
                     },
                 ) {
                     Text(stringResource(R.string.launcher_icon_confirm_change))

@@ -20,14 +20,17 @@ class LauncherIconViewModel(
         initialValue = (application as TrendingApplication).startupSnapshot.launcherIcon,
     )
 
-    fun setLauncherIcon(icon: AppLauncherIcon) {
-        if (icon == selectedIcon.value) return
+    fun setLauncherIcon(icon: AppLauncherIcon, restartProcess: Boolean = false) {
+        if (icon == selectedIcon.value && !restartProcess) return
         viewModelScope.launch {
             LauncherIconCoordinator.applySelection(
                 context = getApplication(),
                 icon = icon,
                 container = container,
             )
+            if (restartProcess) {
+                AppProcessRestarter.restart(getApplication())
+            }
         }
     }
 }

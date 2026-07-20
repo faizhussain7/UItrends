@@ -29,6 +29,9 @@ class PretextCameraSession(
 ) {
     private var cameraProvider: ProcessCameraProvider? = null
     private var camera: Camera? = null
+    private var boundPreviewView: PreviewView? = null
+    private var boundLifecycleOwner: LifecycleOwner? = null
+    private var boundAnalyzer: ImageAnalysis.Analyzer? = null
     private val analysisExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "PretextCamera-Analysis").apply {
             priority = Thread.NORM_PRIORITY
@@ -54,33 +57,10 @@ class PretextCameraSession(
         analyzer: ImageAnalysis.Analyzer,
     ) {
         if (closed) return
-        val provider = cameraProvider ?: obtainProvider()
-        val viewport = awaitViewPort(previewView)
-
-        runCatching { provider.unbindAll() }
-
-        val preview = Preview.Builder()
-            .setResolutionSelector(resolutionSelector)
-            .build()
-            .also { it.surfaceProvider = previewView.surfaceProvider }
-
-        val imageAnalysis = ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-            .setResolutionSelector(resolutionSelector)
-            .build()
-            .also { it.setAnalyzer(analysisExecutor, analyzer) }
-
-        val useCaseGroup = UseCaseGroup.Builder()
-            .setViewPort(viewport)
-            .addUseCase(preview)
-            .addUseCase(imageAnalysis)
-            .build()
-
-        provider.unbindAll()
-        val selector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
-        camera = provider.bindToLifecycle(lifecycleOwner, selector, useCaseGroup)
-        camera?.cameraControl?.enableTorch(torchEnabled)
+        boundPreviewView = previewView
+        boundLifecycleOwner = lifecycleOwner
+        boundAnalyzer = analyzer
+        bindInternal()
     }
 
     suspend fun flipCamera(
@@ -112,6 +92,37 @@ class PretextCameraSession(
         camera = null
         analysisExecutor.shutdown()
         runCatching { analysisExecutor.awaitTermination(5, TimeUnit.SECONDS) }
+    }
+
+    private suspend fun bindInternal() {
+        val previewView = boundPreviewView ?: return
+        val lifecycleOwner = boundLifecycleOwner ?: return
+        val analyzer = boundAnalyzer ?: return
+        val provider = cameraProvider ?: obtainProvider()
+        val viewport = awaitViewPort(previewView)
+        runCatching { provider.unbindAll() }
+
+        val preview = Preview.Builder()
+            .setResolutionSelector(resolutionSelector)
+            .build()
+            .also { it.surfaceProvider = previewView.surfaceProvider }
+
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+            .setResolutionSelector(resolutionSelector)
+            .build()
+            .also { it.setAnalyzer(analysisExecutor, analyzer) }
+
+        val group = UseCaseGroup.Builder()
+            .setViewPort(viewport)
+            .addUseCase(preview)
+            .addUseCase(imageAnalysis)
+            .build()
+
+        val selector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+        camera = provider.bindToLifecycle(lifecycleOwner, selector, group)
+        camera?.cameraControl?.enableTorch(torchEnabled)
     }
 
     private suspend fun obtainProvider(): ProcessCameraProvider = suspendCoroutine { cont ->

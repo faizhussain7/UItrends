@@ -36,9 +36,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mfhapps.trendingui.deeplink.AppDeepLinks
+import com.mfhapps.trendingui.play.PlayServicesViewModel
 import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.screens.home.DemoCatalogScreen
 import com.mfhapps.trendingui.ui.accessibility.LocalReduceMotion
@@ -72,6 +75,8 @@ fun AdaptiveCatalogLayout(
     openDestination: String? = null,
     onOpenDestinationConsumed: () -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val playServicesViewModel: PlayServicesViewModel = viewModel()
     val reduceMotion = rememberReduceMotion()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     val dualPane = isMediumOrWiderWindow()
@@ -181,12 +186,14 @@ fun AdaptiveCatalogLayout(
                                     DemoDetailHost(
                                         paneKey = selectedDemoKey,
                                         onNavigateBack = {
+                                            val activity = context as? android.app.Activity
                                             scope.launch {
                                                 navigator.navigateBack(
                                                     backNavigationBehavior =
                                                         BackNavigationBehavior.PopUntilScaffoldValueChange,
                                                 )
                                             }
+                                            activity?.let { playServicesViewModel.onDemoClosed(it) }
                                         },
                                     )
                                 }

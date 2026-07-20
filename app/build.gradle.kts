@@ -41,6 +41,16 @@ android {
             creatorPropertiesFile.inputStream().use { load(it) }
         }
     }
+    val adsPropertiesFile = rootProject.file("release/ads.properties")
+    val adsProperties = Properties().apply {
+        if (adsPropertiesFile.exists()) {
+            adsPropertiesFile.inputStream().use { load(it) }
+        }
+    }
+    val admobAppId = System.getenv("ADMOB_APP_ID")?.takeIf { it.isNotBlank() }
+        ?: adsProperties.getProperty("admobAppId")?.trim().orEmpty()
+    val admobBannerUnitId = System.getenv("ADMOB_BANNER_UNIT_ID")?.takeIf { it.isNotBlank() }
+        ?: adsProperties.getProperty("admobBannerUnitId")?.trim().orEmpty()
 
     defaultConfig {
         applicationId = "com.mfhapps.trendingui"
@@ -112,6 +122,10 @@ android {
             "https://wa.me/$creatorWhatsappSaudiE164".asBuildConfigString(),
         )
 
+        buildConfigField("String", "ADMOB_APP_ID", admobAppId.asBuildConfigString())
+        buildConfigField("String", "ADMOB_BANNER_UNIT_ID", admobBannerUnitId.asBuildConfigString())
+        manifestPlaceholders["admobAppId"] = admobAppId
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -142,6 +156,13 @@ android {
             isJniDebuggable = false
             isPseudoLocalesEnabled = false
             isCrunchPngs = true
+            if (admobAppId.isBlank() || admobBannerUnitId.isBlank()) {
+                error(
+                    "Missing AdMob IDs for release. Set release/ads.properties or " +
+                        "ADMOB_APP_ID / ADMOB_BANNER_UNIT_ID env vars.",
+                )
+            }
+            manifestPlaceholders["admobAppId"] = admobAppId
 
             val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
             if (!keystorePath.isNullOrBlank()) {
@@ -197,6 +218,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.activity.compose)
@@ -222,14 +244,22 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.work.runtime)
+    implementation(libs.play.app.update)
+    implementation(libs.play.review)
+    implementation(libs.play.ads)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.video)
     implementation(libs.litert)
     implementation(libs.mediapipe.tasks.vision)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui.compose)
+    implementation(libs.androidx.media3.ui.compose.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

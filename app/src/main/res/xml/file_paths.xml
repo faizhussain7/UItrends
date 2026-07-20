@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path name="share_cache" path="share/" />
+    <cache-path name="video_cache" path="pretext_videos/" />
+    <files-path name="pretext_movies" path="movies/" />
+</paths>

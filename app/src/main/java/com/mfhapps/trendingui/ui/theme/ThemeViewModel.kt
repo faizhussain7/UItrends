@@ -17,7 +17,7 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
     val preferences: StateFlow<ThemePreferences> = repository.preferences.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ThemePreferences(themeMode = themeModeStore.current()),
+        initialValue = (application as TrendingApplication).startupSnapshot.themePreferences,
     )
 
     fun setThemeMode(mode: ThemeMode) {

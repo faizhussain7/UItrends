@@ -52,8 +52,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -71,7 +69,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import com.mfhapps.trendingui.play.AdsConfig
+import com.mfhapps.trendingui.play.HomeBannerAd
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
@@ -98,11 +99,15 @@ import com.mfhapps.trendingui.navigation.DemoPaneKey
 import com.mfhapps.trendingui.navigation.DemoSharedIcon
 import com.mfhapps.trendingui.navigation.demoCatalogEntries
 import com.mfhapps.trendingui.navigation.demoSharedContentKey
+import com.mfhapps.trendingui.navigation.featuredHeroDemo
+import com.mfhapps.trendingui.navigation.CatalogFilter
+import com.mfhapps.trendingui.navigation.filterByCatalog
 import com.mfhapps.trendingui.navigation.toDemoPaneKey
 import com.mfhapps.trendingui.ui.accessibility.DecorativeIcon
 import com.mfhapps.trendingui.ui.components.AdaptiveFitText
 import com.mfhapps.trendingui.ui.components.BrandMark
 import com.mfhapps.trendingui.ui.components.Button
+import com.mfhapps.trendingui.ui.components.ButtonGroup
 import com.mfhapps.trendingui.ui.components.CollapsedHeaderBackdrop
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.CatalogMorphShapes
@@ -190,15 +195,11 @@ fun DemoCatalogScreen(
         }
     }
     val demoCountLabel = "${demoCatalogEntries.size} interactive demos"
-    var activeCategory: DemoCategory? by remember { mutableStateOf(null) }
-    val visibleDemos = remember(activeCategory) {
-        if (activeCategory == null) demoCatalogEntries
-        else demoCatalogEntries.filter { it.category == activeCategory }
+    var activeFilter by remember { mutableStateOf(CatalogFilter.All) }
+    val visibleDemos = remember(activeFilter) {
+        demoCatalogEntries.filterByCatalog(activeFilter)
     }
-    val featuredDemo = remember {
-        demoCatalogEntries.firstOrNull { it.title == "Pretext Engine" }
-            ?: demoCatalogEntries.first()
-    }
+    val featuredDemo = remember { featuredHeroDemo() }
     val grouped = remember(visibleDemos) {
         visibleDemos.groupBy { it.category }
             .toSortedMap(compareBy { it.ordinal })
@@ -244,9 +245,15 @@ fun DemoCatalogScreen(
         ) { innerPadding ->
             val landscape = LocalConfiguration.current.orientation ==
                 Configuration.ORIENTATION_LANDSCAPE
+            val bannerReserve = if (AdsConfig.adsEnabled) {
+                AdsConfig.catalogBannerReserveDp.dp
+            } else {
+                0.dp
+            }
             val listContentPadding = catalogScaffoldContentPadding(
                 innerPadding = innerPadding,
                 horizontalGutter = if (landscape) CatalogLandscapeGutter else CatalogPortraitGutter,
+                extraBottom = 16.dp + bannerReserve,
             )
             when (layoutStyle) {
                 HomeLayoutStyle.FeaturedList -> FeaturedCatalogList(
@@ -256,8 +263,8 @@ fun DemoCatalogScreen(
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
                     grouped = grouped,
-                    activeCategory = activeCategory,
-                    onCategoryChange = { activeCategory = it },
+                    activeFilter = activeFilter,
+                    onFilterChange = { activeFilter = it },
                     selectedPaneKey = selectedPaneKey,
                     onOpenDemo = onOpenDemo,
                     onOpenSettings = onOpenSettings,
@@ -272,8 +279,8 @@ fun DemoCatalogScreen(
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
                     grouped = grouped,
-                    activeCategory = activeCategory,
-                    onCategoryChange = { activeCategory = it },
+                    activeFilter = activeFilter,
+                    onFilterChange = { activeFilter = it },
                     selectedPaneKey = selectedPaneKey,
                     onOpenDemo = onOpenDemo,
                     onOpenSettings = onOpenSettings,
@@ -288,8 +295,8 @@ fun DemoCatalogScreen(
                     demoCountLabel = demoCountLabel,
                     featuredDemo = featuredDemo,
                     visibleDemos = visibleDemos,
-                    activeCategory = activeCategory,
-                    onCategoryChange = { activeCategory = it },
+                    activeFilter = activeFilter,
+                    onFilterChange = { activeFilter = it },
                     selectedPaneKey = selectedPaneKey,
                     onOpenDemo = onOpenDemo,
                     onOpenSettings = onOpenSettings,
@@ -312,6 +319,14 @@ fun DemoCatalogScreen(
                 launcherIcon = launcherIcon,
             )
         }
+        HomeBannerAd(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .zIndex(1f),
+        )
     }
 }
 
@@ -324,8 +339,8 @@ private fun FeaturedCatalogList(
     demoCountLabel: String,
     featuredDemo: DemoCatalogEntry,
     grouped: Map<DemoCategory, List<DemoCatalogEntry>>,
-    activeCategory: DemoCategory?,
-    onCategoryChange: (DemoCategory?) -> Unit,
+    activeFilter: CatalogFilter,
+    onFilterChange: (CatalogFilter) -> Unit,
     selectedPaneKey: DemoPaneKey?,
     onOpenDemo: (Any) -> Unit,
     onOpenSettings: () -> Unit,
@@ -363,8 +378,8 @@ private fun FeaturedCatalogList(
         }
         item(key = "catalog_filters", contentType = CONTENT_TYPE_HEADER) {
             CatalogFilters(
-                activeCategory = activeCategory,
-                onCategoryChange = onCategoryChange,
+                activeFilter = activeFilter,
+                onFilterChange = onFilterChange,
                 modifier = Modifier.animateItem(),
             )
         }
@@ -399,8 +414,8 @@ private fun BentoCatalogGrid(
     demoCountLabel: String,
     featuredDemo: DemoCatalogEntry,
     grouped: Map<DemoCategory, List<DemoCatalogEntry>>,
-    activeCategory: DemoCategory?,
-    onCategoryChange: (DemoCategory?) -> Unit,
+    activeFilter: CatalogFilter,
+    onFilterChange: (CatalogFilter) -> Unit,
     selectedPaneKey: DemoPaneKey?,
     onOpenDemo: (Any) -> Unit,
     onOpenSettings: () -> Unit,
@@ -440,8 +455,8 @@ private fun BentoCatalogGrid(
         }
         item(span = StaggeredGridItemSpan.FullLine) {
             CatalogFilters(
-                activeCategory = activeCategory,
-                onCategoryChange = onCategoryChange,
+                activeFilter = activeFilter,
+                onFilterChange = onFilterChange,
             )
         }
         grouped.forEach { (category, demos) ->
@@ -473,8 +488,8 @@ private fun CompactCatalogGrid(
     demoCountLabel: String,
     featuredDemo: DemoCatalogEntry,
     visibleDemos: List<DemoCatalogEntry>,
-    activeCategory: DemoCategory?,
-    onCategoryChange: (DemoCategory?) -> Unit,
+    activeFilter: CatalogFilter,
+    onFilterChange: (CatalogFilter) -> Unit,
     selectedPaneKey: DemoPaneKey?,
     onOpenDemo: (Any) -> Unit,
     onOpenSettings: () -> Unit,
@@ -526,8 +541,8 @@ private fun CompactCatalogGrid(
         }
         item {
             CatalogFilters(
-                activeCategory = activeCategory,
-                onCategoryChange = onCategoryChange,
+                activeFilter = activeFilter,
+                onFilterChange = onFilterChange,
             )
         }
         item {
@@ -1073,54 +1088,43 @@ private fun CompactDemoTile(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CatalogFilters(
-    activeCategory: DemoCategory?,
-    onCategoryChange: (DemoCategory?) -> Unit,
+    activeFilter: CatalogFilter,
+    onFilterChange: (CatalogFilter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val scheme = MaterialTheme.colorScheme
-    val chips = remember {
-        listOf(
-            "All" to null,
-            "Layout" to DemoCategory.Layout,
-            "Motion" to DemoCategory.Motion,
-            "Surfaces" to DemoCategory.Surfaces,
-            "AI" to DemoCategory.AiReading,
-            "3D" to DemoCategory.Sensors3d,
-        )
-    }
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        color = scheme.surfaceContainerHigh,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(horizontal = 10.dp, vertical = 10.dp),
         ) {
-            chips.forEach { (label, category) ->
-                val selected = activeCategory == category
-                FilterChip(
-                    selected = selected,
-                    onClick = { onCategoryChange(category) },
-                    label = {
+            ButtonGroup {
+                CatalogFilter.homePickerEntries.forEach { filter ->
+                    ToggleButton(
+                        checked = activeFilter == filter,
+                        onCheckedChange = { selected ->
+                            if (selected) onFilterChange(filter)
+                        },
+                    ) {
                         Text(
-                            text = label,
-                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                            text = filter.label,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (activeFilter == filter) {
+                                FontWeight.SemiBold
+                            } else {
+                                FontWeight.Medium
+                            },
                         )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        containerColor = Color.Transparent,
-                        labelColor = scheme.onSurfaceVariant,
-                        selectedContainerColor = scheme.primaryContainer,
-                        selectedLabelColor = scheme.onPrimaryContainer,
-                    ),
-                    border = null,
-                )
+                    }
+                }
             }
         }
     }

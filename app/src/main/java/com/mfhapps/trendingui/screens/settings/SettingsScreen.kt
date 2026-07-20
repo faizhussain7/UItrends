@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import com.mfhapps.trendingui.BuildConfig
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mfhapps.trendingui.play.PlayServicesViewModel
 import com.mfhapps.trendingui.launcher.AppLauncherIcon
 import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
 import com.mfhapps.trendingui.ui.components.LocalModalBackdropStyle
@@ -324,9 +326,15 @@ fun SettingsScreen(
                     }
 
                     item(key = "about-card") {
+                        val activity = LocalContext.current as? android.app.Activity
+                        val playServicesViewModel: PlayServicesViewModel = viewModel()
                         SettingsAboutPanel(
                             versionName = BuildConfig.VERSION_NAME,
                             versionCode = BuildConfig.VERSION_CODE,
+                            onRateApp = {
+                                val host = activity ?: return@SettingsAboutPanel
+                                playServicesViewModel.requestReview(host)
+                            },
                         )
                     }
                 }

@@ -95,6 +95,7 @@ import com.mfhapps.trendingui.ui.components.CollapsingBlurTopBarLayout
 import com.mfhapps.trendingui.ui.components.appHazeSource
 import com.mfhapps.trendingui.ui.components.collapsingTopBarContentPadding
 import com.mfhapps.trendingui.ui.components.rememberCollapsedTopAppBarColors
+import com.mfhapps.trendingui.TrendingApplication
 import com.mfhapps.trendingui.ui.detail.NestedBackEffect
 import com.mfhapps.trendingui.ui.guide.DemoTrendGuide
 import kotlinx.coroutines.Dispatchers
@@ -104,6 +105,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.withFrameNanos
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.math.abs
 import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
@@ -121,10 +123,19 @@ fun PretextScreen(
     var cameraStage by remember { mutableStateOf(PretextCameraStage.CameraOverlay) }
     var cameraTooltipBlur by rememberSaveable { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    val recordingController = remember(context) {
+        (context.applicationContext as TrendingApplication).container.pretextRecordingController
+    }
+    val recordingSession by recordingController.state.collectAsStateWithLifecycle(
+        initialValue = PretextRecordingSessionState.Idle,
+    )
+    val isRecordingActive = recordingSession is PretextRecordingSessionState.Active
+
     val exitCamera = { screenMode = PretextScreenMode.Playground }
 
     NestedBackEffect(
-        enabled = screenMode == PretextScreenMode.Camera,
+        enabled = screenMode == PretextScreenMode.Camera && !isRecordingActive,
         onBack = exitCamera,
     )
 
