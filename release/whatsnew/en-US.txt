@@ -1,5 +1,1 @@
-• Add WorkManager dependency and ProGuard rules
-• Update .gitignore
-• Update uitrends-play-store-assets.zip
-• Create face_detection_short_range.tflite
-• Add native debug symbols to release workflow
+• Add monetization and recording features
