@@ -1,9 +1,2 @@
-What's new in 2.0
-
-• Pretext — record short UI clips, replay in full screen, and manage your library
-• Share clips to WhatsApp, Instagram, Telegram, and more, or save to gallery
-• Recording quality options and optional watermark
-• Save or share images from the Masonry gallery
-• Filter home demos by category (Layout, Motion, Surfaces, AI, 3D, and more)
-• In-app Google Play updates with restart when ready
-• Rate UITrends from Settings
+• Refactor UI patterns: docks, modals, and camera defaults
+• Update CI/CD workflows and v2.0 release notes
