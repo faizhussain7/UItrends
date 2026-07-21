@@ -6,10 +6,6 @@ import com.mfhapps.trendingui.core.text.PositionedTextLayout
 import com.mfhapps.trendingui.core.text.PreparedText
 import kotlin.system.measureNanoTime
 
-/**
- * One camera reflow pass input. Shared by Engine and View.measure backends so
- * speed samples compare the same page geometry, style, and obstacle set.
- */
 data class CameraReflowRequest(
     val prepared: PreparedText?,
     val sourceText: String,
@@ -26,12 +22,6 @@ data class CameraReflowRequest(
     val bodyPrepared: PreparedText? = null,
 )
 
-/**
- * Dual-backend timing sample for one reflow tick.
- *
- * [engineNs] / [viewNs] are wall time of [PretextCameraReflowScheduler.computeLayout]
- * for each [PretextMeasureMode] on the same [CameraReflowRequest].
- */
 data class PretextMeasureSpeed(
     val engineNs: Long = 0L,
     val viewNs: Long = 0L,
@@ -72,10 +62,6 @@ data class PretextMeasureSpeed(
                 "${"%.0f".format(ratio)}×"
         }
 
-    /**
-     * Exponential moving average so chip/segment labels stay readable under
-     * frame-to-frame jitter instead of flashing raw single-shot timings.
-     */
     fun blend(sample: PretextMeasureSpeed, alpha: Float = 0.28f): PretextMeasureSpeed {
         fun blendNs(previous: Long, next: Long): Long {
             if (previous <= 0L) return next
@@ -106,11 +92,6 @@ data class CameraReflowBenchmarkResult(
     val sample: PretextMeasureSpeed,
 )
 
-/**
- * Runs Engine and View.measure on the same request, times each, and returns the
- * layout for the active mode. This is the only place dual-backend cost is sampled
- * so UI chips and sheet segments stay consistent.
- */
 object PretextCameraReflowBenchmark {
 
     fun run(

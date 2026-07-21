@@ -49,8 +49,7 @@ fun DemoDetailHost(
                 paneKey == DemoPaneKey.Kinetic ||
                 paneKey == DemoPaneKey.Glass ||
                 paneKey == DemoPaneKey.Orbs ||
-                paneKey == DemoPaneKey.Spatial ||
-                paneKey == DemoPaneKey.Copilot,
+                paneKey == DemoPaneKey.Spatial,
             hideCompactTopBar = paneKey == DemoPaneKey.Calm ||
                 paneKey == DemoPaneKey.Orbs ||
                 paneKey == DemoPaneKey.Spatial ||
@@ -62,7 +61,8 @@ fun DemoDetailHost(
                 paneKey == DemoPaneKey.Chat ||
                 paneKey == DemoPaneKey.ZeroUi ||
                 paneKey == DemoPaneKey.Kinetic ||
-                paneKey == DemoPaneKey.Semantic,
+                paneKey == DemoPaneKey.Semantic ||
+                paneKey == DemoPaneKey.Copilot,
             contentOwnsTitle = paneKey == DemoPaneKey.Masonry ||
                 paneKey == DemoPaneKey.Kinetic ||
                 paneKey == DemoPaneKey.Brutal ||
@@ -88,7 +88,8 @@ fun DemoDetailHost(
                 paneKey == DemoPaneKey.Chat ||
                 paneKey == DemoPaneKey.ZeroUi ||
                 paneKey == DemoPaneKey.Kinetic ||
-                paneKey == DemoPaneKey.Semantic,
+                paneKey == DemoPaneKey.Semantic ||
+                paneKey == DemoPaneKey.Copilot,
             glassHazeEnabled = glassHazeEnabled,
             chromeStyle = when (paneKey) {
                 DemoPaneKey.Brutal -> DetailChromeStyle.NeoBrutal
@@ -155,7 +156,10 @@ private fun DemoScreenForPane(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Semantic),
         )
-        DemoPaneKey.Copilot -> AiCopilotScreen()
+        DemoPaneKey.Copilot -> AiCopilotScreen(
+            onNavigateBack = onNavigateBack,
+            guide = trendGuideForPane(DemoPaneKey.Copilot),
+        )
         DemoPaneKey.Calm -> CalmUiScreen(
             onNavigateBack = onNavigateBack,
             guide = trendGuideForPane(DemoPaneKey.Calm),

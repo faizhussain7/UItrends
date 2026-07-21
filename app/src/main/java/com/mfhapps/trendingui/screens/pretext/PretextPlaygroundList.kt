@@ -249,12 +249,15 @@ fun PretextPlaygroundLazyList(
 private fun PretextPlaygroundIntroSection(
     screenMode: PretextScreenMode,
     onScreenModeChange: (PretextScreenMode) -> Unit,
+    arrivedFromCamera: Boolean = false,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        PretextHeroCard()
+        PretextHeroCard(
+            arrivedFromCamera = arrivedFromCamera,
+        )
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),

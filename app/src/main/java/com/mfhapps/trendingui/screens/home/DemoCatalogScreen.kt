@@ -69,10 +69,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.widthIn
-import com.mfhapps.trendingui.play.AdsConfig
-import com.mfhapps.trendingui.play.HomeBannerAd
+import com.mfhapps.trendingui.play.CatalogAdDock
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
@@ -233,6 +231,8 @@ fun DemoCatalogScreen(
         }
     }
 
+    var adDockHeight by remember { mutableStateOf(0.dp) }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -245,15 +245,11 @@ fun DemoCatalogScreen(
         ) { innerPadding ->
             val landscape = LocalConfiguration.current.orientation ==
                 Configuration.ORIENTATION_LANDSCAPE
-            val bannerReserve = if (AdsConfig.adsEnabled) {
-                AdsConfig.catalogBannerReserveDp.dp
-            } else {
-                0.dp
-            }
             val listContentPadding = catalogScaffoldContentPadding(
                 innerPadding = innerPadding,
                 horizontalGutter = if (landscape) CatalogLandscapeGutter else CatalogPortraitGutter,
-                extraBottom = 16.dp + bannerReserve,
+                extraBottom = 16.dp +
+                    (adDockHeight - innerPadding.calculateBottomPadding()).coerceAtLeast(0.dp),
             )
             when (layoutStyle) {
                 HomeLayoutStyle.FeaturedList -> FeaturedCatalogList(
@@ -319,13 +315,12 @@ fun DemoCatalogScreen(
                 launcherIcon = launcherIcon,
             )
         }
-        HomeBannerAd(
+        CatalogAdDock(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
                 .zIndex(1f),
+            onDockHeightChanged = { adDockHeight = it },
         )
     }
 }

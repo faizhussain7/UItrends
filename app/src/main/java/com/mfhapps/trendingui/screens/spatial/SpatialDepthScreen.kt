@@ -126,11 +126,9 @@ fun SpatialDepthScreen(
         val scope = rememberCoroutineScope()
         val canPopDetail = navigator.canNavigateBack()
 
-        // Navigator contentKey is the single source of truth for selection.
         val selectedId = navigator.currentDestination?.contentKey
         val selectedLayer = selectedId?.let(layersById::get)
 
-        // Expanded layouts always show a detail pane — seed the first layer once.
         LaunchedEffect(isCompact, layers) {
             val firstId = layers.firstOrNull()?.id ?: return@LaunchedEffect
             if (!isCompact && navigator.currentDestination?.contentKey == null) {
@@ -238,7 +236,6 @@ private fun SpatialLayerList(
     val parallax by remember {
         derivedStateOf { listState.firstVisibleItemScrollOffset * 0.18f }
     }
-    // Skip scrolling for the first established selection (enter / dual-pane seed).
     var previousSelectedId by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(selectedId) {

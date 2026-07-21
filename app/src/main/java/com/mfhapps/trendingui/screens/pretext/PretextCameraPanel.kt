@@ -122,7 +122,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.material3.LocalContentColor
 import android.graphics.Paint
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -198,7 +197,6 @@ fun PretextCameraPanel(
     var spotlightStrength by remember { mutableFloatStateOf(0.55f) }
     var showBlur by remember { mutableStateOf(false) }
     var blurRadiusDp by remember { mutableFloatStateOf(16f) }
-    var showHalftone by remember { mutableStateOf(false) }
     var previewBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var previewView by remember { mutableStateOf<PreviewView?>(null) }
     val previewLayoutCache = remember { PretextPreviewLayoutCache() }
@@ -558,19 +556,11 @@ fun PretextCameraPanel(
         )
 
         val bmp = previewBitmap
-        if (showBlur && bmp != null && stage.showsLivePreview && stage != PretextCameraStage.Ascii && stage != PretextCameraStage.VintageNews) {
+        if (showBlur && bmp != null && stage.showsLivePreview && !stage.fillsSilhouetteWithType) {
             BlurredPreviewOverlay(
                 bitmap = bmp,
                 shape = viewShape,
                 blurRadius = blurRadiusDp.dp,
-                alpha = previewVisibility,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
-        if ((showHalftone || stage == PretextCameraStage.VintageNews) && bmp != null && stage.showsLivePreview) {
-            HalftonePreviewOverlay(
-                bitmap = bmp,
                 alpha = previewVisibility,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -581,13 +571,6 @@ fun PretextCameraPanel(
                 shape = viewShape,
                 modifier = Modifier.fillMaxSize(),
                 alpha = 1f - previewVisibility,
-            )
-        }
-
-        if (stage == PretextCameraStage.Terminal && previewVisibility > 0.01f) {
-            TerminalBackdrop(
-                modifier = Modifier.fillMaxSize(),
-                alpha = previewVisibility,
             )
         }
 
@@ -625,20 +608,13 @@ fun PretextCameraPanel(
             )
         }
 
-        if (stage.supportsAsciiOverlay && previewVisibility > 0.01f) {
-            AsciiScanOverlay(
-                modifier = Modifier.fillMaxSize().alpha(previewVisibility * 0.35f),
-                accent = stageTheme.accentCyan,
-            )
-        }
-
         val textColor = stageTheme.textColor
         val engineLayout = layout
         if (engineLayout == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 LoadingIndicator(indicatorSize = 36.dp, color = textColor)
             }
-        } else {
+        } else if (!stage.fillsSilhouetteWithType) {
             PretextPositionedCanvas(
                 layout = engineLayout,
                 fontSizePx = fontSizePx,
@@ -649,12 +625,21 @@ fun PretextCameraPanel(
             )
         }
 
+        if (stage.fillsSilhouetteWithType) {
+            TypePortraitOverlay(
+                shape = viewShape,
+                sourceText = PARAGRAPH,
+                phase = generativePhase,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
         val contourOutlineAlpha = when {
             stage.showsLivePreview -> outlineAlpha * previewVisibility
             stage.usesPaperBackdrop -> outlineAlpha
             else -> 0f
         }
-        if ((stage.showsLivePreview || stage.usesPaperBackdrop) && stage != PretextCameraStage.Ascii) {
+        if ((stage.showsLivePreview || stage.usesPaperBackdrop) && !stage.fillsSilhouetteWithType) {
             if (showSpotlight && stage.showsLivePreview) {
                 ShapeSpotlightOverlay(
                     shape = viewShape,
@@ -813,8 +798,6 @@ fun PretextCameraPanel(
             onShowBlurChange = { showBlur = it },
             blurRadiusDp = blurRadiusDp,
             onBlurRadiusDpChange = { blurRadiusDp = it },
-            showHalftone = showHalftone,
-            onShowHalftoneChange = { showHalftone = it },
             telemetry = telemetry,
             onDismiss = { hud.closeSettings() },
         )
@@ -981,6 +964,20 @@ private fun BoxScope.PretextCameraChromeOverlay(
             ) {
                 DragHintPill()
             }
+        }
+        AnimatedVisibility(
+            visible = hud.isChromeVisible && !isRecording,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
+        ) {
+            PretextLiquidGlassTabs(
+                selected = PretextScreenMode.Camera,
+                onSelected = { mode ->
+                    if (mode == PretextScreenMode.Playground) onExitCamera()
+                },
+                colors = pretextLiquidTabsCameraColors(),
+                modifier = Modifier.width(264.dp),
+            )
         }
         AnimatedVisibility(
             visible = hud.isChromeVisible,
@@ -1158,7 +1155,7 @@ private fun CameraTopHud(
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back to playground",
+                    contentDescription = "Switch to text playground",
                 )
             }
 
@@ -1401,15 +1398,6 @@ private fun DragHintPill(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TerminalBackdrop(modifier: Modifier = Modifier, alpha: Float) {
-    Box(
-        modifier = modifier
-            .alpha(alpha)
-            .background(Color(0xFF0A0E12)),
-    )
-}
-
-@Composable
 private fun EditorialOrbsLayer(
     orbs: List<ViewShape>,
     visibility: Float,
@@ -1444,34 +1432,80 @@ private fun EditorialOrbsLayer(
 }
 
 @Composable
-private fun AsciiScanOverlay(
+private fun TypePortraitOverlay(
+    shape: ViewShape?,
+    sourceText: String,
+    phase: Float,
     modifier: Modifier = Modifier,
-    accent: Color,
 ) {
-    val chars = "@#*+.;: "
+    val scheme = MaterialTheme.colorScheme
+    val words = remember(sourceText) {
+        sourceText
+            .replace(Regex("[^\\p{L}\\p{N}]+"), " ")
+            .trim()
+            .split(' ')
+            .filter(String::isNotBlank)
+            .distinct()
+            .take(32)
+    }
+    val primary = scheme.primary
+    val secondary = scheme.tertiary
+
     Canvas(modifier) {
-        val cell = 14f
-        val cols = (size.width / cell).toInt().coerceAtLeast(1)
-        val rows = (size.height / cell).toInt().coerceAtLeast(1)
-        val paint = Paint().apply {
-            color = accent.copy(alpha = 0.55f).toArgb()
-            textSize = cell * 0.85f
-            isAntiAlias = true
-            typeface = Typeface.MONOSPACE
+        val portrait = shape
+        val outside = Path().apply {
+            addRect(androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height))
+            portrait?.let { addPath(buildShapeClipPath(it)) }
+            fillType = PathFillType.EvenOdd
         }
-        drawContext.canvas.nativeCanvas.apply {
-            for (row in 0 until rows) {
-                for (col in 0 until cols) {
-                    val c = chars[(row * 31 + col * 17) % chars.length]
-                    drawText(
-                        c.toString(),
-                        col * cell + cell * 0.15f,
-                        row * cell + cell * 0.85f,
-                        paint,
-                    )
+        drawPath(outside, color = Color.Black.copy(alpha = if (portrait == null) 0.74f else 0.62f))
+
+        if (portrait == null || words.isEmpty()) return@Canvas
+
+        val clip = buildShapeClipPath(portrait)
+        val bounds = portrait.boundsPx
+        val textSize = (bounds.width() / 10f).coerceIn(18f, 44f)
+        val lineStep = textSize * 1.12f
+        val drift = (phase * lineStep * 2f) % lineStep
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+            this.textSize = textSize
+        }
+        val canvas = drawContext.canvas
+        canvas.save()
+        canvas.clipPath(clip)
+        var wordIndex = (phase * words.size).toInt() % words.size
+        var row = 0
+        var y = bounds.top - lineStep + drift
+        while (y < bounds.bottom + lineStep) {
+            var x = bounds.left - if (row % 2 == 0) textSize * 1.6f else textSize * 0.35f
+            while (x < bounds.right) {
+                val word = words[wordIndex % words.size].uppercase()
+                paint.color = when (wordIndex % 4) {
+                    0 -> primary.copy(alpha = 0.95f).toArgb()
+                    1 -> Color.White.copy(alpha = 0.90f).toArgb()
+                    else -> secondary.copy(alpha = 0.88f).toArgb()
                 }
+                drawContext.canvas.nativeCanvas.drawText(word, x, y, paint)
+                x += paint.measureText(word) + textSize * 0.55f
+                wordIndex++
             }
+            row++
+            y += lineStep
         }
+        canvas.restore()
+        drawPath(
+            clip,
+            brush = Brush.linearGradient(
+                colors = listOf(
+                    primary.copy(alpha = 0.75f),
+                    secondary.copy(alpha = 0.55f),
+                ),
+                start = Offset(bounds.left, bounds.top),
+                end = Offset(bounds.right, bounds.bottom),
+            ),
+            style = Stroke(width = 3f),
+        )
     }
 }
 
@@ -1692,8 +1726,6 @@ private fun CameraSettingsSheet(
     onShowBlurChange: (Boolean) -> Unit,
     blurRadiusDp: Float,
     onBlurRadiusDpChange: (Float) -> Unit,
-    showHalftone: Boolean,
-    onShowHalftoneChange: (Boolean) -> Unit,
     telemetry: VisionTelemetry,
     onDismiss: () -> Unit,
 ) {
@@ -1724,9 +1756,14 @@ private fun CameraSettingsSheet(
             when (current) {
                 CameraSettingsPage.Root -> {
                     Text(
-                        "Camera settings",
+                        "Live camera options",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        "Change how Pretext looks and how the paragraph is laid out around detections.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
                     Surface(
@@ -1786,8 +1823,6 @@ private fun CameraSettingsSheet(
                         onShowBlurChange = onShowBlurChange,
                         blurRadiusDp = blurRadiusDp,
                         onBlurRadiusDpChange = onBlurRadiusDpChange,
-                        showHalftone = showHalftone,
-                        onShowHalftoneChange = onShowHalftoneChange,
                     )
 
                     Surface(
@@ -1943,7 +1978,8 @@ private fun CameraPermissionCard(
             Spacer(Modifier.height(12.dp))
             Text("Camera access", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
             Text(
-                "Live tracking and per-frame text reflow need the camera.",
+                "Pretext reflows a paragraph around whatever the camera sees, every frame. " +
+                    "It starts on the front camera — just point it at yourself.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp, bottom = 20.dp),
@@ -1987,51 +2023,3 @@ private fun buildShapeClipPath(shape: ViewShape): Path {
     return clip
 }
 
-@Composable
-private fun HalftonePreviewOverlay(
-    bitmap: android.graphics.Bitmap,
-    alpha: Float,
-    modifier: Modifier = Modifier,
-) {
-    if (alpha <= 0f) return
-    val img = remember(bitmap) { bitmap.asImageBitmap() }
-    val colorMatrix = remember {
-        androidx.compose.ui.graphics.ColorMatrix(
-            floatArrayOf(
-                0.393f + 0.607f * 0.3f, 0.769f - 0.769f * 0.3f, 0.189f - 0.189f * 0.3f, 0f, 0f,
-                0.349f - 0.349f * 0.3f, 0.686f + 0.314f * 0.3f, 0.168f - 0.168f * 0.3f, 0f, 0f,
-                0.272f - 0.272f * 0.3f, 0.534f - 0.534f * 0.3f, 0.131f + 0.869f * 0.3f, 0f, 0f,
-                0f, 0f, 0f, 1f, 0f
-            )
-        )
-    }
-
-    Box(modifier = modifier.alpha(alpha)) {
-        Image(
-            bitmap = img,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            colorFilter = androidx.compose.ui.graphics.ColorFilter.colorMatrix(colorMatrix),
-            contentScale = androidx.compose.ui.layout.ContentScale.Crop
-        )
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val dotSpacing = 8f
-            val dotRadius = 1.5f
-            val dotColor = Color.Black.copy(alpha = 0.2f)
-
-            var x = 0f
-            while (x < size.width) {
-                var y = 0f
-                while (y < size.height) {
-                    drawCircle(
-                        color = dotColor,
-                        radius = dotRadius,
-                        center = Offset(x, y)
-                    )
-                    y += dotSpacing
-                }
-                x += dotSpacing
-            }
-        }
-    }
-}

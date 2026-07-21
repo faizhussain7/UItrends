@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -31,25 +33,29 @@ import androidx.compose.ui.unit.sp
 fun MarkdownText(
     text: String,
     modifier: Modifier = Modifier,
+    contentColor: Color = Color.Unspecified,
 ) {
     val blocks = remember(text) { parseBlocks(text) }
     val scheme = MaterialTheme.colorScheme
     val codeBg = scheme.surfaceContainerHighest
+    val bodyColor = contentColor.takeOrElse {
+        LocalContentColor.current.takeOrElse { scheme.onSurface }
+    }
 
     Column(modifier = modifier) {
         blocks.forEachIndexed { index, block ->
             if (index > 0) Spacer(Modifier.height(6.dp))
             when (block) {
                 is MdBlock.Heading -> Text(
-                    text = renderInline(block.text, scheme.onSurface),
+                    text = renderInline(block.text, bodyColor),
                     style = if (block.level <= 1) MaterialTheme.typography.titleLarge
                     else MaterialTheme.typography.titleMedium,
-                    color = scheme.onSurface,
+                    color = bodyColor,
                 )
                 is MdBlock.Paragraph -> Text(
-                    text = renderInline(block.text, scheme.onSurface),
+                    text = renderInline(block.text, bodyColor),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = scheme.onSurface,
+                    color = bodyColor,
                 )
                 is MdBlock.Bullet -> Row(
                     modifier = Modifier.fillMaxWidth().padding(start = 4.dp),
@@ -60,9 +66,9 @@ fun MarkdownText(
                         color = scheme.primary,
                     )
                     Text(
-                        renderInline(block.text, scheme.onSurface),
+                        renderInline(block.text, bodyColor),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = scheme.onSurface,
+                        color = bodyColor,
                     )
                 }
                 is MdBlock.CodeBlock -> Box(

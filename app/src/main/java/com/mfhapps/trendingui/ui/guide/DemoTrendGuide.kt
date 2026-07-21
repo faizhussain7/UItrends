@@ -56,7 +56,7 @@ private fun pretextGuide() = DemoTrendGuide(
     patternName = "Custom text layout engine",
     summary = "High-performance paragraph and line layout with live camera-driven reflow.",
     whatItIs = "Pretext is a native text engine (not TextView measure loops) that prepares glyph runs once and reflows when constraints change—ideal for AR overlays, captions, and dynamic columns.",
-    usageInThisDemo = "Use Playground to tune line height, alignment, and batch layout. Open Camera to see live reflow around detected regions. Compare Engine vs legacy measure in the reflow benchmark card.",
+    usageInThisDemo = "Opens straight into the live camera on the front lens — point it at yourself and watch the paragraph wrap around you. Switch to the Text playground (pill above the record dock) to type your own text, tune line height and alignment, and run the Engine vs View.measure benchmark.",
     bestPractices = listOf(
         "Prepare text off the main thread for large blocks; layout on demand when width changes.",
         "Keep overlay text on a barrier/scrim when video or blur sits behind it.",
@@ -71,17 +71,17 @@ private fun pretextGuide() = DemoTrendGuide(
 
 private fun virtualChatGuide() = DemoTrendGuide(
     patternName = "Virtualized chat bubbles",
-    summary = "Thousands of messages with shrink-wrapped bubbles and streaming layout.",
+    summary = "Thousands of messages with shrink-wrapped bubbles, streaming layout, and an expressive composer.",
     whatItIs = "Chat UIs stress recycling, asymmetric bubbles, and incremental layout when tokens stream in. Lazy lists plus debounced recomposition keep frame times stable.",
-    usageInThisDemo = "Scroll the history—bubbles are generated with varied widths. Watch how new assistant chunks append without relayout jank. Compare date dividers and scroll-to-bottom behavior.",
+    usageInThisDemo = "Scroll the 500-message history, tap a suggestion chip or type a prompt, then watch measured streaming replies. Jump-to-latest morphs in when you scroll up.",
     bestPractices = listOf(
         "Give each message a stable key; avoid remeasuring the full transcript on every token.",
         "Debounce or batch streaming updates (50–100 ms) before invalidating layout.",
-        "Reserve min touch targets and contrast for sent vs received bubbles.",
+        "Use asymmetric bubble corners and clear sent/received contrast; keep composer thumb-reachable.",
     ),
     links = listOf(
         TrendGuideLink("Lazy lists in Compose", "https://developer.android.com/develop/ui/compose/lists"),
-        TrendGuideLink("Conversation design (Material)", "https://m2.material.io/components/cards#behavior"),
+        TrendGuideLink("Material 3 Expressive", "https://m3.material.io/blog/building-with-m3-expressive"),
         TrendGuideLink("Accessibility: text scaling", "https://developer.android.com/develop/ui/compose/accessibility/semantics"),
     ),
 )
@@ -193,17 +193,17 @@ private fun neumorphismGuide() = DemoTrendGuide(
 private fun zeroUiGuide() = DemoTrendGuide(
     patternName = "Zero UI",
     summary = "Chrome that appears only when context demands it.",
-    whatItIs = "Zero UI hides toolbars and FABs until gesture, focus, or idle timeout—common in readers, maps, and ambient assistants where content is the interface.",
-    usageInThisDemo = "Try each section: focus search for chips, tap content for timed actions, long-press text to select, tap the reader canvas for edge chrome, and touch the player to wake idle controls.",
+    whatItIs = "Zero UI hides toolbars until focus, tap, long-press, pan, or idle wake—content stays primary. Uses Material 3 Expressive HorizontalFloatingToolbar with exit-always scroll.",
+    usageInThisDemo = "Scroll to hide the bottom toolbar. Try Focus, Tap, Select, Reader, Idle, Map, Edge, and Ambient cards.",
     bestPractices = listOf(
-        "Always expose a discoverable affordance (hint text, coach mark, or first-run).",
-        "Never hide the only way to complete a critical task.",
-        "Announce revealed controls for TalkBack when they appear.",
+        "Keep one discoverable hint per surface.",
+        "Never hide the only path for a critical action.",
+        "Announce revealed controls for TalkBack.",
     ),
     links = listOf(
-        TrendGuideLink("Ambient computing (Google)", "https://developers.google.com/assistant"),
+        TrendGuideLink("Floating toolbar (M3)", "https://m3.material.io/components/floating-toolbar/overview"),
         TrendGuideLink("Compose gestures", "https://developer.android.com/develop/ui/compose/touch-input/pointer-input"),
-        TrendGuideLink("Visibility & discoverability", "https://www.nngroup.com/articles/visibility-affordance/"),
+        TrendGuideLink("Visibility & affordance", "https://www.nngroup.com/articles/visibility-affordance/"),
     ),
 )
 
@@ -242,10 +242,10 @@ private fun semanticGuide() = DemoTrendGuide(
 )
 
 private fun copilotGuide() = DemoTrendGuide(
-    patternName = "AI copilot sheet",
-    summary = "Streaming assistant UI anchored in a bottom sheet with phased status.",
-    whatItIs = "Copilot patterns combine partial-height sheets, token streaming, and explicit phases (thinking, searching, generating) so users trust latency.",
-    usageInThisDemo = "Document preview stays visible above the sheet peek (sheet cannot hide). Drag up to expand copilot, down to peek. Send prompts for phased status and streamed markdown. Stop mid-flight.",
+    patternName = "AI copilot dock",
+    summary = "Streaming assistant in an expandable bottom dock with phased status.",
+    whatItIs = "Copilot patterns keep the document primary and put the assistant in a peek dock. Expand on focus, swipe, or tap—then stream with explicit phases.",
+    usageInThisDemo = "Read the document above. Tap the dock handle, swipe up, or focus the ask field to expand. Summarize, Rewrite, or send a prompt. Back collapses the dock.",
     bestPractices = listOf(
         "Show system status for long operations; never fake instant answers.",
         "Let users dismiss or stop generation without losing context.",
@@ -253,8 +253,8 @@ private fun copilotGuide() = DemoTrendGuide(
     ),
     links = listOf(
         TrendGuideLink("Bottom sheet (Material)", "https://m3.material.io/components/bottom-sheets/overview"),
-        TrendGuideLink("Compose ModalBottomSheet", "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#ModalBottomSheet(kotlin.Function0,androidx.compose.ui.Modifier,androidx.compose.material3.SheetState,kotlin.Boolean,androidx.compose.ui.graphics.Shape,androidx.compose.ui.unit.Dp,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,androidx.compose.ui.unit.Dp,androidx.compose.ui.graphics.Color,kotlin.Function0,androidx.compose.foundation.layout.WindowInsets,kotlin.Function1)"),
         TrendGuideLink("People + AI guidelines (Google)", "https://pair.withgoogle.com/guidebook/"),
+        TrendGuideLink("Floating toolbar (M3)", "https://m3.material.io/components/floating-toolbar/overview"),
     ),
 )
 
@@ -262,7 +262,7 @@ private fun calmGuide() = DemoTrendGuide(
     patternName = "Calm UI / reader mode",
     summary = "Low-chrome reading with supporting pane and gentle cross-fades.",
     whatItIs = "Calm technology keeps attention on long-form text: muted palettes, comfortable measure, optional serif, and side navigation on wide screens.",
-    usageInThisDemo = "Read chapters with fade transitions. Tap display settings — the reader panel replaces the top bar. E-ink offers black, blue, or green ink (light or dark per system). Use chapter chips on phone or the contents rail on tablet.",
+    usageInThisDemo = "Read chapters with fade transitions. Tap display settings — reader options slide down from the top, Calculator-style. Adjust type, justification, e-ink, and focus mode. Use chapter chips on phone or the contents rail on tablet.",
     bestPractices = listOf(
         "Target 45–75 characters per line; increase line height for body text.",
         "Honor system font scale and reduce motion for transitions.",

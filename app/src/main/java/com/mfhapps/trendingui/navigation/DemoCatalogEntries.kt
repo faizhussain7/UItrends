@@ -52,7 +52,7 @@ val demoCatalogEntries = listOf(
     ),
     DemoCatalogEntry(
         title = "Virtual Chat",
-        subtitle = "500 shrink-wrapped bubbles · streaming layout",
+        subtitle = "500 shrink-wrapped bubbles · expressive composer",
         icon = Icons.AutoMirrored.Filled.Chat,
         category = DemoCategory.AiReading,
         tags = setOf(DemoTag.AI),
@@ -103,7 +103,7 @@ val demoCatalogEntries = listOf(
     ),
     DemoCatalogEntry(
         title = "Zero UI",
-        subtitle = "Contextual chrome · minimal chrome",
+        subtitle = "M3 floating toolbar · gesture reveals",
         icon = Icons.Default.TouchApp,
         category = DemoCategory.AiReading,
         tags = setOf(DemoTag.AI),
@@ -127,7 +127,7 @@ val demoCatalogEntries = listOf(
     ),
     DemoCatalogEntry(
         title = "AI Copilot",
-        subtitle = "Streaming tokens · bottom sheet",
+        subtitle = "Focus-to-expand dock · streaming",
         icon = Icons.Default.SmartToy,
         category = DemoCategory.AiReading,
         tags = setOf(DemoTag.AI),

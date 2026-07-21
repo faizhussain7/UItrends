@@ -74,11 +74,13 @@ fun SwitchPreferenceRow(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     enabled: Boolean = true,
+    containerColor: Color = Color.Unspecified,
 ) {
     SwitchListItem(
         checked = checked,
         onCheckedChange = onCheckedChange,
         enabled = enabled,
+        containerColor = containerColor,
         modifier = modifier.padding(vertical = 2.dp),
         headlineContent = { Text(title, style = MaterialTheme.typography.bodyMedium) },
         supportingContent = subtitle?.let {

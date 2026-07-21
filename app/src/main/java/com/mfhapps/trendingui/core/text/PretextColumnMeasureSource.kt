@@ -8,14 +8,6 @@ data class ColumnLinePiece(
     val widthPx: Float,
 )
 
-/**
- * Feeds text into [TextMeasurementEngine.layoutColumn].
- *
- * Engine and View.measure share one obstacle-band / slot-carving pipeline.
- * Only the per-slot width probe differs:
- * - [EngineColumnMeasureSource]: precomputed grapheme advances from prepare()
- * - [ViewPaintColumnMeasureSource]: [Paint.breakText] each slot (View-style measure)
- */
 interface PretextColumnMeasureSource {
     val endUnitIndex: Int get() = 0
     fun hasMore(): Boolean

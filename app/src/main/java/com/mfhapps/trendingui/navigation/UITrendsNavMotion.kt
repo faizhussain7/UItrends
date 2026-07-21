@@ -94,26 +94,27 @@ fun sharedBoundsTransform(): FiniteAnimationSpec<Rect> = ExpressiveMotion.shared
 fun pretextModeEnterForward(): EnterTransition =
     slideInVertically(
         animationSpec = slideSpatial,
-        initialOffsetY = { fullHeight -> fullHeight / 6 },
-    ) + fadeIn(floatEffects) +
-        scaleIn(initialScale = 0.98f, animationSpec = floatSpatial)
+        initialOffsetY = { fullHeight -> fullHeight },
+    )
 
 fun pretextModeExitForward(): ExitTransition =
     slideOutVertically(
         animationSpec = slideSpatial,
-        targetOffsetY = { fullHeight -> -fullHeight / 10 },
-    ) + fadeOut(floatEffects)
+        targetOffsetY = { fullHeight -> -fullHeight / 4 },
+    ) + fadeOut(floatEffects) +
+        scaleOut(targetScale = 0.96f, animationSpec = floatSpatial)
 
 fun pretextModePopEnter(): EnterTransition =
     slideInVertically(
         animationSpec = slideSpatial,
-        initialOffsetY = { fullHeight -> -fullHeight / 10 },
-    ) + fadeIn(floatEffects)
+        initialOffsetY = { fullHeight -> -fullHeight / 4 },
+    ) + fadeIn(floatEffects) +
+        scaleIn(initialScale = 0.96f, animationSpec = floatSpatial)
 
 fun pretextModePopExit(): ExitTransition =
     slideOutVertically(
         animationSpec = slideSpatial,
-        targetOffsetY = { fullHeight -> fullHeight / 6 },
-    ) + fadeOut(floatEffects)
+        targetOffsetY = { fullHeight -> fullHeight },
+    )
 
 fun Any.demoSharedContentKey(): String = "demo-icon-${this::class.simpleName}"

@@ -39,7 +39,7 @@ class PretextCameraSession(
     }
     @Volatile private var closed = false
 
-    var lensFacing: Int = CameraSelector.LENS_FACING_BACK
+    var lensFacing: Int = CameraSelector.LENS_FACING_FRONT
         private set
     var torchEnabled: Boolean = false
         private set

@@ -47,7 +47,8 @@
             android:name=".MainActivity"
             android:configChanges="uiMode"
             android:exported="true"
-            android:theme="@style/Theme.Trendinguipatterns.Starting" />
+            android:theme="@style/Theme.Trendinguipatterns.Starting"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity-alias
             android:name=".LauncherIconBijapurLight"

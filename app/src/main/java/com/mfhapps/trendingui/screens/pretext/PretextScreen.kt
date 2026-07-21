@@ -116,7 +116,8 @@ fun PretextScreen(
     onNavigateBack: () -> Unit = {},
     guide: DemoTrendGuide? = null,
 ) {
-    var screenMode by rememberSaveable { mutableStateOf(PretextScreenMode.Playground) }
+    var screenMode by rememberSaveable { mutableStateOf(PretextScreenMode.Camera) }
+    var arrivedFromCamera by rememberSaveable { mutableStateOf(false) }
     var cameraMeasureMode by remember { mutableStateOf(PretextMeasureMode.ViewMeasure) }
     var visionTrackMode by remember { mutableStateOf(VisionTrackMode.Person) }
     var showBoundingBox by remember { mutableStateOf(true) }
@@ -132,7 +133,14 @@ fun PretextScreen(
     )
     val isRecordingActive = recordingSession is PretextRecordingSessionState.Active
 
-    val exitCamera = { screenMode = PretextScreenMode.Playground }
+    val exitCamera = {
+        arrivedFromCamera = true
+        screenMode = PretextScreenMode.Playground
+    }
+    val enterCamera = {
+        arrivedFromCamera = false
+        screenMode = PretextScreenMode.Camera
+    }
 
     NestedBackEffect(
         enabled = screenMode == PretextScreenMode.Camera && !isRecordingActive,
@@ -175,10 +183,15 @@ fun PretextScreen(
 
             PretextScreenMode.Playground ->             PretextPlaygroundScaffold(
                 screenMode = screenMode,
-                onScreenModeChange = { screenMode = it },
+                onScreenModeChange = { mode ->
+                    if (mode == PretextScreenMode.Camera) enterCamera() else {
+                        screenMode = mode
+                    }
+                },
                 onNavigateBack = onNavigateBack,
                 guide = guide,
                 tooltipBlurEnabled = cameraTooltipBlur,
+                arrivedFromCamera = arrivedFromCamera,
             )
         }
     }
@@ -192,6 +205,7 @@ private fun PretextPlaygroundScaffold(
     onNavigateBack: () -> Unit,
     guide: DemoTrendGuide?,
     tooltipBlurEnabled: Boolean,
+    arrivedFromCamera: Boolean,
 ) {
     val nestedBackDispatcher = LocalNestedBackDispatcher.current
     val listState = rememberPretextPlaygroundListState()
@@ -306,6 +320,7 @@ private fun PretextPlaygroundScaffold(
             fps = fps,
             lastMeasureMs = lastMeasureMs,
             onLastMeasureMsChange = { lastMeasureMs = it },
+            arrivedFromCamera = arrivedFromCamera,
             scaffoldPadding = collapsingTopBarContentPadding(
                 extra = PaddingValues(bottom = 16.dp),
             ),
@@ -325,6 +340,7 @@ private fun PretextPlaygroundContent(
     fps: Int,
     lastMeasureMs: Long,
     onLastMeasureMsChange: (Long) -> Unit,
+    arrivedFromCamera: Boolean,
     scaffoldPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
@@ -522,6 +538,7 @@ private fun PretextPlaygroundContent(
                     PretextHeroCard(
                         fps = fps,
                         lastMeasureMs = lastMeasureMs,
+                        arrivedFromCamera = arrivedFromCamera,
                     )
                     Surface(
                         modifier = Modifier.fillMaxWidth(),

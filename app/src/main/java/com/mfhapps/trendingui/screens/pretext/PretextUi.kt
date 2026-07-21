@@ -19,10 +19,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.automirrored.outlined.WrapText
 import androidx.compose.material.icons.outlined.Category
@@ -31,11 +32,9 @@ import androidx.compose.material.icons.outlined.CropFree
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.GridOn
 import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ViewColumn
-import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.Videocam
@@ -115,22 +114,23 @@ private fun pretextSegmentedButtonColors() = SegmentedButtonDefaults.colors(
 )
 
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PretextHeroCard(
     modifier: Modifier = Modifier,
     fps: Int? = null,
     lastMeasureMs: Long = 0L,
+    arrivedFromCamera: Boolean = false,
 ) {
     val scheme = MaterialTheme.colorScheme
     val heroMorph = CatalogMorphShapes.heroMorph
     val brush = Brush.linearGradient(
         listOf(
-            scheme.primaryContainer,
-            scheme.tertiaryContainer,
+            if (arrivedFromCamera) scheme.tertiaryContainer else scheme.primaryContainer,
+            if (arrivedFromCamera) scheme.primaryContainer else scheme.tertiaryContainer,
         ),
     )
-    val onHero = scheme.onPrimaryContainer
+    val onHero = if (arrivedFromCamera) scheme.onTertiaryContainer else scheme.onPrimaryContainer
     ShapeClickableSurface(
         onClick = {},
         shape = RoundedCornerShape(36.dp),
@@ -142,33 +142,52 @@ fun PretextHeroCard(
         rippleColor = onHero.copy(alpha = 0.22f),
         shadowElevation = 8.dp,
     ) {
-        Box(
+        Column(
             Modifier
                 .fillMaxWidth()
                 .background(brush)
                 .padding(28.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 ExpressiveShapeBadge(
-                    icon = Icons.Outlined.AutoAwesome,
+                    icon = if (arrivedFromCamera) Icons.Outlined.Videocam else Icons.Outlined.AutoAwesome,
                     modifier = Modifier.size(72.dp),
+                    backgroundColor = if (arrivedFromCamera) scheme.tertiary else scheme.primary,
+                    iconColor = if (arrivedFromCamera) scheme.onTertiary else scheme.onPrimary,
                 )
                 Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier.weight(1f),
                 ) {
+                    if (arrivedFromCamera) {
+                        Text(
+                            text = "From live camera",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = onHero.copy(alpha = 0.78f),
+                        )
+                    }
                     AdaptiveFitText(
-                        text = "Pretext text engine",
+                        text = if (arrivedFromCamera) {
+                            "Text playground"
+                        } else {
+                            "Pretext text engine"
+                        },
                         style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
                         color = onHero,
                         allowTruncation = false,
                         minFontSize = 18.sp,
                     )
                     AdaptiveFitText(
-                        text = "Measure once. Layout in arithmetic. Reflow every frame.",
+                        text = if (arrivedFromCamera) {
+                            "Tune the layout, then jump back."
+                        } else {
+                            "Measure once. Reflow around anything the camera sees."
+                        },
                         style = MaterialTheme.typography.bodyLarge,
                         color = onHero.copy(alpha = 0.86f),
                         allowTruncation = false,
@@ -279,9 +298,9 @@ fun PretextSectionTitle(
 @Composable
 fun PretextHowItWorksStrip(modifier: Modifier = Modifier) {
     val steps = listOf(
-        Icons.Outlined.TextFields to "prepare()",
-        Icons.Outlined.CenterFocusStrong to "detect()",
-        Icons.Outlined.Speed to "layout()",
+        Icons.Outlined.TextFields to "Measure text",
+        Icons.Outlined.CenterFocusStrong to "Detect shape",
+        Icons.Outlined.Speed to "Reflow lines",
     )
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -313,36 +332,39 @@ fun PretextHowItWorksStrip(modifier: Modifier = Modifier) {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+fun PretextScreenMode.icon(): ImageVector = when (this) {
+    PretextScreenMode.Camera -> Icons.Outlined.Videocam
+    PretextScreenMode.Playground -> Icons.Outlined.TextFields
+}
+
 @Composable
 fun PretextModeSelector(
     selected: PretextScreenMode,
     onSelected: (PretextScreenMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        val colors = pretextSegmentedButtonColors()
-        PretextScreenMode.entries.forEachIndexed { index, mode ->
-            SegmentedButton(
-                selected = selected == mode,
-                onClick = { onSelected(mode) },
-                shape = SegmentedButtonDefaults.itemShape(index, PretextScreenMode.entries.size),
-                colors = colors,
-                icon = {
-                    DecorativeIcon(
-                        when (mode) {
-                            PretextScreenMode.Playground -> Icons.Outlined.TextFields
-                            PretextScreenMode.Camera -> Icons.Outlined.Videocam
-                        },
-                        modifier = Modifier.size(18.dp),
-                        tint = if (selected == mode) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    )
-                },
-                label = { Text(mode.label) },
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = "Pick a view — tap, or hold & slide",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        PretextLiquidGlassTabs(
+            selected = selected,
+            onSelected = onSelected,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        androidx.compose.animation.AnimatedContent(
+            targetState = selected,
+            label = "pretextModeCaption",
+        ) { mode ->
+            Text(
+                text = mode.subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -456,57 +478,70 @@ fun PretextStageSelector(
     onSelected: (PretextCameraStage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Box(Modifier.fillMaxWidth()) {
-            ListItem(
-                headlineContent = { Text("Stage") },
-                supportingContent = { Text(selected.label) },
-                leadingContent = {
-                    DecorativeIcon(
-                        when (selected) {
-                            PretextCameraStage.CameraOverlay -> Icons.Outlined.Videocam
-                            PretextCameraStage.Studio -> Icons.AutoMirrored.Outlined.Chat
-                            PretextCameraStage.Editorial -> Icons.Outlined.Waves
-                            PretextCameraStage.Terminal -> Icons.Outlined.Terminal
-                            PretextCameraStage.Generative -> Icons.Outlined.AutoAwesome
-                            PretextCameraStage.Ascii -> Icons.Outlined.GridOn
-                            PretextCameraStage.VintageNews -> Icons.Outlined.Newspaper
-                        },
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp),
-                    )
-                },
-                trailingContent = {
-                    DecorativeIcon(
-                        if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(22.dp),
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.fillMaxWidth().clickable { expanded = true },
+    val scheme = MaterialTheme.colorScheme
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(
+            modifier = Modifier.pretextSheetInset(),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                "Live typography stage",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
             )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) {
-                PretextCameraStage.entries.forEach { stage ->
-                    DropdownMenuItem(
-                        text = { Text(stage.label) },
-                        onClick = {
-                            expanded = false
-                            onSelected(stage)
-                        },
-                    )
+            Text(
+                "Each stage changes how type and the camera respond to movement.",
+                style = MaterialTheme.typography.bodySmall,
+                color = scheme.onSurfaceVariant,
+            )
+        }
+        LazyRow(
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = PretextSheetInset),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            items(PretextCameraStage.entries, key = { it.name }) { stage ->
+                val active = stage == selected
+                Surface(
+                    onClick = { onSelected(stage) },
+                    modifier = Modifier
+                        .width(if (active) 172.dp else 148.dp)
+                        .height(112.dp),
+                    shape = RoundedCornerShape(if (active) 28.dp else 20.dp),
+                    color = if (active) scheme.primaryContainer else scheme.surfaceContainer,
+                    contentColor = if (active) scheme.onPrimaryContainer else scheme.onSurface,
+                    tonalElevation = if (active) 3.dp else 0.dp,
+                ) {
+                    Column(
+                        Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(if (active) 16.dp else 12.dp),
+                            color = if (active) {
+                                scheme.primary
+                            } else {
+                                scheme.surfaceContainerHighest
+                            },
+                            contentColor = if (active) scheme.onPrimary else scheme.onSurfaceVariant,
+                        ) {
+                            Box(Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
+                                DecorativeIcon(stage.icon(), modifier = Modifier.size(20.dp))
+                            }
+                        }
+                        Text(
+                            stage.label,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                            maxLines = 2,
+                        )
+                    }
                 }
             }
         }
         Text(
             selected.hint,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = scheme.onSurfaceVariant,
             modifier = Modifier.pretextSheetInset(),
         )
     }
@@ -521,7 +556,7 @@ fun PretextTrackModeSelector(
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            "Track",
+            "What to track",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.pretextSheetInset(),
@@ -561,13 +596,13 @@ fun PretextTrackModeSelector(
         Text(
             when (selected) {
                 VisionTrackMode.Person ->
-                    "Full-body silhouette — arms, legs, and pose outline."
+                    "Looks for a full body — arms, torso, and pose outline."
                 VisionTrackMode.Face ->
-                    "MediaPipe face mesh → jawline contour for tight reflow."
+                    "Locks onto a face outline for tighter wrap around the head."
                 VisionTrackMode.Object ->
-                    "Largest detected object in frame (NCNN YOLOv8n)."
+                    "Looks for everyday objects in the frame."
                 VisionTrackMode.Auto ->
-                    "Runs face, body, and object detectors each frame — picks the strongest match with sticky hysteresis."
+                    "Picks the strongest signal among face, body, and object."
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -591,8 +626,6 @@ fun PretextCameraOptions(
     onShowBlurChange: (Boolean) -> Unit,
     blurRadiusDp: Float,
     onBlurRadiusDpChange: (Float) -> Unit,
-    showHalftone: Boolean,
-    onShowHalftoneChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -678,25 +711,6 @@ fun PretextCameraOptions(
                 )
             }
 
-            HorizontalDivider(
-                modifier = Modifier.pretextSheetInset(),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            )
-
-            SwitchListItem(
-                checked = showHalftone,
-                onCheckedChange = onShowHalftoneChange,
-                containerColor = Color.Transparent,
-                headlineContent = { Text("Newspaper Halftone") },
-                supportingContent = { Text("Apply a vintage newsprint effect to the camera.") },
-                leadingContent = {
-                    DecorativeIcon(
-                        Icons.Outlined.AutoAwesome,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp),
-                    )
-                },
-            )
         }
     }
 }
@@ -716,7 +730,7 @@ fun PretextMeasureSelector(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
-            "Measurement",
+            "How text is measured",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.pretextSheetInset(),
@@ -771,14 +785,7 @@ fun PretextMeasureSelector(
         }
         val comparison = speed.comparisonLabel
         Text(
-            text = comparison.ifEmpty {
-                when (selected) {
-                    PretextMeasureMode.Engine ->
-                        "Paint.prepare() once, layoutColumn() reflows around tracked objects per frame."
-                    PretextMeasureMode.ViewMeasure ->
-                        "Shared slot-carving · Paint.breakText per band. Layout styles available below."
-                }
-            },
+            text = comparison.ifEmpty { selected.hint },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
@@ -796,10 +803,22 @@ fun PretextCameraLayoutSelector(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            "Paragraph layout",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.pretextSheetInset(),
+        )
         Box(Modifier.fillMaxWidth()) {
             ListItem(
-                headlineContent = { Text("Text layout") },
-                supportingContent = { Text(selected.label) },
+                headlineContent = { Text(selected.label) },
+                supportingContent = {
+                    Text(
+                        selected.hint,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
                 leadingContent = {
                     DecorativeIcon(
                         when (selected) {
@@ -830,7 +849,16 @@ fun PretextCameraLayoutSelector(
             ) {
                 PretextCameraTextLayoutStyle.entries.forEach { style ->
                     DropdownMenuItem(
-                        text = { Text(style.label) },
+                        text = {
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(style.label, fontWeight = FontWeight.Medium)
+                                Text(
+                                    style.hint,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        },
                         onClick = {
                             expanded = false
                             onSelected(style)
@@ -839,12 +867,6 @@ fun PretextCameraLayoutSelector(
                 }
             }
         }
-        Text(
-            selected.hint,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.pretextSheetInset(),
-        )
     }
 }
 
@@ -931,13 +953,21 @@ fun PretextFeatureChips(
 
 
 enum class PretextScreenMode(val label: String, val subtitle: String) {
-    Playground("Playground", "prepare() + layout() · benchmarks"),
-    Camera("Live camera", "Native vision · paragraph reflow"),
+    Camera("Live camera", "Point the camera — text reflows around people, faces & objects in real time."),
+    Playground("Text playground", "Type your own text, tune the layout, and benchmark the engine."),
 }
 
-enum class PretextMeasureMode(val label: String, val shortLabel: String) {
-    Engine("Pretext engine", "Engine"),
-    ViewMeasure("View.measure", "View"),
+enum class PretextMeasureMode(val label: String, val shortLabel: String, val hint: String) {
+    Engine(
+        label = "Pretext engine",
+        shortLabel = "Engine",
+        hint = "Fast path — measure glyphs once, then reflow around the tracked shape every frame.",
+    ),
+    ViewMeasure(
+        label = "Android View",
+        shortLabel = "View",
+        hint = "Classic TextView-style measure for comparison. Usually slower than the engine.",
+    ),
 }
 
 
@@ -948,51 +978,49 @@ enum class PretextCameraStage(
     val usesPaperBackdrop: Boolean = false,
     val supportsMultiObstacle: Boolean = false,
     val supportsManualOrbs: Boolean = false,
-    val supportsAsciiOverlay: Boolean = false,
     val supportsGenerativeObstacle: Boolean = false,
+    val fillsSilhouetteWithType: Boolean = false,
 ) {
     CameraOverlay(
-        label = "Camera overlay",
-        hint = "Text floats on the live camera feed.",
+        label = "Live cutout",
+        hint = "Your live image cuts through a wall of text that reflows around your silhouette.",
         showsLivePreview = true,
     ),
+    TypePortrait(
+        label = "Type portrait",
+        hint = "Your silhouette is drawn with moving words while the world outside falls away.",
+        showsLivePreview = true,
+        fillsSilhouetteWithType = true,
+    ),
     Studio(
-        label = "Studio",
-        hint = "Paper surface with live camera visible inside the detected contour.",
+        label = "Editorial spread",
+        hint = "A calm paper composition with the live subject embedded inside flowing columns.",
         showsLivePreview = false,
         usesPaperBackdrop = true,
     ),
     Editorial(
-        label = "Editorial",
-        hint = "Drag orbs + optional vision contour — text wraps 2–3 obstacles.",
+        label = "Kinetic canvas",
+        hint = "Drag expressive shapes through the page and watch every line move around them.",
         showsLivePreview = false,
         usesPaperBackdrop = true,
         supportsMultiObstacle = true,
         supportsManualOrbs = true,
     ),
-    Terminal(
-        label = "Terminal",
-        hint = "Dark feed, mono HUD, cyan/amber accents — CinemASCII-style.",
-        showsLivePreview = true,
-    ),
     Generative(
-        label = "Generative",
-        hint = "Procedural orb animates — no camera required for the obstacle.",
+        label = "Motion orbit",
+        hint = "An autonomous shape orbits through the composition and continuously reshapes the text.",
         showsLivePreview = false,
         usesPaperBackdrop = true,
         supportsGenerativeObstacle = true,
     ),
-    Ascii(
-        label = "ASCII",
-        hint = "Live camera with a light character-grid overlay.",
-        showsLivePreview = true,
-        supportsAsciiOverlay = true,
-    ),
-    VintageNews(
-        label = "Vintage News",
-        hint = "Live camera with sepia halftone newsprint effect.",
-        showsLivePreview = true,
-    ),
+}
+
+fun PretextCameraStage.icon(): ImageVector = when (this) {
+    PretextCameraStage.CameraOverlay -> Icons.Outlined.Videocam
+    PretextCameraStage.TypePortrait -> Icons.Outlined.Person
+    PretextCameraStage.Studio -> Icons.AutoMirrored.Outlined.Article
+    PretextCameraStage.Editorial -> Icons.Outlined.Waves
+    PretextCameraStage.Generative -> Icons.Outlined.AutoAwesome
 }
 
 enum class PretextLayoutMode(val label: String, val hint: String) {
@@ -1007,24 +1035,24 @@ enum class PretextLayoutMode(val label: String, val hint: String) {
 
 enum class PretextCameraTextLayoutStyle(val label: String, val hint: String) {
     ColumnWrap(
-        label = "Column",
-        hint = "layoutColumn() — per-line slots carved around polygon contours (editorial / expo-pretext).",
+        label = "Tight wrap",
+        hint = "Lines carve around the silhouette outline — best for people and faces.",
     ),
     DynamicFloat(
-        label = "Float",
-        hint = "layoutDynamic() — line width shrinks beside the obstacle (classic magazine float-left).",
+        label = "Magazine float",
+        hint = "Lines get shorter beside the shape, like text floating around a photo.",
     ),
     Newspaper(
         label = "Newspaper",
-        hint = "layoutNewspaper() — headline band + 2–3 body columns around vision shapes.",
+        hint = "Headline on top, then multi-column body that flows around detections.",
     ),
     Magazine(
-        label = "Magazine",
-        hint = "Wide headline + two tighter columns — editorial spread on paper stages.",
+        label = "Magazine spread",
+        hint = "Wide headline plus two tighter columns — editorial layout on paper stages.",
     ),
     Uniform(
-        label = "Uniform",
-        hint = "layout() — fixed column width; obstacles ignored (baseline / terminal HUD).",
+        label = "Straight columns",
+        hint = "Fixed-width columns that ignore obstacles — useful as a baseline.",
     ),
 }
 
