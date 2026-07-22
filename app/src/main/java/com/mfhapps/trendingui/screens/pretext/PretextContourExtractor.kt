@@ -1,6 +1,5 @@
 package com.mfhapps.trendingui.screens.pretext
 
-import com.mfhapps.trendingui.native.NativeContour
 import com.mfhapps.trendingui.native.PretextNativeGeometry
 
 internal object PretextContourExtractor {
@@ -11,7 +10,7 @@ internal object PretextContourExtractor {
         maskH: Int,
         imageW: Int,
         imageH: Int,
-    ): NativeContour? = PretextNativeGeometry.extractPerson(
+    ): com.mfhapps.trendingui.native.NativeContour? = PretextNativeGeometry.extractPerson(
         mask = mask,
         maskW = maskW,
         maskH = maskH,
@@ -20,7 +19,7 @@ internal object PretextContourExtractor {
         imageH = imageH,
     )
 
-    fun fromFacePolyline(polylinePx: FloatArray, imageW: Int, imageH: Int): NativeContour? {
+    fun fromFacePolyline(polylinePx: FloatArray, imageW: Int, imageH: Int): com.mfhapps.trendingui.native.NativeContour? {
         if (polylinePx.size < 12) return null
         return PretextNativeGeometry.extractFace(
             polylineXy = polylinePx,
@@ -33,7 +32,7 @@ internal object PretextContourExtractor {
         )
     }
 
-    fun fromFaceBox(box: FloatArray, imageW: Int, imageH: Int): NativeContour? {
+    fun fromFaceBox(box: FloatArray, imageW: Int, imageH: Int): com.mfhapps.trendingui.native.NativeContour? {
         val cx = (box[0] + box[2]) * 0.5f
         val cy = (box[1] + box[3]) * 0.5f
         val rx = (box[2] - box[0]) * 0.46f
@@ -48,20 +47,4 @@ internal object PretextContourExtractor {
             imageH = imageH,
         )
     }
-
-    fun fromBox(
-        left: Float,
-        top: Float,
-        right: Float,
-        bottom: Float,
-        imageW: Int,
-        imageH: Int,
-    ): NativeContour? = PretextNativeGeometry.extractObject(
-        left = left,
-        top = top,
-        right = right,
-        bottom = bottom,
-        imageW = imageW,
-        imageH = imageH,
-    )
 }

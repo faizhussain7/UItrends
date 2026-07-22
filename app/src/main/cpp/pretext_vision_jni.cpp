@@ -71,6 +71,29 @@ Java_com_mfhapps_trendingui_native_PretextNativeVision_nativeRelease(JNIEnv*, jc
 #endif
 }
 
+JNIEXPORT void JNICALL
+Java_com_mfhapps_trendingui_native_PretextNativeVision_nativeSetHighQuality(
+    JNIEnv*,
+    jclass,
+    jboolean high) {
+#ifdef PRETEXT_USE_NCNN
+    pretext_ncnn::setHighQuality(high == JNI_TRUE);
+#else
+    (void)high;
+#endif
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_mfhapps_trendingui_native_PretextNativeVision_nativeIsSegmentationBackend(
+    JNIEnv*,
+    jclass) {
+#ifdef PRETEXT_USE_NCNN
+    return pretext_ncnn::isSegmentationBackend() ? JNI_TRUE : JNI_FALSE;
+#else
+    return JNI_FALSE;
+#endif
+}
+
 JNIEXPORT jfloatArray JNICALL
 Java_com_mfhapps_trendingui_native_PretextNativeVision_nativeProcessFrame(
     JNIEnv* env,
@@ -132,41 +155,63 @@ Java_com_mfhapps_trendingui_native_PretextNativeVision_nativeProcessFrame(
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_com_mfhapps_trendingui_native_PretextNativeVision_nativeDetectBestRgb(
+Java_com_mfhapps_trendingui_native_PretextNativeVision_nativeDetectTopKRgb(
     JNIEnv* env,
     jclass,
     jbyteArray rgb,
     jint width,
     jint height,
+    jint maxK,
     jboolean excludePerson) {
 #ifdef PRETEXT_USE_NCNN
-    if (!rgb) return nullptr;
+    if (!rgb || maxK <= 0) return nullptr;
     const jsize len = env->GetArrayLength(rgb);
     if (len < width * height * 3) return nullptr;
     jbyte* bytes = env->GetByteArrayElements(rgb, nullptr);
     if (!bytes) return nullptr;
 
-    pretext_ncnn::Detection det;
-    const bool ok = pretext_ncnn::detectBest(
+    std::vector<pretext_ncnn::DetectionWithContour> dets(static_cast<size_t>(maxK));
+    int count = 0;
+    const bool ok = pretext_ncnn::detectTopKWithContours(
         reinterpret_cast<const unsigned char*>(bytes),
         width,
         height,
-        &det,
+        dets.data(),
+        maxK,
+        &count,
         excludePerson == JNI_TRUE);
     env->ReleaseByteArrayElements(rgb, bytes, JNI_ABORT);
-    if (!ok) return nullptr;
+    if (!ok || count <= 0) return nullptr;
 
-    jfloatArray arr = env->NewFloatArray(6);
+    std::vector<float> buf;
+    buf.reserve(static_cast<size_t>(1 + count * 8));
+    buf.push_back(static_cast<float>(count));
+    for (int i = 0; i < count; ++i) {
+        const auto& dc = dets[static_cast<size_t>(i)];
+        const int n = static_cast<int>(dc.contour.norm.size());
+        buf.push_back(dc.det.left);
+        buf.push_back(dc.det.top);
+        buf.push_back(dc.det.right);
+        buf.push_back(dc.det.bottom);
+        buf.push_back(dc.det.score);
+        buf.push_back(static_cast<float>(dc.det.classId));
+        buf.push_back(static_cast<float>(n));
+        buf.push_back(static_cast<float>(n >= 3 ? 1.f : 0.f));
+        for (int v = 0; v < n; ++v) {
+            buf.push_back(dc.contour.norm[static_cast<size_t>(v)].x);
+            buf.push_back(dc.contour.norm[static_cast<size_t>(v)].y);
+        }
+    }
+    jfloatArray arr = env->NewFloatArray(static_cast<jsize>(buf.size()));
     if (!arr) return nullptr;
-    const float buf[6] = {det.left, det.top, det.right, det.bottom, det.score,
-                          static_cast<float>(det.classId)};
-    env->SetFloatArrayRegion(arr, 0, 6, buf);
+    env->SetFloatArrayRegion(arr, 0, static_cast<jsize>(buf.size()), buf.data());
     return arr;
 #else
     (void)env;
     (void)rgb;
     (void)width;
     (void)height;
+    (void)maxK;
     (void)excludePerson;
     return nullptr;
 #endif

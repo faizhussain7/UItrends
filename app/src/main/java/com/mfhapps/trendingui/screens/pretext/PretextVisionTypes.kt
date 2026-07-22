@@ -36,70 +36,6 @@ data class VisionContour(
     val frame: FrameMetrics,
 ) {
     fun boundsRectNorm(): RectF = RectF(left, top, right, bottom)
-
-    companion object {
-        fun fromCenterNorm(
-            cx: Float,
-            cy: Float,
-            widthFrac: Float,
-            heightFrac: Float,
-            source: VisionSource,
-            frame: FrameMetrics,
-            label: String? = null,
-        ): VisionContour {
-            val halfW = widthFrac * 0.5f
-            val halfH = heightFrac * 0.5f
-            return VisionContour(
-                left = (cx - halfW).coerceIn(0f, 1f - widthFrac),
-                top = (cy - halfH).coerceIn(0f, 1f - heightFrac),
-                right = (cx + halfW).coerceIn(widthFrac, 1f),
-                bottom = (cy + halfH).coerceIn(heightFrac, 1f),
-                label = label,
-                source = source,
-                frame = frame,
-            )
-        }
-
-        fun fromNativeVisionPacket(
-            packet: FloatArray,
-            objectLabels: Array<String>,
-            frame: FrameMetrics,
-        ): VisionContour? {
-            if (packet.size < 8) return null
-            val sourceId = packet[0].toInt().coerceAtLeast(0)
-            val classId = packet[1].toInt().coerceAtLeast(0)
-            val left = packet[3].coerceIn(0f, 1f)
-            val top = packet[4].coerceIn(0f, 1f)
-            val right = packet[5].coerceIn(0f, 1f)
-            val bottom = packet[6].coerceIn(0f, 1f)
-            val nPts = packet[7].toInt()
-            if (nPts < 3 || packet.size < 8 + nPts * 2) return null
-            val poly = ArrayList<Pair<Float, Float>>(nPts)
-            for (i in 0 until nPts) {
-                poly += packet[8 + i * 2].coerceIn(0f, 1f) to packet[8 + i * 2 + 1].coerceIn(0f, 1f)
-            }
-            val source = when (sourceId) {
-                2 -> VisionSource.Object
-                0 -> VisionSource.Face
-                else -> VisionSource.Person
-            }
-            val label = if (source == VisionSource.Object) {
-                objectLabels.getOrElse(classId) { "object" }
-            } else {
-                source.label.lowercase()
-            }
-            return VisionContour(
-                left = left,
-                top = top,
-                right = right,
-                bottom = bottom,
-                polygonNorm = poly,
-                label = label,
-                source = source,
-                frame = frame,
-            )
-        }
-    }
 }
 
 fun generativeOrbAt(viewW: Float, viewH: Float, phase: Float): ViewShape {
@@ -188,6 +124,7 @@ data class ViewShape(
     val label: String?,
     val source: VisionSource,
     val isLiveDetection: Boolean,
+    val instanceId: Int = -1,
 ) {
     fun toRectObstacle(): RectObstacle = RectObstacle(
         x = boundsPx.left,
@@ -196,18 +133,6 @@ data class ViewShape(
         h = (boundsPx.height()).coerceAtLeast(4f),
     )
 }
-
-internal fun VisionContour.isCoarseBoxFallback(): Boolean =
-    (polygonNorm?.size ?: 0) <= 4
-
-internal fun VisionDetectReport.isBlobBoxFallback(): Boolean =
-    note in BLOB_BOX_NOTES || (contour?.isCoarseBoxFallback() == true)
-
-private val BLOB_BOX_NOTES = setOf(
-    "frame-fill-clamped",
-    "bbox-fallback",
-    "area-clamped",
-)
 
 
 data class VisionDetectReport(
@@ -241,6 +166,8 @@ data class VisionAccuracySnapshot(
     val normBBoxArea: Float,
     val viewBBoxAreaRatio: Float,
     val polygonVertices: Int,
+    val shapeQuality: Float = 0f,
+    val polygonFillRatio: Float = 0f,
     val boundsFullyInView: Boolean,
     val iouVsPrevious: Float?,
     val centerDriftNorm: Float?,

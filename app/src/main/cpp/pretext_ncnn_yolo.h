@@ -7,6 +7,8 @@
 
 #include <android/asset_manager.h>
 
+#include "pretext_geometry.h"
+
 namespace pretext_ncnn {
 
 struct Detection {
@@ -18,15 +20,25 @@ struct Detection {
     int classId = -1;
 };
 
+struct DetectionWithContour {
+    Detection det{};
+    pretext::ContourPacket contour{};
+};
+
 bool init(AAssetManager* mgr);
 void release();
 
+void setHighQuality(bool high);
+bool isSegmentationBackend();
+bool isHighQuality();
 
-bool detectBest(
+bool detectTopKWithContours(
     const unsigned char* rgb,
     int width,
     int height,
-    Detection* out,
+    DetectionWithContour* out,
+    int maxK,
+    int* outCount,
     bool excludePerson = false);
 
 const char* classLabel(int classId);

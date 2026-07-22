@@ -1,7 +1,6 @@
 package com.mfhapps.trendingui.screens.pretext
 
 internal data class PretextCameraHudContent(
-    val shapeLabel: String,
     val statusText: String,
     val statusActive: Boolean,
     val telemetry: VisionTelemetry,
@@ -15,6 +14,7 @@ internal data class PretextCameraHudContent(
 internal fun buildPretextCameraHudContent(
     manualOverride: Boolean,
     viewShape: ViewShape?,
+    extraShapes: List<ViewShape> = emptyList(),
     editorialOrbs: List<ViewShape>,
     trackMode: VisionTrackMode,
     telemetry: VisionTelemetry,
@@ -25,9 +25,14 @@ internal fun buildPretextCameraHudContent(
     torchOn: Boolean,
     measureMode: PretextMeasureMode,
 ): PretextCameraHudContent {
-    val statusActive = manualOverride || viewShape != null || editorialOrbs.isNotEmpty()
+    val trackedShapes = buildList {
+        viewShape?.let { add(it) }
+        addAll(extraShapes)
+    }
+    val statusActive = manualOverride || trackedShapes.isNotEmpty() || editorialOrbs.isNotEmpty()
     val statusText = when {
         manualOverride -> "Manual override"
+        trackedShapes.size > 1 -> trackedMultiStatus(trackedShapes)
         viewShape?.isLiveDetection == true -> buildString {
             append(viewShape.source.label)
             viewShape.label?.let { append(" · $it") }
@@ -49,7 +54,6 @@ internal fun buildPretextCameraHudContent(
     }
 
     return PretextCameraHudContent(
-        shapeLabel = pretextContourShapeLabel(viewShape?.source ?: VisionSource.Idle),
         statusText = statusText,
         statusActive = statusActive,
         telemetry = telemetry,
@@ -61,12 +65,20 @@ internal fun buildPretextCameraHudContent(
     )
 }
 
-internal fun pretextContourShapeLabel(source: VisionSource): String = when (source) {
-    VisionSource.Person -> "TFLite segmentation"
-    VisionSource.Face -> "Face contour"
-    VisionSource.Object -> "Object contour"
-    VisionSource.Manual -> "Manual override"
-    VisionSource.Idle -> "Scanning"
+private fun trackedMultiStatus(shapes: List<ViewShape>): String {
+    val faces = shapes.count { it.source == VisionSource.Face }
+    val persons = shapes.count { it.source == VisionSource.Person }
+    val objects = shapes.count { it.source == VisionSource.Object }
+    val parts = buildList {
+        if (faces > 0) add("$faces face${if (faces > 1) "s" else ""}")
+        if (persons > 0) add("$persons person${if (persons > 1) "s" else ""}")
+        if (objects > 0) add("$objects object${if (objects > 1) "s" else ""}")
+    }
+    return if (parts.isEmpty()) {
+        "${shapes.size} shapes tracked"
+    } else {
+        parts.joinToString(" · ") + " tracked"
+    }
 }
 
 private fun objectDetectStatus(

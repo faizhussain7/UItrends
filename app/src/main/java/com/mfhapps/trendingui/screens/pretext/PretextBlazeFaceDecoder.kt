@@ -67,8 +67,17 @@ internal object PretextBlazeFaceDecoder {
         )
     }
 
-    fun detectWithScore(rgb: ByteArray, imageW: Int, imageH: Int, interpreter: Interpreter): Detection? {
-        if (imageW < 2 || imageH < 2) return null
+    fun detectWithScore(rgb: ByteArray, imageW: Int, imageH: Int, interpreter: Interpreter): Detection? =
+        detectMulti(rgb, imageW, imageH, interpreter, maxInstances = 1).firstOrNull()
+
+    fun detectMulti(
+        rgb: ByteArray,
+        imageW: Int,
+        imageH: Int,
+        interpreter: Interpreter,
+        maxInstances: Int,
+    ): List<Detection> {
+        if (imageW < 2 || imageH < 2 || maxInstances <= 0) return emptyList()
         val letterbox = computeLetterbox(imageW, imageH)
         val input = ByteBuffer.allocateDirect(INPUT * INPUT * 3 * 4).order(ByteOrder.nativeOrder())
         fillInputLetterbox(rgb, imageW, imageH, letterbox, input)
@@ -102,20 +111,24 @@ internal object PretextBlazeFaceDecoder {
             if (!isFaceLikeBox(box)) continue
             candidates += box to score
         }
-        if (candidates.isEmpty()) return null
+        if (candidates.isEmpty()) return emptyList()
 
-        val best = nonMaxSuppression(candidates).maxByOrNull { it.second } ?: return null
-        val refined = refineFaceBox(
-            floatArrayOf(
-                best.first[0] * imageW,
-                best.first[1] * imageH,
-                best.first[2] * imageW,
-                best.first[3] * imageH,
-            ),
-            imageW,
-            imageH,
-        )
-        return Detection(box = refined, score = best.second)
+        return nonMaxSuppression(candidates)
+            .sortedByDescending { it.second }
+            .take(maxInstances.coerceAtLeast(1))
+            .map { (normBox, score) ->
+                val refined = refineFaceBox(
+                    floatArrayOf(
+                        normBox[0] * imageW,
+                        normBox[1] * imageH,
+                        normBox[2] * imageW,
+                        normBox[3] * imageH,
+                    ),
+                    imageW,
+                    imageH,
+                )
+                Detection(box = refined, score = score)
+            }
     }
 
     fun refineFaceBox(boxPx: FloatArray, imageW: Int, imageH: Int): FloatArray {
@@ -298,7 +311,7 @@ internal object PretextBlazeFaceDecoder {
         for (c in sorted) {
             if (kept.any { iou(c.first, it.first) > NMS_IOU }) continue
             kept += c
-            if (kept.size >= 6) break
+            if (kept.size >= PretextVisionLimits.MAX_FACES) break
         }
         return kept
     }

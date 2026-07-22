@@ -62,7 +62,6 @@ data class NativeContour(
     }
 }
 
-
 object PretextNativeGeometry {
     private var loaded = false
 
@@ -99,18 +98,6 @@ object PretextNativeGeometry {
         return NativeContour.fromPacket(
             nativeExtractFace(polylineXy, cx, cy, rx, ry, imageW, imageH),
         )
-    }
-
-    fun extractObject(
-        left: Float,
-        top: Float,
-        right: Float,
-        bottom: Float,
-        imageW: Int,
-        imageH: Int,
-    ): NativeContour? {
-        ensureLoaded()
-        return NativeContour.fromPacket(nativeExtractObject(left, top, right, bottom, imageW, imageH))
     }
 
     fun bandInterval(polyPx: FloatArray, bandTop: Float, bandBottom: Float): Pair<Float, Float>? {
@@ -150,15 +137,6 @@ object PretextNativeGeometry {
         cy: Float,
         rx: Float,
         ry: Float,
-        imageW: Int,
-        imageH: Int,
-    ): FloatArray?
-
-    private external fun nativeExtractObject(
-        left: Float,
-        top: Float,
-        right: Float,
-        bottom: Float,
         imageW: Int,
         imageH: Int,
     ): FloatArray?

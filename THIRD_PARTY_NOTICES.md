@@ -77,19 +77,18 @@ Fetched into `app/src/main/assets/vision/` on first build. See also [`app/src/ma
 | `selfie_segmentation.tflite` | Person / Auto | [MediaPipe selfie segmenter](https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite) | Apache-2.0 (MediaPipe) |
 | `face_landmarker.task` | Face / Auto | [MediaPipe face landmarker](https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task) | Apache-2.0 (MediaPipe) |
 | `blaze_face_short_range.tflite` | Face fallback | [MediaPipe BlazeFace](https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite) | Apache-2.0 (MediaPipe) |
-| `face_detection_short_range.tflite` | Downloaded; legacy spare asset | [MediaPipe assets](https://storage.googleapis.com/mediapipe-assets/face_detection_short_range.tflite) | Apache-2.0 (MediaPipe) |
-| `ssd_mobilenet_coco.tflite` | Object fallback (no NCNN) | [TensorFlow Lite Support testdata](https://github.com/tensorflow/tflite-support) | Apache-2.0 (inference via LiteRT) |
-| `yolov8n.param` / `yolov8n.bin` | Object (NCNN) | [nihui/ncnn-assets](https://github.com/nihui/ncnn-assets) YOLOv8n NCNN export | **See YOLOv8 note below** |
+| `yolo11n_seg.param` / `yolo11n_seg.bin` | Object (NCNN primary) | [nihui/ncnn-assets](https://github.com/nihui/ncnn-assets) YOLO11n-seg | **See YOLO note below** |
+| `yolov8n_seg.param` / `yolov8n_seg.bin` | Object (NCNN fallback) | [nihui/ncnn-assets](https://github.com/nihui/ncnn-assets) YOLOv8n-seg | **See YOLO note below** |
 
-### YOLOv8 weights — important
+### YOLO weights — important
 
-`yolov8n.param` / `yolov8n.bin` are **YOLOv8n** weights converted for NCNN. Ultralytics YOLOv8 is commonly licensed under **AGPL-3.0**, with a separate [enterprise license](https://www.ultralytics.com/license).
+`yolo11n_seg` / `yolov8n_seg` are Ultralytics YOLO weights converted for NCNN. Ultralytics YOLO is commonly licensed under **AGPL-3.0**, with a separate [enterprise license](https://www.ultralytics.com/license).
 
 If you ship these weights in a **closed-source commercial app**, review Ultralytics terms and either:
 
 - obtain a suitable license,
 - replace the model with one whose license fits your distribution, or
-- remove NCNN object detection (LiteRT SSD MobileNet fallback remains, with different accuracy).
+- remove NCNN object segmentation.
 
 The **NCNN conversion scripts/assets** (nihui/ncnn-assets) do not replace the underlying model license.
 
@@ -99,9 +98,9 @@ The **NCNN conversion scripts/assets** (nihui/ncnn-assets) do not replace the un
 
 | Mode | Primary backend | Fallback | Native contour |
 | --- | --- | --- | --- |
-| Person | LiteRT selfie segmentation (.tflite) | Mask blob → box | `pretext_geometry` (MIT) |
+| Person | LiteRT selfie segmentation (.tflite) | — | `pretext_geometry` (MIT) |
 | Face | MediaPipe landmarker | BlazeFace via LiteRT (.tflite) | `pretext_geometry` (MIT) |
-| Object | NCNN YOLOv8n | LiteRT SSD MobileNet (.tflite) | `pretext_geometry` (MIT) |
+| Object | NCNN YOLO11n-seg | NCNN YOLOv8n-seg | mask → `pretext_geometry` (MIT) |
 
 ---
 

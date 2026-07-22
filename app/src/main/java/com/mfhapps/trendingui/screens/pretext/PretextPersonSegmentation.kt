@@ -327,4 +327,91 @@ internal object PretextPersonSegmentation {
             polygonNorm = contour.polygonNorm,
         )
     }
+
+    data class MaskBlob(
+        val label: Int,
+        val minX: Int,
+        val minY: Int,
+        val maxX: Int,
+        val maxY: Int,
+        val area: Int,
+    )
+
+    data class MaskBlobSet(
+        val blobs: List<MaskBlob>,
+        val labels: IntArray,
+    )
+
+    fun findTopForegroundBlobs(
+        mask: MaskPlane,
+        maxK: Int,
+        pixelThresh: Float = MASK_PIXEL_THRESH,
+    ): MaskBlobSet {
+        val w = mask.width
+        val h = mask.height
+        val total = w * h
+        if (total <= 0 || maxK <= 0) return MaskBlobSet(emptyList(), IntArray(0))
+        val labels = IntArray(total)
+        val blobs = ArrayList<MaskBlob>()
+        var nextLabel = 1
+        val minBlobPixels = ((total * MIN_BLOB_NORM) * 0.35f).toInt().coerceAtLeast(24)
+
+        fun flood(sx: Int, sy: Int, label: Int): MaskBlob? {
+            var minX = sx
+            var minY = sy
+            var maxX = sx
+            var maxY = sy
+            var area = 0
+            val stack = ArrayDeque<Pair<Int, Int>>()
+            stack.addLast(sx to sy)
+            while (stack.isNotEmpty()) {
+                val (x, y) = stack.removeLast()
+                if (x !in 0 until w || y !in 0 until h) continue
+                val idx = y * w + x
+                if (labels[idx] != 0 || mask.data[idx] < pixelThresh) continue
+                labels[idx] = label
+                area++
+                if (x < minX) minX = x
+                if (y < minY) minY = y
+                if (x > maxX) maxX = x
+                if (y > maxY) maxY = y
+                stack.addLast(x + 1 to y)
+                stack.addLast(x - 1 to y)
+                stack.addLast(x to y + 1)
+                stack.addLast(x to y - 1)
+            }
+            if (area < minBlobPixels) return null
+            return MaskBlob(label, minX, minY, maxX, maxY, area)
+        }
+
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val idx = y * w + x
+                if (labels[idx] != 0 || mask.data[idx] < pixelThresh) continue
+                flood(x, y, nextLabel)?.let { blobs += it }
+                nextLabel++
+            }
+        }
+
+        val ranked = blobs.sortedByDescending { scoreBlob(it, w, h) }.take(maxK.coerceAtLeast(1))
+        return MaskBlobSet(ranked, labels)
+    }
+
+    fun isolateBlobMask(mask: MaskPlane, blob: MaskBlob, labels: IntArray): MaskPlane {
+        val out = FloatArray(mask.data.size)
+        val w = mask.width
+        for (i in mask.data.indices) {
+            if (labels[i] == blob.label) out[i] = mask.data[i]
+        }
+        return MaskPlane(out, w, mask.height)
+    }
+
+    private fun scoreBlob(blob: MaskBlob, w: Int, h: Int): Float {
+        val normArea = blob.area.toFloat() / (w * h).coerceAtLeast(1)
+        val cx = (blob.minX + blob.maxX) * 0.5f / w
+        val cy = (blob.minY + blob.maxY) * 0.5f / h
+        val centerDist = kotlin.math.hypot(cx - 0.5f, cy - 0.5f)
+        val centerBoost = (1.15f - centerDist * 0.45f).coerceIn(0.75f, 1.15f)
+        return normArea * centerBoost
+    }
 }

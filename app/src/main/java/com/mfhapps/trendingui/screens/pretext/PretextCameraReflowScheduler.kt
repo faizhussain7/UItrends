@@ -235,8 +235,7 @@ object PretextCameraReflowScheduler {
         region: LayoutRegion,
         lineHeightPx: Float,
     ): PositionedTextLayout {
-        val primary = shapes.maxByOrNull { it.boundsPx.width() * it.boundsPx.height() }
-        if (primary == null) {
+        if (shapes.isEmpty()) {
             val measured = TextMeasurementEngine.layout(
                 prepared = prepared,
                 containerWidthPx = region.width.toInt().coerceAtLeast(1),
@@ -245,10 +244,6 @@ object PretextCameraReflowScheduler {
             return measured.toPositionedLayout(region.x, region.y, lineHeightPx)
         }
 
-        val bounds = primary.boundsPx
-        val obstacleTop = bounds.top
-        val obstacleBottom = bounds.bottom
-        val obstacleLeft = bounds.left.coerceIn(region.x + 48f, region.x + region.width - 48f)
         val minTextWidth = 72f
 
         return TextMeasurementEngine.layoutDynamic(
@@ -257,11 +252,15 @@ object PretextCameraReflowScheduler {
             lineHeightPx = lineHeightPx,
             maxWidthAtLineTop = { lineTop ->
                 val lineBottom = lineTop + lineHeightPx
-                val intersects = lineBottom > obstacleTop && lineTop < obstacleBottom
-                if (intersects) {
-                    (obstacleLeft - region.x).coerceAtLeast(minTextWidth)
-                } else {
+                val intersecting = shapes.filter { shape ->
+                    val bounds = shape.boundsPx
+                    lineBottom > bounds.top && lineTop < bounds.bottom
+                }
+                if (intersecting.isEmpty()) {
                     region.width
+                } else {
+                    val obstacleLeft = intersecting.minOf { it.boundsPx.left }
+                    (obstacleLeft - region.x).coerceAtLeast(minTextWidth)
                 }
             },
         )

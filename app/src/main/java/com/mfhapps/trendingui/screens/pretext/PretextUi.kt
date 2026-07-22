@@ -596,13 +596,13 @@ fun PretextTrackModeSelector(
         Text(
             when (selected) {
                 VisionTrackMode.Person ->
-                    "Looks for a full body — arms, torso, and pose outline."
+                    "Finds up to ${PretextVisionLimits.MAX_PERSONS} people and reflows around each silhouette."
                 VisionTrackMode.Face ->
-                    "Locks onto a face outline for tighter wrap around the head."
+                    "Tracks up to ${PretextVisionLimits.MAX_FACES} faces with individual outlines."
                 VisionTrackMode.Object ->
-                    "Looks for everyday objects in the frame."
+                    "Detects up to ${PretextVisionLimits.MAX_OBJECTS} objects in the frame."
                 VisionTrackMode.Auto ->
-                    "Picks the strongest signal among face, body, and object."
+                    "Combines faces, bodies, and objects — up to ${PretextVisionLimits.MAX_AUTO} shapes at once."
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

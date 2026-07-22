@@ -19,32 +19,36 @@ internal class PretextMediaPipeFaceLandmarker(context: Context) {
         val backend: String = "mediapipe-face-landmarker",
     )
 
-    fun detect(rgb: ByteArray, imageW: Int, imageH: Int): FaceLandmarkDetection? {
-        if (imageW < 8 || imageH < 8) return null
-        val marker = landmarker ?: createLandmarker() ?: return null
-        val bitmap = rgbToBitmap(rgb, imageW, imageH) ?: return null
+    fun detectMulti(rgb: ByteArray, imageW: Int, imageH: Int, maxFaces: Int): List<FaceLandmarkDetection> {
+        if (imageW < 8 || imageH < 8 || maxFaces <= 0) return emptyList()
+        val marker = landmarker ?: createLandmarker() ?: return emptyList()
+        val bitmap = rgbToBitmap(rgb, imageW, imageH) ?: return emptyList()
         return try {
             val mpImage = BitmapImageBuilder(bitmap).build()
             val result = marker.detect(mpImage)
             val faces = result.faceLandmarks()
-            if (faces.isEmpty()) return null
+            if (faces.isEmpty()) return emptyList()
 
-            val landmarks = faces.maxByOrNull { face ->
-                ovalPresenceScore(face)
-            } ?: return null
-            if (landmarks.size < MIN_LANDMARK_COUNT) return null
-
-            val score = ovalPresenceScore(landmarks)
-            if (score < MIN_PRESENCE_SCORE) return null
-
-            val polylinePx = buildFaceOvalPolylinePx(landmarks, imageW, imageH) ?: return null
-            FaceLandmarkDetection(polylinePx = polylinePx, score = score)
+            faces.asSequence()
+                .mapNotNull { landmarks ->
+                    if (landmarks.size < MIN_LANDMARK_COUNT) return@mapNotNull null
+                    val score = ovalPresenceScore(landmarks)
+                    if (score < MIN_PRESENCE_SCORE) return@mapNotNull null
+                    val polylinePx = buildFaceOvalPolylinePx(landmarks, imageW, imageH) ?: return@mapNotNull null
+                    FaceLandmarkDetection(polylinePx = polylinePx, score = score)
+                }
+                .sortedByDescending { it.score }
+                .take(maxFaces.coerceAtLeast(1))
+                .toList()
         } catch (_: Exception) {
-            null
+            emptyList()
         } finally {
             bitmap.recycle()
         }
     }
+
+    fun detect(rgb: ByteArray, imageW: Int, imageH: Int): FaceLandmarkDetection? =
+        detectMulti(rgb, imageW, imageH, maxFaces = 1).firstOrNull()
 
     fun close() {
         landmarker?.close()
@@ -60,7 +64,7 @@ internal class PretextMediaPipeFaceLandmarker(context: Context) {
             val options = FaceLandmarker.FaceLandmarkerOptions.builder()
                 .setBaseOptions(baseOptions)
                 .setRunningMode(RunningMode.IMAGE)
-                .setNumFaces(1)
+                .setNumFaces(PretextVisionLimits.MAX_FACES)
                 .setMinFaceDetectionConfidence(MIN_FACE_DETECTION_CONFIDENCE)
                 .setMinFacePresenceConfidence(MIN_FACE_PRESENCE_CONFIDENCE)
                 .setMinTrackingConfidence(MIN_TRACKING_CONFIDENCE)

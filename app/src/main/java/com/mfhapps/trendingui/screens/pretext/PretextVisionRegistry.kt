@@ -6,49 +6,45 @@ internal class PretextVisionRegistry(
     private val objectBackend: PretextVisionBackend,
 ) {
 
-    data class AutoDetectBundle(
-        val primary: VisionDetectReport,
-        val extras: List<VisionDetectReport> = emptyList(),
-    )
-
     fun detect(
         mode: VisionTrackMode,
         frame: PretextVisionFrame,
         activeSource: VisionSource?,
-    ): VisionDetectReport = when (mode) {
-        VisionTrackMode.Face -> safeDetect(face, frame)
-        VisionTrackMode.Person -> safeDetect(person, frame)
-        VisionTrackMode.Object -> safeDetect(objectBackend, frame)
-        VisionTrackMode.Auto -> {
-            val bundle = detectAll(frame)
-            PretextAutoSelector.selectPrimary(bundle, activeSource)?.report
-                ?: VisionDetectReport(null, "auto", note = "no-pick")
+    ): VisionDetectReport = detectMulti(mode, frame, maxInstances = 1, activeSource).firstOrNull()
+        ?: when (mode) {
+            VisionTrackMode.Face -> VisionDetectReport(null, "auto", note = "no-face")
+            VisionTrackMode.Person -> VisionDetectReport(null, "auto", note = "mask-failed")
+            VisionTrackMode.Object -> VisionDetectReport(null, "auto", note = "no-object")
+            VisionTrackMode.Auto -> VisionDetectReport(null, "auto", note = "no-pick")
         }
-    }
 
-    fun detectAutoMulti(
+    fun detectMulti(
+        mode: VisionTrackMode,
         frame: PretextVisionFrame,
-        maxShapes: Int,
+        maxInstances: Int,
         activeSource: VisionSource?,
-    ): AutoDetectBundle {
-        val multi = PretextAutoSelector.selectMulti(detectAll(frame), maxShapes, activeSource)
-        val primaryPick = multi.primary
-        if (primaryPick != null) {
-            return AutoDetectBundle(primaryPick.report, multi.extras.map { it.report })
+    ): List<VisionDetectReport> = when (mode) {
+        VisionTrackMode.Face -> safeDetectMulti(face, frame, maxInstances)
+        VisionTrackMode.Person -> safeDetectMulti(person, frame, maxInstances)
+        VisionTrackMode.Object -> safeDetectMulti(objectBackend, frame, maxInstances)
+        VisionTrackMode.Auto -> {
+            val faces = safeDetectMulti(face, frame, PretextVisionLimits.MAX_FACES)
+            val persons = safeDetectMulti(person, frame, PretextVisionLimits.MAX_PERSONS)
+            val objects = safeDetectMulti(objectBackend, frame, PretextVisionLimits.MAX_OBJECTS)
+            PretextInstanceSelector.mergeAuto(
+                faceReports = faces,
+                personReports = persons,
+                objectReports = objects,
+                maxTotal = maxInstances.coerceAtMost(PretextVisionLimits.MAX_AUTO),
+            )
         }
-        return AutoDetectBundle(VisionDetectReport(null, "auto", note = "no-pick"))
     }
 
-    fun detectAll(frame: PretextVisionFrame): PretextDetectionBundle =
-        PretextDetectionBundle(
-            face = safeDetect(face, frame),
-            person = safeDetect(person, frame),
-            objectReport = safeDetect(objectBackend, frame),
-        )
-
-    private fun safeDetect(backend: PretextVisionBackend, frame: PretextVisionFrame): VisionDetectReport =
-        runCatching { backend.detect(frame) }
-            .getOrElse { error ->
-                VisionDetectReport(null, backend.backendLabel, note = error.javaClass.simpleName)
-            }
+    private fun safeDetectMulti(
+        backend: PretextVisionBackend,
+        frame: PretextVisionFrame,
+        maxInstances: Int,
+    ): List<VisionDetectReport> =
+        runCatching { backend.detectMulti(frame, maxInstances) }
+            .getOrElse { emptyList() }
 }

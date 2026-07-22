@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <vector>
 #include <numeric>
 
@@ -42,42 +43,6 @@ static float boundsCenterX(const Bounds& b) {
 
 static float boundsCenterY(const Bounds& b) {
     return (b.top + b.bottom) * 0.5f;
-}
-
-static void push(std::vector<Vec2>& out, const Vec2& p) {
-    if (out.empty()) {
-        out.push_back(p);
-        return;
-    }
-    const Vec2& last = out.back();
-    const float dx = p.x - last.x;
-    const float dy = p.y - last.y;
-    if (dx * dx + dy * dy > 1.44f) out.push_back(p);
-}
-
-static void pushArc(
-    std::vector<Vec2>& out,
-    Vec2 center,
-    float radius,
-    float a0,
-    float a1,
-    int segments) {
-    for (int i = 0; i <= segments; ++i) {
-        const float t = static_cast<float>(i) / static_cast<float>(segments);
-        const float a = a0 + (a1 - a0) * t;
-        push(out, {center.x + radius * std::cos(a), center.y + radius * std::sin(a)});
-    }
-}
-
-static Vec2 pushOut(const Vec2& p, const Vec2& center, float amount) {
-    return p + norm(p - center) * amount;
-}
-
-static Vec2 limbPoint(const Vec2& a, const Vec2& b, const Vec2& joint, float halfWidth, bool rightSide) {
-    const Vec2 tangent = norm(b - a);
-    Vec2 n{-tangent.y, tangent.x};
-    if ((rightSide && n.x < 0.f) || (!rightSide && n.x > 0.f)) n = n * -1.f;
-    return joint + n * halfWidth;
 }
 
 static ContourPacket refineWithPoseExtremities(
@@ -157,7 +122,7 @@ ContourPacket contourFromSegmentationMask(
     ContourPacket empty;
     if (!mask || maskW < 8 || maskH < 8 || imageW <= 0 || imageH <= 0) return empty;
 
-    constexpr int kMaxMaskSide = 256;
+    constexpr int kMaxMaskSide = 320;
     int dsW = maskW;
     int dsH = maskH;
     if (dsW > kMaxMaskSide || dsH > kMaxMaskSide) {
@@ -186,7 +151,7 @@ ContourPacket contourFromSegmentationMask(
     const float diag = std::sqrt(
         static_cast<float>(imageW) * static_cast<float>(imageW) +
         static_cast<float>(imageH) * static_cast<float>(imageH));
-    scaled = simplifyClosedRdp(scaled, diag * 0.0025f, kMaxContourVerts);
+    scaled = simplifyClosedRdp(scaled, diag * 0.002f, kMaxContourVerts);
     smoothChaikinClosed(scaled, 1);
     ContourPacket pkt = packPolygon(scaled, imageW, imageH);
 
@@ -196,6 +161,48 @@ ContourPacket contourFromSegmentationMask(
     }
     if (area < 0.004f) {
         return empty;
+    }
+    return pkt;
+}
+
+ContourPacket extractObjectContourFromMaskCrop(
+    const float* maskCrop,
+    int cropW,
+    int cropH,
+    float offsetX,
+    float offsetY,
+    int imageW,
+    int imageH,
+    bool temporalSmooth) {
+    ContourPacket empty;
+    if (!maskCrop || cropW < 4 || cropH < 4 || imageW <= 0 || imageH <= 0) return empty;
+
+    std::vector<float> work(static_cast<size_t>(cropW * cropH));
+    for (int i = 0; i < cropW * cropH; ++i) {
+        work[static_cast<size_t>(i)] = maskCrop[i] >= 0.5f ? 1.f : 0.f;
+    }
+    boxBlurMask3x3(work, cropW, cropH);
+
+    std::vector<Vec2> contourMask = extractBestPersonIsoContour(work.data(), cropW, cropH);
+    if (contourMask.size() < 6) return empty;
+
+    for (Vec2& p : contourMask) {
+        p.x += offsetX;
+        p.y += offsetY;
+    }
+
+    const float diag = std::sqrt(
+        static_cast<float>(imageW) * static_cast<float>(imageW) +
+        static_cast<float>(imageH) * static_cast<float>(imageH));
+    contourMask = simplifyClosedRdp(contourMask, diag * 0.0025f, kMaxContourVerts);
+    smoothChaikinClosed(contourMask, 1);
+    ContourPacket pkt = packPolygon(contourMask, imageW, imageH);
+
+    const float area = normBoundsArea(pkt.bounds);
+    if (area > kMaxObjectNormArea + 0.08f || area < 0.002f) return empty;
+
+    if (temporalSmooth) {
+        return smoothTemporal(pkt, 0.42f, 2);
     }
     return pkt;
 }
@@ -212,7 +219,7 @@ ContourPacket extractPersonContour(
     if (pkt.norm.size() >= 6 && landmarks && landmarkCount >= 10) {
         pkt = refineWithPoseExtremities(pkt, landmarks, landmarkCount, imageW, imageH);
     }
-    return smoothTemporal(pkt, 0.44f, 0);
+    return pkt;
 }
 
 ContourPacket extractFaceContour(
@@ -233,9 +240,9 @@ ContourPacket extractFaceContour(
         const float diag = std::sqrt(
             static_cast<float>(imageW) * static_cast<float>(imageW) +
             static_cast<float>(imageH) * static_cast<float>(imageH));
-        ring = simplifyClosedRdp(ring, diag * 0.002f, 80);
+        ring = simplifyClosedRdp(ring, diag * 0.0015f, 96);
         smoothChaikinClosed(ring, 1);
-        return smoothTemporal(packPolygon(ring, imageW, imageH), 0.48f, 1);
+        return packPolygon(ring, imageW, imageH);
     }
 
     std::vector<Vec2> ring;
@@ -246,33 +253,7 @@ ContourPacket extractFaceContour(
         ring.push_back({cx + rx * std::cos(t), cy + ry * std::sin(t)});
     }
     smoothChaikinClosed(ring, 1);
-    return smoothTemporal(packPolygon(ring, imageW, imageH), 0.52f, 1);
-}
-
-ContourPacket contourFromObjectBox(
-    float left,
-    float top,
-    float right,
-    float bottom,
-    int imageW,
-    int imageH) {
-    const float w = right - left;
-    const float h = bottom - top;
-    const float r = std::min(w, h) * 0.18f;
-    const float cxL = left + r;
-    const float cxR = right - r;
-    const float cyT = top + r;
-    const float cyB = bottom - r;
-
-    std::vector<Vec2> ring;
-    ring.reserve(52);
-    const int cornerSegs = 10;
-    pushArc(ring, {cxR, cyT}, r, -kPi * 0.5f, 0.f, cornerSegs);
-    pushArc(ring, {cxR, cyB}, r, 0.f, kPi * 0.5f, cornerSegs);
-    pushArc(ring, {cxL, cyB}, r, kPi * 0.5f, kPi, cornerSegs);
-    pushArc(ring, {cxL, cyT}, r, kPi, kPi * 1.5f, cornerSegs);
-    smoothChaikinClosed(ring, 1);
-    return smoothTemporal(packPolygon(ring, imageW, imageH), 0.38f, 2);
+    return packPolygon(ring, imageW, imageH);
 }
 
 ContourPacket smoothTemporal(const ContourPacket& incoming, float alpha, int channel) {
@@ -287,7 +268,9 @@ ContourPacket smoothTemporal(const ContourPacket& incoming, float alpha, int cha
     }
 
     const float inArea = normBoundsArea(incoming.bounds);
-    const float maxNormArea = (ch == 1) ? kMaxFaceNormArea : kMaxPersonNormArea;
+    const float maxNormArea = (ch == 1) ? kMaxFaceNormArea
+        : (ch == 2) ? kMaxObjectNormArea
+        : kMaxPersonNormArea;
     if (inArea > maxNormArea + 0.08f && g_hasLastGood[ch]) {
         ContourPacket held = g_lastGoodPkt[ch];
         held.bounds = g_prevBounds[ch];

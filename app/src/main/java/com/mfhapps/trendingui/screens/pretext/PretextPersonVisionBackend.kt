@@ -11,14 +11,64 @@ internal class PretextPersonVisionBackend(
     private val runtime: PretextVisionRuntime,
 ) : PretextVisionBackend {
 
+    private val maskFilter = PretextMaskTemporalFilter(depth = 3)
+
     override val source = VisionSource.Person
     override val backendLabel = "tflite-selfie"
 
     override fun detect(frame: PretextVisionFrame): VisionDetectReport {
+        return detectMulti(frame, maxInstances = 1).firstOrNull()
+            ?: VisionDetectReport(null, backendLabel, note = "mask-failed")
+    }
+
+    override fun detectMulti(frame: PretextVisionFrame, maxInstances: Int): List<VisionDetectReport> {
         val mask = traceSection("pretext:tflite:selfie") {
             runSelfieSegmentation(frame.rgb, frame.rgbWidth, frame.rgbHeight)
-        } ?: return VisionDetectReport(null, backendLabel, note = "mask-failed")
-        return detectPersonFromMask(mask, frame.frame, frame.lensFacing)
+        } ?: return emptyList()
+
+        val plane = PretextPersonSegmentation.MaskPlane(mask.data, mask.width, mask.height)
+        val stats = PretextPersonSegmentation.analyzeMask(plane)
+        val score = max(stats.fgRatio, stats.centerFgRatio)
+        if (!PretextPersonSegmentation.passesForegroundGate(stats, frame.lensFacing)) {
+            return emptyList()
+        }
+
+        if (maxInstances <= 1) {
+            val single = detectPersonFromMask(mask, frame.frame, frame.lensFacing)
+            return if (single.contour != null) listOf(single) else emptyList()
+        }
+
+        val blobSet = PretextPersonSegmentation.findTopForegroundBlobs(
+            mask = plane,
+            maxK = maxInstances.coerceAtMost(PretextVisionLimits.MAX_PERSONS),
+        )
+        if (blobSet.blobs.isEmpty()) {
+            val single = detectPersonFromMask(mask, frame.frame, frame.lensFacing)
+            return if (single.contour != null) listOf(single) else emptyList()
+        }
+
+        return blobSet.blobs.mapNotNull { blob ->
+            val isolated = PretextPersonSegmentation.isolateBlobMask(plane, blob, blobSet.labels)
+            val contour = traceSection("pretext:native:person") {
+                PretextContourExtractor.fromMask(
+                    isolated.data,
+                    isolated.width,
+                    isolated.height,
+                    frame.frame.analysisWidth,
+                    frame.frame.analysisHeight,
+                )
+            }
+            var vision = contour?.toVisionContour(VisionSource.Person, "person", frame.frame)
+                ?: return@mapNotNull null
+            vision = PretextPersonSegmentation.clampContourToReasonableSize(vision)
+            val quality = PretextShapeAnalyzer.analyze(vision, score)
+            if (!PretextShapeAnalyzer.isPublishable(quality, VisionSource.Person)) return@mapNotNull null
+            val area = vision.boundsRectNorm().width() * vision.boundsRectNorm().height()
+            if (area !in MIN_PUBLISH_NORM_AREA..MAX_PUBLISH_NORM_AREA) return@mapNotNull null
+            VisionDetectReport(vision, "tflite-selfie+cpp-contour", score = score)
+        }.let { reports ->
+            PretextInstanceSelector.suppressOverlapping(reports, iouThreshold = 0.55f)
+        }
     }
 
     private fun detectPersonFromMask(
@@ -34,63 +84,35 @@ internal class PretextPersonVisionBackend(
             return VisionDetectReport(null, backendLabel, score = score, note = "low-foreground")
         }
 
+        val smoothed = maskFilter.smooth(mask.data)
         val contour = traceSection("pretext:native:person") {
             PretextContourExtractor.fromMask(
-                mask.data, mask.width, mask.height, frame.analysisWidth, frame.analysisHeight,
+                smoothed,
+                mask.width,
+                mask.height,
+                frame.analysisWidth,
+                frame.analysisHeight,
             )
         }
 
-        val hadNativeContour = contour != null
         var vision = contour?.toVisionContour(VisionSource.Person, "person", frame)
-        val hadVisionContour = vision != null
         if (vision != null) {
             vision = PretextPersonSegmentation.clampContourToReasonableSize(vision)
-            val area = vision.boundsRectNorm().width() * vision.boundsRectNorm().height()
-            if (area in MIN_PUBLISH_NORM_AREA..MAX_PUBLISH_NORM_AREA) {
-                return VisionDetectReport(vision, "tflite-selfie+cpp-contour", score = score)
+            val quality = PretextShapeAnalyzer.analyze(vision, score)
+            if (PretextShapeAnalyzer.isPublishable(quality, VisionSource.Person)) {
+                val area = vision.boundsRectNorm().width() * vision.boundsRectNorm().height()
+                if (area in MIN_PUBLISH_NORM_AREA..MAX_PUBLISH_NORM_AREA) {
+                    return VisionDetectReport(vision, "tflite-selfie+cpp-contour", score = score)
+                }
             }
-            vision = null
-        }
-
-        val preferLoose = score >= 0.12f || PretextPersonSegmentation.isFrameFillBlob(stats)
-        val blobContour = personBlobContourFallback(plane, frame, preferLoose = preferLoose)
-        if (blobContour != null) {
-            return VisionDetectReport(blobContour, "tflite-selfie+blob-contour", score = score, note = "blob-contour")
         }
 
         val note = when {
             PretextPersonSegmentation.isBlobTooSmall(stats) -> "blob-too-small"
-            PretextPersonSegmentation.isFrameFillBlob(stats) -> "frame-fill"
-            !hadNativeContour || !hadVisionContour -> "contour-failed"
-            else -> "area-too-large"
+            !PretextPersonSegmentation.passesForegroundGate(stats, lensFacing) -> "low-foreground"
+            else -> "contour-failed"
         }
         return VisionDetectReport(null, backendLabel, score = score, note = note)
-    }
-
-    private fun personBlobContourFallback(
-        plane: PretextPersonSegmentation.MaskPlane,
-        frame: FrameMetrics,
-        preferLoose: Boolean = false,
-    ): VisionContour? {
-        val tightBlob = PretextPersonSegmentation.contourFromMaskBlobTight(plane, frame)
-        val looseBlob = if (preferLoose) {
-            PretextPersonSegmentation.contourFromMaskBlob(plane, frame)
-        } else {
-            null
-        }
-        val blob = tightBlob ?: looseBlob ?: return null
-        val aw = frame.analysisWidth.toFloat().coerceAtLeast(1f)
-        val ah = frame.analysisHeight.toFloat().coerceAtLeast(1f)
-        val rounded = PretextContourExtractor.fromBox(
-            left = blob.left * aw,
-            top = blob.top * ah,
-            right = blob.right * aw,
-            bottom = blob.bottom * ah,
-            imageW = frame.analysisWidth,
-            imageH = frame.analysisHeight,
-        )?.toVisionContour(VisionSource.Person, "person", frame) ?: return null
-        val area = rounded.boundsRectNorm().width() * rounded.boundsRectNorm().height()
-        return if (area in MIN_PUBLISH_NORM_AREA..MAX_PUBLISH_NORM_AREA) rounded else null
     }
 
     private data class MaskResult(val data: FloatArray, val width: Int, val height: Int)

@@ -10,41 +10,53 @@ internal class PretextFaceVisionBackend(
     override val backendLabel = "mediapipe-face-landmarker"
 
     override fun detect(frame: PretextVisionFrame): VisionDetectReport {
-        val mpLm = traceSection("pretext:mediapipe:face-landmarker") {
-            runtime.mediaPipeFaceLandmarker.detect(frame.rgb, frame.rgbWidth, frame.rgbHeight)
-        }
-        if (mpLm != null) {
-            return buildFaceContourReport(
-                polylinePx = mpLm.polylinePx,
-                boxPx = null,
-                score = mpLm.score,
-                detectBackend = mpLm.backend,
-                frame = frame.frame,
+        return detectMulti(frame, maxInstances = 1).firstOrNull()
+            ?: VisionDetectReport(null, backendLabel, note = "no-face")
+    }
+
+    override fun detectMulti(frame: PretextVisionFrame, maxInstances: Int): List<VisionDetectReport> {
+        val mpFaces = traceSection("pretext:mediapipe:face-landmarker") {
+            runtime.mediaPipeFaceLandmarker.detectMulti(
+                frame.rgb,
+                frame.rgbWidth,
+                frame.rgbHeight,
+                maxFaces = maxInstances.coerceAtMost(PretextVisionLimits.MAX_FACES),
             )
+        }
+        if (mpFaces.isNotEmpty()) {
+            return mpFaces.mapNotNull { face ->
+                buildFaceContourReport(
+                    polylinePx = face.polylinePx,
+                    boxPx = null,
+                    score = face.score,
+                    detectBackend = face.backend,
+                    frame = frame.frame,
+                ).takeIf { it.contour != null }
+            }
         }
 
         val fallback = traceSection("pretext:tflite:blazeface") {
             synchronized(runtime.interpreterLock) {
-                if (runtime.closed) return@traceSection null
-                val interpreter = runtime.faceInterpreter() ?: return@traceSection null
-                PretextBlazeFaceDecoder.detectWithScore(
+                if (runtime.closed) return@traceSection emptyList()
+                val interpreter = runtime.faceInterpreter() ?: return@traceSection emptyList()
+                PretextBlazeFaceDecoder.detectMulti(
                     frame.rgb,
                     frame.rgbWidth,
                     frame.rgbHeight,
                     interpreter,
+                    maxInstances = maxInstances,
                 )
             }
         }
-        if (fallback == null) {
-            return VisionDetectReport(null, backendLabel, note = "no-face")
+        return fallback.mapNotNull { detection ->
+            buildFaceContourReport(
+                polylinePx = null,
+                boxPx = detection.box,
+                score = detection.score,
+                detectBackend = "tflite-blazeface",
+                frame = frame.frame,
+            ).takeIf { it.contour != null }
         }
-        return buildFaceContourReport(
-            polylinePx = null,
-            boxPx = fallback.box,
-            score = fallback.score,
-            detectBackend = "tflite-blazeface",
-            frame = frame.frame,
-        )
     }
 
     private fun buildFaceContourReport(
@@ -73,6 +85,10 @@ internal class PretextFaceVisionBackend(
             ?: return VisionDetectReport(null, detectBackend, score = score, note = "contour-failed")
 
         vision = PretextPersonSegmentation.clampFaceContour(vision)
+        val quality = PretextShapeAnalyzer.analyze(vision, score)
+        if (!PretextShapeAnalyzer.isPublishable(quality, VisionSource.Face)) {
+            return VisionDetectReport(null, detectBackend, score = score, note = "face-quality")
+        }
         val area = vision.boundsRectNorm().width() * vision.boundsRectNorm().height()
         if (area < MIN_FACE_NORM_AREA) {
             return VisionDetectReport(null, detectBackend, score = score, note = "face-too-small")

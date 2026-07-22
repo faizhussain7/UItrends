@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 namespace pretext {
@@ -52,6 +53,7 @@ constexpr float kDefaultMaskThreshold = 0.42f;
 
 constexpr float kMaxPersonNormArea = 0.68f;
 constexpr float kMaxFaceNormArea = 0.20f;
+constexpr float kMaxObjectNormArea = 0.52f;
 
 
 ContourPacket contourFromSegmentationMask(
@@ -60,6 +62,16 @@ ContourPacket contourFromSegmentationMask(
     int maskH,
     int imageW,
     int imageH);
+
+ContourPacket extractObjectContourFromMaskCrop(
+    const float* maskCrop,
+    int cropW,
+    int cropH,
+    float offsetX,
+    float offsetY,
+    int imageW,
+    int imageH,
+    bool temporalSmooth = false);
 
 
 ContourPacket extractPersonContour(
@@ -79,15 +91,6 @@ ContourPacket extractFaceContour(
     float cy,
     float rx,
     float ry,
-    int imageW,
-    int imageH);
-
-
-ContourPacket contourFromObjectBox(
-    float left,
-    float top,
-    float right,
-    float bottom,
     int imageW,
     int imageH);
 

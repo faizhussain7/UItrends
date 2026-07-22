@@ -29,15 +29,24 @@ internal class PretextVisionRuntime(context: Context) {
         private set
     var faceInterpreter: Interpreter? = null
         private set
-    var ssdInterpreter: Interpreter? = null
-        private set
 
     var selfieLoadFailed = false
     var faceLoadFailed = false
-    var ssdLoadFailed = false
+
+    @Volatile var objectHighQuality: Boolean = false
 
     init {
-        ncnnReady = runCatching { PretextNativeVision.init(assets) }.getOrDefault(false)
+        ncnnReady = runCatching { PretextNativeVision.init(assets, highQuality = objectHighQuality) }.getOrDefault(false)
+    }
+
+    fun reloadNcnn(highQuality: Boolean = objectHighQuality): Boolean {
+        objectHighQuality = highQuality
+        if (ncnnReady) {
+            PretextNativeVision.release()
+            ncnnReady = false
+        }
+        ncnnReady = runCatching { PretextNativeVision.init(assets, highQuality = objectHighQuality) }.getOrDefault(false)
+        return ncnnReady
     }
 
     fun close() {
@@ -47,10 +56,8 @@ internal class PretextVisionRuntime(context: Context) {
             mediaPipeFaceLandmarker.close()
             selfieInterpreter?.close()
             faceInterpreter?.close()
-            ssdInterpreter?.close()
             selfieInterpreter = null
             faceInterpreter = null
-            ssdInterpreter = null
             if (ncnnReady) {
                 PretextNativeVision.release()
             }
@@ -74,15 +81,6 @@ internal class PretextVisionRuntime(context: Context) {
             .onFailure { faceLoadFailed = true }
             .getOrNull()
             ?.also { faceInterpreter = it }
-    }
-
-    fun ssdInterpreter(): Interpreter? {
-        if (ssdLoadFailed) return null
-        ssdInterpreter?.let { return it }
-        return runCatching { loadModel("vision/ssd_mobilenet_coco.tflite", 2) }
-            .onFailure { ssdLoadFailed = true }
-            .getOrNull()
-            ?.also { ssdInterpreter = it }
     }
 
     private fun loadModel(assetPath: String, threads: Int): Interpreter {

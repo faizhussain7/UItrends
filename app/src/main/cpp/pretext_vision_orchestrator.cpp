@@ -22,17 +22,21 @@ bool processObjectFromRgb(
     if (!rgb || rgbW <= 0 || rgbH <= 0 || imageW <= 0 || imageH <= 0 || !out) return false;
 
 #ifdef PRETEXT_USE_NCNN
-    pretext_ncnn::Detection det;
-    if (!pretext_ncnn::detectBest(rgb, rgbW, rgbH, &det,  true)) return false;
-
-    pretext::ContourPacket pkt = pretext::contourFromObjectBox(
-        det.left, det.top, det.right, det.bottom, imageW, imageH);
-    if (pkt.norm.size() < 3) return false;
+    if (!pretext_ncnn::isSegmentationBackend()) {
+        return false;
+    }
+    pretext_ncnn::DetectionWithContour dc;
+    int count = 0;
+    if (!pretext_ncnn::detectTopKWithContours(rgb, rgbW, rgbH, &dc, 1, &count, true) ||
+        count <= 0) {
+        return false;
+    }
+    if (dc.contour.norm.size() < 6) return false;
 
     out->source = VisionSourceId::Object;
-    out->classId = det.classId;
-    out->score = det.score;
-    out->contour = std::move(pkt);
+    out->classId = dc.det.classId;
+    out->score = dc.det.score;
+    out->contour = std::move(dc.contour);
     return true;
 #else
     (void)rgb;

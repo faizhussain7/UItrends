@@ -5,6 +5,8 @@
 
 #include <jni.h>
 
+#include <cstdint>
+
 #include <vector>
 
 #include "pretext_geometry.h"
@@ -109,22 +111,6 @@ Java_com_mfhapps_trendingui_native_PretextNativeGeometry_nativeExtractFace(
     }
     pretext::ContourPacket pkt = pretext::extractFaceContour(
         polyPtr, pointCount, cx, cy, rx, ry, imageW, imageH);
-    if (pkt.norm.size() < 3) return nullptr;
-    return makePacket(env, pkt);
-}
-
-JNIEXPORT jfloatArray JNICALL
-Java_com_mfhapps_trendingui_native_PretextNativeGeometry_nativeExtractObject(
-    JNIEnv* env,
-    jclass,
-    jfloat left,
-    jfloat top,
-    jfloat right,
-    jfloat bottom,
-    jint imageW,
-    jint imageH) {
-    pretext::ContourPacket pkt = pretext::contourFromObjectBox(
-        left, top, right, bottom, imageW, imageH);
     if (pkt.norm.size() < 3) return nullptr;
     return makePacket(env, pkt);
 }

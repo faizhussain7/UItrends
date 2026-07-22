@@ -392,6 +392,7 @@ fun PretextCameraPanel(
     val hudContent = buildPretextCameraHudContent(
         manualOverride = manualOverride,
         viewShape = viewShape,
+        extraShapes = extraShapes,
         editorialOrbs = editorialOrbs,
         trackMode = trackModeState,
         telemetry = telemetry,
@@ -439,7 +440,10 @@ fun PretextCameraPanel(
                     if (pinVisionContour) viewShape?.let { add(it) }
                     if (stage.supportsMultiObstacle) addAll(extraShapes)
                 }.take(3)
-                else -> listOfNotNull(viewShape)
+                else -> buildList {
+                    viewShape?.let { add(it) }
+                    addAll(extraShapes)
+                }.take(PretextVisionLimits.MAX_AUTO)
             }
         }
 
@@ -647,8 +651,19 @@ fun PretextCameraPanel(
                     modifier = Modifier.fillMaxSize(),
                 )
             }
-            TrackingOutline(
-                shape = viewShape,
+            TrackingOutlines(
+                shapes = buildList {
+                    viewShape?.let { add(it) }
+                    addAll(extraShapes)
+                },
+                alpha = contourOutlineAlpha,
+                modifier = Modifier.fillMaxSize(),
+            )
+            PretextContourInstanceBadges(
+                shapes = buildList {
+                    viewShape?.let { add(it) }
+                    addAll(extraShapes)
+                },
                 alpha = contourOutlineAlpha,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -923,7 +938,6 @@ private fun BoxScope.PretextCameraChromeOverlay(
             .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         CameraTopHud(
-            shapeLabel = content.shapeLabel,
             statusText = content.statusText,
             statusActive = content.statusActive,
             telemetry = content.telemetry,
@@ -1121,7 +1135,6 @@ private fun PretextMeasureSpeedChip(
 
 @Composable
 private fun CameraTopHud(
-    shapeLabel: String,
     statusText: String,
     statusActive: Boolean,
     telemetry: VisionTelemetry,
@@ -1169,9 +1182,6 @@ private fun CameraTopHud(
                     dark = stageTheme.hudOnDark,
                     mono = stageTheme.monoHud,
                 )
-                if (statusActive && !isRecording) {
-                    ShapeBadge(label = shapeLabel, dark = stageTheme.hudOnDark, mono = stageTheme.monoHud)
-                }
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -1220,31 +1230,6 @@ private fun CameraTopHud(
                 accentCyan = stageTheme.accentCyan,
             )
         }
-    }
-}
-
-@Composable
-private fun ShapeBadge(label: String, dark: Boolean, mono: Boolean = false) {
-    Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = if (dark) {
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.88f)
-        } else {
-            Color.Black.copy(alpha = 0.42f)
-        },
-        contentColor = if (dark) {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        } else {
-            Color.White
-        },
-    ) {
-        Text(
-            label,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.labelSmall,
-            fontFamily = if (mono) PretextTerminalMono else FontFamily.Default,
-            fontWeight = FontWeight.Medium,
-        )
     }
 }
 
@@ -1636,6 +1621,22 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawContourLayers(
                 style = Stroke(2f),
             )
         }
+    }
+}
+
+@Composable
+private fun TrackingOutlines(
+    shapes: List<ViewShape>,
+    alpha: Float,
+    modifier: Modifier = Modifier,
+) {
+    if (alpha <= 0.01f || shapes.isEmpty()) return
+    shapes.forEachIndexed { index, shape ->
+        TrackingOutline(
+            shape = shape,
+            alpha = alpha * if (index == 0) 1f else 0.82f,
+            modifier = modifier,
+        )
     }
 }
 

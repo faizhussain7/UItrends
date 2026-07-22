@@ -26,38 +26,39 @@ internal class PretextVisionEngine(context: Context) {
         mode: VisionTrackMode,
         lensFacing: Int = CameraSelector.LENS_FACING_BACK,
         activeSource: VisionSource? = null,
-    ): VisionDetectReport {
-        if (runtime.closed) {
-            return VisionDetectReport(null, "closed", note = "engine-closed")
-        }
+    ): VisionDetectReport = detectMulti(
+        imageProxy = imageProxy,
+        mode = mode,
+        lensFacing = lensFacing,
+        maxInstances = 1,
+        activeSource = activeSource,
+    ).firstOrNull() ?: VisionDetectReport(null, "none", note = "no-detection")
 
-        if (mode == VisionTrackMode.Object) {
-            val frame = frameMetrics(imageProxy)
-            if (!runtime.isNcnnReady) {
-                return VisionDetectReport(null, "native-yuv", note = "ncnn-not-ready")
-            }
-            objectBackend.processNativeFrame(imageProxy, frame)?.let { return it }
-            return VisionDetectReport(null, "native-yuv", note = "no-detection")
-        }
-
-        return traceSection("pretext:rgb") {
-            registry.detect(mode, toVisionFrame(imageProxy, lensFacing), activeSource)
-        }
-    }
-
-    fun detectAutoMulti(
+    fun detectMulti(
         imageProxy: ImageProxy,
+        mode: VisionTrackMode,
         lensFacing: Int = CameraSelector.LENS_FACING_BACK,
-        maxShapes: Int = 3,
+        maxInstances: Int = PretextVisionLimits.maxFor(mode),
         activeSource: VisionSource? = null,
-    ): PretextVisionRegistry.AutoDetectBundle {
+    ): List<VisionDetectReport> {
         if (runtime.closed) {
-            return PretextVisionRegistry.AutoDetectBundle(
-                VisionDetectReport(null, "closed", note = "engine-closed"),
-            )
+            return emptyList()
         }
+
+        if (mode == VisionTrackMode.Object && maxInstances == 1) {
+            val frame = frameMetrics(imageProxy)
+            if (runtime.isNcnnReady) {
+                objectBackend.processNativeFrame(imageProxy, frame)?.let { return listOf(it) }
+            }
+        }
+
         return traceSection("pretext:rgb") {
-            registry.detectAutoMulti(toVisionFrame(imageProxy, lensFacing), maxShapes, activeSource)
+            registry.detectMulti(
+                mode = mode,
+                frame = toVisionFrame(imageProxy, lensFacing),
+                maxInstances = maxInstances,
+                activeSource = activeSource,
+            )
         }
     }
 

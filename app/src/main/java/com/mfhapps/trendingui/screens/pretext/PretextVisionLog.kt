@@ -9,21 +9,23 @@ internal object PretextVisionLog {
 
     private var lastNormRect: RectF? = null
 
-    fun analyzeContour(contour: VisionContour?): VisionAccuracySnapshot? {
+    fun analyzeContour(contour: VisionContour?, detScore: Float? = null): VisionAccuracySnapshot? {
         if (contour == null) return null
         val norm = contour.boundsRectNorm()
         val area = (norm.width() * norm.height()).coerceIn(0f, 1f)
-        val verts = contour.polygonNorm?.size ?: 0
+        val quality = PretextShapeAnalyzer.analyze(contour, detScore)
         val iou = lastNormRect?.let { iouNorm(it, norm) }
         val drift = lastNormRect?.let { centerDriftNorm(it, norm) }
         lastNormRect = RectF(norm)
         return VisionAccuracySnapshot(
             tracking = ShapeTrackingState.Live,
             backend = null,
-            score = null,
+            score = detScore,
             normBBoxArea = area,
             viewBBoxAreaRatio = 0f,
-            polygonVertices = verts,
+            polygonVertices = quality.polygonVertices,
+            shapeQuality = quality.score,
+            polygonFillRatio = quality.fillRatio,
             boundsFullyInView = true,
             iouVsPrevious = iou,
             centerDriftNorm = drift,

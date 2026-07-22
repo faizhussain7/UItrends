@@ -81,6 +81,16 @@ fun catalogScaffoldContentPadding(
 }
 
 @Composable
+fun catalogAdDockHorizontalInsets(): WindowInsets {
+    val sides = when (LocalCatalogPaneRole.current) {
+        CatalogPaneRole.List -> WindowInsetsSides.Start
+        CatalogPaneRole.Detail -> WindowInsetsSides.End
+        CatalogPaneRole.Single -> WindowInsetsSides.Horizontal
+    }
+    return WindowInsets.safeDrawing.only(sides)
+}
+
+@Composable
 fun safeDrawingPaddingValues(): PaddingValues = WindowInsets.safeDrawing.asPaddingValues()
 
 @Composable
